@@ -26,7 +26,7 @@ public class UserController {
     /**
      * 根据id查询用户
      */
-    @GetMapping("/id")
+    @GetMapping("/{id}")
     @ApiOperation("根据id查询用户")
     public R<User> getById(@PathVariable long id){
         User user = userService.getById(id);

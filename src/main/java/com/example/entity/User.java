@@ -27,7 +27,7 @@ public class User {
     private String phone;
 
     //个人介绍
-    private String describe;
+    private String description;
 
     //1男2女0保密
     private int sex;

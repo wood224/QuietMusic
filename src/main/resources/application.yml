@@ -3,9 +3,9 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: JDBC:mysql://180.76.136.85:3306/jmmusic
+    url: jdbc:mysql://180.76.136.85:3306/jmmusic?characterEncoding=utf-8
     username: root
-    password: Iwgyf2002
+    password: Iwgyf@2002
   application:
     name: jmmusic
 mybatis-plus:
