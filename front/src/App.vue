@@ -2,7 +2,7 @@
   <div>
     <h1>APP 根组件</h1>
 
-    <router-link to="/home">Home 组件</router-link>
+    <router-link to="/home">Home 路由</router-link>
 
     <router-view></router-view>
   </div>
