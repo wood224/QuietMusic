@@ -87,6 +87,8 @@ public class UserController {
     @GetMapping("/login")
     @ApiOperation("用户登陆")
     public R<User> login(User user){
+        if(user.getUsername()==null&&user.getPhone()==null)
+            return R.error("请输入用户名或手机号码！");
         LambdaQueryWrapper<User> lambdaQueryWrapper =new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(user.getUsername()!=null,User::getUsername,user.getUsername());
         lambdaQueryWrapper.eq(User::getPassword,user.getPassword());
