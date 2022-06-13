@@ -46,7 +46,11 @@ public class UserController {
         return R.success(list);
     }
 
+    /**
+     * 检测用户名重复
+     */
     @GetMapping("/repeat")
+    @ApiOperation("检测用户名是否重复")
     public R<String> isRepeat(String username){
         LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(User::getUsername,username);
