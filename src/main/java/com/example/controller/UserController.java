@@ -46,6 +46,19 @@ public class UserController {
         return R.success(list);
     }
 
+    @GetMapping("/repeat")
+    public R<String> isRepeat(String username){
+        LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(User::getUsername,username);
+        User user = userService.getOne(lambdaQueryWrapper);
+        if(user!=null)
+        {
+            return R.error("用户名重复");
+        }
+        return R.success("用户名可用");
+    }
+
+
     /**
      * 用户注册
      */
@@ -59,7 +72,6 @@ public class UserController {
         {
             return R.error("用户名重复!");
         }
-
         user.setCreateTime(LocalDateTime.now());
         userService.save(user);
         return R.success("添加成功!");
@@ -70,16 +82,17 @@ public class UserController {
      */
     @GetMapping("/login")
     @ApiOperation("用户登陆")
-    public R<User> login(String username,String password){
+    public R<User> login(User user){
         LambdaQueryWrapper<User> lambdaQueryWrapper =new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(User::getUsername,username);
-        lambdaQueryWrapper.eq(User::getPassword,password);
-        User user= userService.getOne(lambdaQueryWrapper);
-        if (user!=null)
+        lambdaQueryWrapper.eq(user.getUsername()!=null,User::getUsername,user.getUsername());
+        lambdaQueryWrapper.eq(User::getPassword,user.getPassword());
+        lambdaQueryWrapper.eq(user.getPhone()!=null,User::getPhone,user.getPhone());
+        User userh= userService.getOne(lambdaQueryWrapper);
+        if (userh!=null)
         {
-            if(user.getStatus()==0)
+            if(userh.getStatus()==0)
                 return R.error("用户封禁中!");
-            return R.success(user);
+            return R.success(userh);
         }
         return R.error("登陆失败，请检查用户名或密码是否正确！");
     }
