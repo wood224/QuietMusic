@@ -33,7 +33,7 @@
                         </el-icon>
                         <span>两次密码不一致</span>
                     </div>
-                    <el-button type="primary">注册</el-button>
+                    <el-button type="primary" @click="signUp">注册</el-button>
                 </form>
             </div>
             <div class="form-container sign-in-container">
@@ -62,7 +62,7 @@
                     <input type="password" placeholder="请输入密码" v-model="password">
                     <span class="errorPassword"></span>
                     <a href="#">忘记密码?</a>
-                    <el-button type="primary">登录</el-button>
+                    <el-button type="primary" @click="signIn">登录</el-button>
                 </form>
             </div>
             <div class="overlay-container">
@@ -110,6 +110,8 @@ export default {
             } else {
                 this.alterName = false
             }
+            this.alterPwd = false
+            this.alterConfirmPwd = false
         },
         moveLeft() {
             this.$refs.container.classList.add('right-panel-active')
@@ -176,6 +178,16 @@ export default {
             } else {
                 return this.alterConfirmPwd = false
             }
+        },
+
+        //登录
+        signIn() {
+
+        },
+
+        //注册
+        signUp() {
+
         }
     },
 }
