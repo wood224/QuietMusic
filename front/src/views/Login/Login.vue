@@ -1,13 +1,11 @@
 <template>
-    <div>
-        <h3> Home 路由</h3>
 
-    </div>
 </template>
 
 <script>
+
 export default {
-    name: 'Home',
+    name: 'Login',
 }
 </script>
 

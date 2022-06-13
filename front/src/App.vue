@@ -1,8 +1,7 @@
 <template>
   <div>
-    <h1>APP 根组件</h1>
-
-    <router-link to="/home">Home 路由</router-link>
+    <router-link to="/home">Home 路由</router-link>&nbsp;
+    <a href="login.html">登录页面</a>
 
     <router-view></router-view>
   </div>

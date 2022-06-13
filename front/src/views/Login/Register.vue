@@ -1,13 +1,13 @@
 <template>
     <div>
-        <h3> Home 路由</h3>
-
+        <h1>注册</h1>
     </div>
 </template>
 
 <script>
 export default {
-    name: 'Home',
+    name: 'Register'
+
 }
 </script>
 
