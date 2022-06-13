@@ -52,6 +52,14 @@ public class UserController {
     @PostMapping("/register")
     @ApiOperation("用户注册")
     public R<String> register(@RequestBody User user){
+        LambdaQueryWrapper<User> lambdaQueryWrapper =new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(User::getUsername, user.getUsername());
+        User userh = userService.getOne(lambdaQueryWrapper);
+        if(userh!=null)
+        {
+            return R.error("用户名重复!");
+        }
+
         user.setCreateTime(LocalDateTime.now());
         userService.save(user);
         return R.success("添加成功!");
