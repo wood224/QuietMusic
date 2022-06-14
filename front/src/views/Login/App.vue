@@ -1,7 +1,7 @@
 <template>
     <div class="login">
         <h2>登录/注册</h2>
-        <div class="container" ref="container">
+        <div class="container" :class="{ 'right-panel-active': isRightActive }">
             <div class="form-container sign-up-container">
                 <form action="">
                     <h1>注册</h1>
@@ -100,11 +100,14 @@ export default {
             alterPwd: false,
             alterConfirmPwd: false,
 
+            //移动class绑定
+            isRightActive: false,
         }
     },
     methods: {
         moveRight() {
-            this.$refs.container.classList.remove('right-panel-active')
+            // this.$refs.container.classList.remove('right-panel-active')
+            this.isRightActive = false
             if (this.modeLogin === 'Name') {
                 this.alterPhone = false
             } else {
@@ -114,7 +117,8 @@ export default {
             this.alterConfirmPwd = false
         },
         moveLeft() {
-            this.$refs.container.classList.add('right-panel-active')
+            // this.$refs.container.classList.add('right-panel-active')
+            this.isRightActive = true
         },
 
         //切换到用户名登录模式
