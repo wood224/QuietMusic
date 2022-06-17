@@ -1,11 +1,11 @@
 import { createApp } from 'vue'
-import App from './App.vue'
+import Login from './Login.vue'
 import router from './router'
 // import store from './store'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import axios from 'axios'
 
-const app = createApp(App)
+const app = createApp(Login)
 
 // app.use(store)
 app.use(router)
