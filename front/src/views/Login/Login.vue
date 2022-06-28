@@ -6,34 +6,36 @@
                 <form action="">
                     <h1>注册</h1>
                     <input type="text" placeholder="请输入用户名" v-model="name" @blur="validateName(name)">
-                    <div class="alterError" v-show="alterName">
+                    <div class="alertError" v-show="alertName">
                         <el-icon>
                             <CircleCloseFilled />
                         </el-icon>
                         <span>用户名格式不正确: 6-30位字母或数字或"_"</span>
                     </div>
                     <input type="phone" placeholder="请输入手机号码" v-model.number="phone" @blur="validatePhone(phone)">
-                    <div class="alterError" v-show="alterPhone">
+                    <div class="alertError" v-show="alertPhone">
                         <el-icon>
                             <CircleCloseFilled />
                         </el-icon>
                         <span>手机号码格式不正确</span>
                     </div>
                     <input type="password" placeholder="请输入密码" v-model="password" @blur="validatePwd(password)">
-                    <div class="alterError" v-show="alterPwd">
+                    <div class="alertError" v-show="alertPwd">
                         <el-icon>
                             <CircleCloseFilled />
                         </el-icon>
                         <span>密码格式不正确: 6-30位字母或数字或"_"</span>
                     </div>
                     <input type="password" placeholder="密码确认(请再输入一遍密码)" v-model="confirmPassword" @blur="confirmPwd">
-                    <div class="alterError" v-show="alterConfirmPwd">
+                    <div class="alertError" v-show="alertConfirmPwd">
                         <el-icon>
                             <CircleCloseFilled />
                         </el-icon>
                         <span>两次密码不一致</span>
                     </div>
-                    <el-button type="primary" @click="signUp">注册</el-button>
+                    <el-button type="primary" @click="signUp"
+                        :disabled="alertName || alertPhone || alertPwd || alertConfirmPwd">注册
+                    </el-button>
                 </form>
             </div>
             <div class="form-container sign-in-container">
@@ -45,7 +47,7 @@
                     </div>
                     <input type="text" placeholder="请输入用户名" v-model="name" v-show="modeLogin === 'Name'"
                         @blur="validateName(name)">
-                    <div class="alterError" v-show="alterName">
+                    <div class="alertError" v-show="alertName">
                         <el-icon>
                             <CircleCloseFilled />
                         </el-icon>
@@ -53,7 +55,7 @@
                     </div>
                     <input type="phone" placeholder="请输入手机号码" v-model.number="phone" v-show="modeLogin === 'Phone'"
                         @blur="validatePhone(phone)">
-                    <div class="alterError" v-show="alterPhone">
+                    <div class="alertError" v-show="alertPhone">
                         <el-icon>
                             <CircleCloseFilled />
                         </el-icon>
@@ -95,10 +97,10 @@ export default {
             confirmPassword: '',    //确认密码
 
             //格式不正确提示信息
-            alterName: false,
-            alterPhone: false,
-            alterPwd: false,
-            alterConfirmPwd: false,
+            alertName: false,
+            alertPhone: false,
+            alertPwd: false,
+            alertConfirmPwd: false,
 
             //移动class绑定
             isRightActive: false,
@@ -109,12 +111,12 @@ export default {
             // this.$refs.container.classList.remove('right-panel-active')
             this.isRightActive = false
             if (this.modeLogin === 'Name') {
-                this.alterPhone = false
+                this.alertPhone = false
             } else {
-                this.alterName = false
+                this.alertName = false
             }
-            this.alterPwd = false
-            this.alterConfirmPwd = false
+            this.alertPwd = false
+            this.alertConfirmPwd = false
         },
         moveLeft() {
             // this.$refs.container.classList.add('right-panel-active')
@@ -124,25 +126,25 @@ export default {
         //切换到用户名登录模式
         modeName() {
             this.modeLogin = 'Name'
-            this.alterPhone = false
+            this.alertPhone = false
         },
 
         //切换到电话号码登录模式
         modePhone() {
             this.modeLogin = 'Phone'
-            this.alterName = false
+            this.alertName = false
         },
 
         //校验手机号
         validatePhone(Phone) {
             const reg = /^1[3-9][0-9]{9}$/
             if (Phone === '' || Phone === undefined || Phone === null) {
-                return this.alterPhone = true
+                return this.alertPhone = true
             } else {
                 if ((!reg.test(Phone)) && Phone != '') {
-                    return this.alterPhone = true
+                    return this.alertPhone = true
                 } else {
-                    return this.alterPhone = false
+                    return this.alertPhone = false
                 }
             }
         },
@@ -151,12 +153,12 @@ export default {
         validateName(Name) {
             const reg = /^\w{6,30}$/
             if (Name === '' || Name === undefined || Name === null) {
-                return this.alterName = true
+                return this.alertName = true
             } else {
                 if ((!reg.test(Name)) && Name != '') {
-                    return this.alterName = true
+                    return this.alertName = true
                 } else {
-                    return this.alterName = false
+                    return this.alertName = false
                 }
             }
         },
@@ -165,12 +167,12 @@ export default {
         validatePwd(Pwd) {
             const reg = /^\w{6,30}$/
             if (Pwd === '' || Pwd === undefined || Pwd === null) {
-                return this.alterPwd = true
+                return this.alertPwd = true
             } else {
                 if ((!reg.test(Pwd)) && Pwd != '') {
-                    return this.alterPwd = true
+                    return this.alertPwd = true
                 } else {
-                    return this.alterPwd = false
+                    return this.alertPwd = false
                 }
             }
         },
@@ -178,20 +180,78 @@ export default {
         //密码确认
         confirmPwd() {
             if (!(this.password === this.confirmPassword)) {
-                return this.alterConfirmPwd = true
+                return this.alertConfirmPwd = true
             } else {
-                return this.alterConfirmPwd = false
+                return this.alertConfirmPwd = false
             }
         },
 
         //登录
-        signIn() {
-
+        async signIn() {
+            if (this.modeLogin === 'Name' && this.name === '') {
+                this.alertName = true
+            }
+            if (this.modeLogin === 'Phone' && (this.phone === undefined || this.phone === '')) {
+                this.alertPhone = true
+            }
+            if (this.password === '') {
+                this.alertPwd = true
+            }
+            if (this.modeLogin === 'Name') {
+                if (!this.alertName && !this.alertPwd) {
+                    const { data: res } = await this.$http.get('/login', {
+                        username: this.name,
+                        password: this.password
+                    })
+                    if (res.code === 1) {
+                        return alert('登录成功')
+                    } else {
+                        return alert(res.msg)
+                    }
+                }
+            }
+            if (this.modeLogin === 'Phone') {
+                if (!this.alertPhone && !this.alertPwd) {
+                    const { data: res } = await this.$http.get('/login', {
+                        phone: this.phone,
+                        password: this.password
+                    })
+                    if (res.code === 1) {
+                        alert('登录成功')
+                    } else {
+                        alert(res.msg)
+                    }
+                }
+            }
         },
 
         //注册
-        signUp() {
-
+        async signUp() {
+            if (this.name === '') {
+                this.alertName = true
+            }
+            if (this.phone === undefined || this.phone === '') {
+                this.alertPhone = true
+            }
+            if (this.password === '') {
+                this.alertPwd = true
+            }
+            if (this.confirmPassword === '') {
+                this.alertConfirmPwd = true
+            }
+            if (!this.alertName && !this.alertPhone && !this.alertPwd && !this.alertConfirmPwd) {
+                const { data: res } = await this.$http.post('/register', {
+                    name: this.name,
+                    username: this.name,
+                    phone: this.phone,
+                    password: this.password
+                })
+                if (res.code === 1) {
+                    alert('注册成功')
+                } else {
+                    alert(res.msg)
+                }
+            }
         }
     },
 }
@@ -427,7 +487,7 @@ input {
     transform: translateX(20%);
 }
 
-.alterError {
+.alertError {
     background-color: #FEF0F0;
     width: 280px;
     height: 30px;
