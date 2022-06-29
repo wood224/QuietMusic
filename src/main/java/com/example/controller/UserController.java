@@ -79,6 +79,7 @@ public class UserController {
             return R.error("用户名重复!");
         }
         user.setCreateTime(LocalDateTime.now());
+        user.setStatus(1);
         userService.save(user);
         return R.success("添加成功!");
     }
