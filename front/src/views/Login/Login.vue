@@ -64,7 +64,8 @@
                     <input type="password" placeholder="请输入密码" v-model="password">
                     <span class="errorPassword"></span>
                     <a href="#">忘记密码?</a>
-                    <el-button type="primary" @click="signIn">登录</el-button>
+                    <el-button type="primary" @click="signIn" :disabled="alertName || alertPhone || alertPwd">登录
+                    </el-button>
                 </form>
             </div>
             <div class="overlay-container">
@@ -121,6 +122,7 @@ export default {
         moveLeft() {
             // this.$refs.container.classList.add('right-panel-active')
             this.isRightActive = true
+            this.confirmPwd()
         },
 
         //切换到用户名登录模式
@@ -199,12 +201,13 @@ export default {
             }
             if (this.modeLogin === 'Name') {
                 if (!this.alertName && !this.alertPwd) {
-                    const { data: res } = await this.$http.get('/login', {
+                    const { data: res } = await this.$http.post('/login', {
                         username: this.name,
                         password: this.password
                     })
                     if (res.code === 1) {
-                        return alert('登录成功')
+                        // return alert('登录成功')
+                        location.href = 'index.html'
                     } else {
                         return alert(res.msg)
                     }
@@ -212,14 +215,15 @@ export default {
             }
             if (this.modeLogin === 'Phone') {
                 if (!this.alertPhone && !this.alertPwd) {
-                    const { data: res } = await this.$http.get('/login', {
+                    const { data: res } = await this.$http.post('/login', {
                         phone: this.phone,
                         password: this.password
                     })
                     if (res.code === 1) {
-                        alert('登录成功')
+                        // return alert('登录成功')
+                        location.href = 'index.html'
                     } else {
-                        alert(res.msg)
+                        return alert(res.msg)
                     }
                 }
             }
