@@ -79,6 +79,7 @@ public class UserController {
             return R.error("用户名重复!");
         }
         user.setCreateTime(LocalDateTime.now());
+        user.setStatus(1);
         userService.save(user);
         return R.success("添加成功!");
     }
@@ -88,7 +89,7 @@ public class UserController {
      */
     @PostMapping("/login")
     @ApiOperation("用户登陆")
-    public R<User> login(User user, HttpServletRequest request){
+    public R<User> login(@RequestBody User user, HttpServletRequest request){
         if(user.getUsername()==null&&user.getPhone()==null)
             return R.error("请输入用户名或手机号码！");
         LambdaQueryWrapper<User> lambdaQueryWrapper =new LambdaQueryWrapper<>();
