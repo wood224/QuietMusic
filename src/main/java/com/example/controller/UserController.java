@@ -9,6 +9,8 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -84,9 +86,9 @@ public class UserController {
     /**
      * 用户登陆
      */
-    @GetMapping("/login")
+    @PostMapping("/login")
     @ApiOperation("用户登陆")
-    public R<User> login(User user){
+    public R<User> login(User user, HttpServletRequest request){
         if(user.getUsername()==null&&user.getPhone()==null)
             return R.error("请输入用户名或手机号码！");
         LambdaQueryWrapper<User> lambdaQueryWrapper =new LambdaQueryWrapper<>();
@@ -98,6 +100,7 @@ public class UserController {
         {
             if(userh.getStatus()==0)
                 return R.error("用户封禁中!");
+            request.getSession().setAttribute("user",userh.getId());
             return R.success(userh);
         }
         return R.error("登陆失败，请检查用户名或密码是否正确！");
