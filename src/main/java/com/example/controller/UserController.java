@@ -85,7 +85,7 @@ public class UserController {
         int count = Math.toIntExact(userService.count(lambdaQueryWrapper));
         if(count>0)
             return R.error("该用户名或手机号已被注册");
-        String password = user.getPassword()+"iwgyf";
+        String password = user.getPassword()+user.getUsername();
         password = DigestUtils.md5DigestAsHex(password.getBytes());
         user.setPassword(password);
         user.setStatus(1);
@@ -103,7 +103,7 @@ public class UserController {
             return R.error("请输入用户名或手机号码！");
         LambdaQueryWrapper<User> lambdaQueryWrapper =new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(user.getUsername()!=null,User::getUsername,user.getUsername());
-        String password = user.getPassword()+"iwgyf";
+        String password = user.getPassword()+user.getUsername();
         password= DigestUtils.md5DigestAsHex(password.getBytes());
         lambdaQueryWrapper.eq(User::getPassword,password);
         lambdaQueryWrapper.eq(user.getPhone()!=null,User::getPhone,user.getPhone());
