@@ -7,6 +7,7 @@ import com.example.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServlet;
@@ -42,7 +43,7 @@ public class UserController {
     @ApiOperation("批量获取用户")
     public R<List<User>> getList(String name){
         LambdaQueryWrapper<User> lambdaQueryWrapper =new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.like(User::getName,name);
+        lambdaQueryWrapper.like(name!=null,User::getName,name);
 
         List<User> list = userService.list(lambdaQueryWrapper);
         return R.success(list);
@@ -53,13 +54,20 @@ public class UserController {
      */
     @GetMapping("/repeat")
     @ApiOperation("检测用户名是否重复")
-    public R<String> isRepeat(String username){
+    public R<String> isRepeat(String username,String phone){
         LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(User::getUsername,username);
+        LambdaQueryWrapper<User> lambdaQueryWrapper1 = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper1.eq(User::getPhone,phone);
         User user = userService.getOne(lambdaQueryWrapper);
+        User user1 = userService.getOne(lambdaQueryWrapper1);
         if(user!=null)
         {
             return R.error("用户名重复");
+        }
+        if(user1!=null)
+        {
+            return R.error("当前手机号已注册");
         }
         return R.success("用户名可用");
     }
@@ -73,12 +81,13 @@ public class UserController {
     public R<String> register(@RequestBody User user){
         LambdaQueryWrapper<User> lambdaQueryWrapper =new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(User::getUsername, user.getUsername());
-        User userh = userService.getOne(lambdaQueryWrapper);
-        if(userh!=null)
-        {
-            return R.error("用户名重复!");
-        }
-        user.setCreateTime(LocalDateTime.now());
+        lambdaQueryWrapper.eq(User::getPhone, user.getPhone());
+        int count = Math.toIntExact(userService.count(lambdaQueryWrapper));
+        if(count>0)
+            return R.error("该用户名或手机号已被注册");
+        String password = user.getPassword()+"iwgyf";
+        password = DigestUtils.md5DigestAsHex(password.getBytes());
+        user.setPassword(password);
         user.setStatus(1);
         userService.save(user);
         return R.success("添加成功!");
@@ -94,7 +103,9 @@ public class UserController {
             return R.error("请输入用户名或手机号码！");
         LambdaQueryWrapper<User> lambdaQueryWrapper =new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(user.getUsername()!=null,User::getUsername,user.getUsername());
-        lambdaQueryWrapper.eq(User::getPassword,user.getPassword());
+        String password = user.getPassword()+"iwgyf";
+        password= DigestUtils.md5DigestAsHex(password.getBytes());
+        lambdaQueryWrapper.eq(User::getPassword,password);
         lambdaQueryWrapper.eq(user.getPhone()!=null,User::getPhone,user.getPhone());
         User userh= userService.getOne(lambdaQueryWrapper);
         if (userh!=null)
@@ -115,6 +126,16 @@ public class UserController {
     public R<String> update(@RequestBody User user){
         userService.updateById(user);
         return R.success("修改成功!");
+    }
+
+    /**
+     * 注销用户
+     */
+    @DeleteMapping("/delete")
+    @ApiOperation("注销账户")
+    public R<String> delete(@RequestBody User user){
+        userService.removeById(user);
+        return R.success("注销成功");
     }
 
     /**
