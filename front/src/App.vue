@@ -1,17 +1,28 @@
 <template>
-  <div>
-    <router-link to="/home">Home 路由</router-link>&nbsp;
-    <a href="login.html">登录页面</a>
+	<div>
+		<Header></Header>
+		<div class="container">
+			<router-view></router-view>
+		</div>
 
-    <router-view></router-view>
-  </div>
+	</div>
 </template>
 
 <script>
+import Header from './components/Header.vue'
+
 export default {
 
+	components: {
+		Header,
+	}
 }
 </script>
 
 <style lang="less" scoped>
+.container {
+	background-color: red;
+	margin: 0 auto;
+	width: 1000px;
+}
 </style>

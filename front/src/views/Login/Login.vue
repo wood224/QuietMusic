@@ -87,6 +87,8 @@
 </template>
 
 <script>
+import { mapMutations } from "vuex"
+
 export default {
     name: 'App',
     data() {
@@ -108,6 +110,8 @@ export default {
         }
     },
     methods: {
+        ...mapMutations(['setUserInfo']),
+
         moveRight() {
             // this.$refs.container.classList.remove('right-panel-active')
             this.isRightActive = false
@@ -199,36 +203,44 @@ export default {
             if (this.password === '') {
                 this.alertPwd = true
             }
-            if (this.modeLogin === 'Name') {
-                if (!this.alertName && !this.alertPwd) {
-                    const { data: res } = await this.$http.post('/login', {
-                        username: this.name,
-                        password: this.password
-                    })
-                    if (res.code === 1) {
-                        // return alert('登录成功')
-                        location.href = 'index.html'
-                    } else {
-                        return alert(res.msg)
+            else {
+                let res
+                //用户名登录
+                if (this.modeLogin === 'Name') {
+                    if (!this.alertName && !this.alertPwd) {
+                        const { data } = await this.$http.post('/login', {
+                            username: this.name,
+                            password: this.password
+                        })
+                        res = data
                     }
                 }
-            }
-            if (this.modeLogin === 'Phone') {
-                if (!this.alertPhone && !this.alertPwd) {
-                    const { data: res } = await this.$http.post('/login', {
-                        phone: this.phone,
-                        password: this.password
-                    })
-                    if (res.code === 1) {
-                        // return alert('登录成功')
-                        location.href = 'index.html'
-                    } else {
-                        return alert(res.msg)
+                //手机号登录
+                else if (this.modeLogin === 'Phone') {
+                    if (!this.alertPhone && !this.alertPwd) {
+                        const { data } = await this.$http.post('/login', {
+                            phone: this.phone,
+                            password: this.password
+                        })
+                        res = data
                     }
+                }
+                if (res.code === 1) {
+                    location.href = 'index.html'
+                    //记录登录状态的对象
+                    let userInfo = {
+                        isLogin: true,
+                        manage: true,
+                        name: res.data.name
+                    }
+                    //将表示登录状态的对象存入 localstorage 和 vuex 中
+                    localStorage.setItem("userInfo", JSON.stringify(userInfo))
+                    this.setUserInfo(userInfo)
+                } else {
+                    return alert(res.msg)
                 }
             }
         },
-
         //注册
         async signUp() {
             if (this.name === '') {
@@ -252,6 +264,8 @@ export default {
                 })
                 if (res.code === 1) {
                     alert('注册成功')
+                    this.password = ''
+                    this.moveRight()
                 } else {
                     alert(res.msg)
                 }

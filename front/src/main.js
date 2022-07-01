@@ -14,6 +14,7 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 axios.defaults.baseURL = 'http://180.76.136.85:8080'
 app.config.globalProperties.$http = axios
 
-app.use(store).use(router)
+app.use(store)
+app.use(router)
 
 app.mount('#app')
