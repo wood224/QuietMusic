@@ -24,14 +24,14 @@ public class R<T> implements Serializable {
     public static <T> R<T> success(T object) {
         R<T> r = new R<T>();
         r.data = object;
-        r.code = 1;
+        r.code = 200;
         return r;
     }
 
     public static <T> R<T> error(String msg) {
         R r = new R();
         r.msg = msg;
-        r.code = 0;
+        r.code = 210;
         return r;
     }
 
