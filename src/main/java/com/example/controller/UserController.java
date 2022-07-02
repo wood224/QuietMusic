@@ -79,16 +79,17 @@ public class UserController {
     @PostMapping("/register")
     @ApiOperation("用户注册")
     public R<String> register(@RequestBody User user){
+        //检测是否被注册
         LambdaQueryWrapper<User> lambdaQueryWrapper =new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(User::getUsername, user.getUsername());
         lambdaQueryWrapper.eq(User::getPhone, user.getPhone());
         int count = Math.toIntExact(userService.count(lambdaQueryWrapper));
         if(count>0)
             return R.error("该用户名或手机号已被注册");
-        String password = user.getPassword()+"iwgyf";
+        String password = user.getPassword()+user.getUsername();
         password = DigestUtils.md5DigestAsHex(password.getBytes());
         user.setPassword(password);
-        user.setStatus(1);
+        //user.setStatus(1);//bug原因:int默认为0，Integer默认为null，应用后者
         userService.save(user);
         return R.success("添加成功!");
     }
@@ -99,14 +100,17 @@ public class UserController {
     @PostMapping("/login")
     @ApiOperation("用户登陆")
     public R<User> login(@RequestBody User user, HttpServletRequest request){
+        //验证是否用户名以及手机号都为空
         if(user.getUsername()==null&&user.getPhone()==null)
             return R.error("请输入用户名或手机号码！");
+        //添加条件
         LambdaQueryWrapper<User> lambdaQueryWrapper =new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(user.getUsername()!=null,User::getUsername,user.getUsername());
-        String password = user.getPassword()+"iwgyf";
+        String password = user.getPassword()+user.getUsername();
         password= DigestUtils.md5DigestAsHex(password.getBytes());
         lambdaQueryWrapper.eq(User::getPassword,password);
         lambdaQueryWrapper.eq(user.getPhone()!=null,User::getPhone,user.getPhone());
+        //获取用户
         User userh= userService.getOne(lambdaQueryWrapper);
         if (userh!=null)
         {
