@@ -31,7 +31,7 @@ public class R<T> implements Serializable {
     public static <T> R<T> error(String msg) {
         R r = new R();
         r.msg = msg;
-        r.code = 210;
+        r.code = 410;
         return r;
     }
 
