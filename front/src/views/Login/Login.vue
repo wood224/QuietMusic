@@ -203,10 +203,10 @@ export default {
                     username: this.name
                 }
             })
-            if (res.code === 0) {
-                return true
-            } else {
+            if (res.code === 200) {
                 return false
+            } else {
+                return true
             }
         },
 
@@ -284,7 +284,7 @@ export default {
                         res = data
                     }
                 }
-                if (res.code === 1) {
+                if (res.code === 200) {
                     location.href = 'index.html'
                     //记录登录状态的对象
                     let userInfo = {
@@ -321,7 +321,7 @@ export default {
                     phone: this.phone,
                     password: this.password
                 })
-                if (res.code === 1) {
+                if (res.code === 200) {
                     alert('注册成功')
                     this.password = ''
                     this.moveRight()

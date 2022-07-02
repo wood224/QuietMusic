@@ -13,7 +13,7 @@
                 <a href="login.html">登录</a>
             </div>
             <div v-else class="userInfo">
-                <div class="username">{{ userInfo.name }}, 欢迎您</div>
+                <div class="userName">{{ userInfo.name }}, 欢迎您</div>
                 <div class="userMenu">
                     <ul>
                         <li>功能1</li>
