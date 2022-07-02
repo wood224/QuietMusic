@@ -12,12 +12,24 @@
                         </el-icon>
                         <span>用户名格式不正确: 6-30位字母或数字或"_"</span>
                     </div>
+                    <div class="alertError" v-show="alertRepeatName">
+                        <el-icon>
+                            <CircleCloseFilled />
+                        </el-icon>
+                        <span>该用户名已存在</span>
+                    </div>
                     <input type="phone" placeholder="请输入手机号码" v-model.number="phone" @blur="validatePhone(phone)">
                     <div class="alertError" v-show="alertPhone">
                         <el-icon>
                             <CircleCloseFilled />
                         </el-icon>
                         <span>手机号码格式不正确</span>
+                    </div>
+                    <div class="alertError" v-show="alertRepeatPhone">
+                        <el-icon>
+                            <CircleCloseFilled />
+                        </el-icon>
+                        <span>该手机号已注册</span>
                     </div>
                     <input type="password" placeholder="请输入密码" v-model="password" @blur="validatePwd(password)">
                     <div class="alertError" v-show="alertPwd">
@@ -34,7 +46,8 @@
                         <span>两次密码不一致</span>
                     </div>
                     <el-button type="primary" @click="signUp"
-                        :disabled="alertName || alertPhone || alertPwd || alertConfirmPwd">注册
+                        :disabled="alertName || alertPhone || alertPwd || alertConfirmPwd || alertRepeatName || alertRepeatPhone">
+                        注册
                     </el-button>
                 </form>
             </div>
@@ -61,7 +74,13 @@
                         </el-icon>
                         <span>手机号码格式不正确</span>
                     </div>
-                    <input type="password" placeholder="请输入密码" v-model="password">
+                    <input type="password" placeholder="请输入密码" v-model="password" @blur="validatePwd(password)">
+                    <div class="alertError" v-show="alertPwd">
+                        <el-icon>
+                            <CircleCloseFilled />
+                        </el-icon>
+                        <span>密码格式不正确: 6-30位字母或数字或"_"</span>
+                    </div>
                     <span class="errorPassword"></span>
                     <a href="#">忘记密码?</a>
                     <el-button type="primary" @click="signIn" :disabled="alertName || alertPhone || alertPwd">登录
@@ -101,7 +120,9 @@ export default {
 
             //格式不正确提示信息
             alertName: false,
+            alertRepeatName: false,
             alertPhone: false,
+            alertRepeatPhone: false,
             alertPwd: false,
             alertConfirmPwd: false,
 
@@ -141,29 +162,67 @@ export default {
             this.alertName = false
         },
 
+        //校验手机号是否存在
+        async validateRepeatPhone() {
+            //判断手机号是否已被注册
+            const { data: res } = await this.$http.get('/repeat', {
+                params: {
+                    phone: this.phone
+                }
+            })
+            if (res.code === 0) {
+                return true
+            } else {
+                return false
+            }
+        },
+
         //校验手机号
-        validatePhone(Phone) {
+        async validatePhone(Phone) {
             const reg = /^1[3-9][0-9]{9}$/
             if (Phone === '' || Phone === undefined || Phone === null) {
                 return this.alertPhone = true
             } else {
                 if ((!reg.test(Phone)) && Phone != '') {
+                    //如果手机号不符合要求, 则一定不重复
+                    this.alertRepeatPhone = false
                     return this.alertPhone = true
                 } else {
+                    const PromiseResult = await this.validateRepeatPhone()
+                    this.alertRepeatPhone = PromiseResult
                     return this.alertPhone = false
                 }
             }
         },
 
+        //校验用户名是否存在
+        async validateRepeatName() {
+            //判断用户名是否已被注册
+            const { data: res } = await this.$http.get('/repeat', {
+                params: {
+                    username: this.name
+                }
+            })
+            if (res.code === 0) {
+                return true
+            } else {
+                return false
+            }
+        },
+
         //校验用户名
-        validateName(Name) {
+        async validateName(Name) {
             const reg = /^\w{6,30}$/
             if (Name === '' || Name === undefined || Name === null) {
                 return this.alertName = true
             } else {
                 if ((!reg.test(Name)) && Name != '') {
+                    //如果用户名不符合要求, 则一定不重复
+                    this.alertRepeatName = false
                     return this.alertName = true
                 } else {
+                    const PromiseResult = await this.validateRepeatName()
+                    this.alertRepeatName = PromiseResult
                     return this.alertName = false
                 }
             }
@@ -255,7 +314,7 @@ export default {
             if (this.confirmPassword === '') {
                 this.alertConfirmPwd = true
             }
-            if (!this.alertName && !this.alertPhone && !this.alertPwd && !this.alertConfirmPwd) {
+            if (!this.alertName && !this.alertPhone && !this.alertPwd && !this.alertConfirmPwd && !this.alertRepeatName && !this.alertRepeatPhone) {
                 const { data: res } = await this.$http.post('/register', {
                     name: this.name,
                     username: this.name,
