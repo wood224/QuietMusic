@@ -27,7 +27,7 @@ public class WyyApiController {
     @GetMapping("/url")
     @ApiOperation("获取音乐url")
     public Object getUrl(String id, String br) {
-        String brkey = null;
+        String brkey = "";
         if(br!=null)
             brkey="&br="+br;
         String url = "https://netease-cloud-music-api-theta-two-56.vercel.app/song/url?id=" + id + brkey;
@@ -37,9 +37,9 @@ public class WyyApiController {
     @GetMapping("/search")
     @ApiOperation("搜索")
     public Object search(String keywords, String limit, String offset, String type) {
-        String limitkey=null;
-        String offsetkey=null;
-        String typekey=null;
+        String limitkey="";
+        String offsetkey="";
+        String typekey="";
         if(limit!=null)
             limitkey="&limit="+limit;
         if(offset!=null)
@@ -71,7 +71,9 @@ public class WyyApiController {
     @GetMapping("/banner")
     @ApiOperation("轮播图")
     public Object getBanner(Integer type) {
-        String typekey="?type="+type;
+        String typekey="";
+        if (type!=null)
+            typekey="?type="+type;
         String url = "https://netease-cloud-music-api-theta-two-56.vercel.app/banner" + typekey;
         return restTemplate.getForObject(url, Object.class);
     }
@@ -80,7 +82,7 @@ public class WyyApiController {
     @GetMapping("/artistlist")
     @ApiOperation("获取歌手列表")
     public Object getArtists(Integer type, Integer area) {
-        String keys=null;
+        String keys="";
         if(type==null&&area!=null)
             keys="?area="+area;
         else if(type!=null&&area==null)
