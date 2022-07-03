@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.common.R;
 import com.example.entity.User;
 import com.example.service.UserService;
+import com.example.utils.IsPhone;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,6 +80,11 @@ public class UserController {
     @PostMapping("/register")
     @ApiOperation("用户注册")
     public R<String> register(@RequestBody User user){
+        //校验手机号格式
+        if(!IsPhone.checkNum(user.getPhone()))
+        {
+            return R.error("请输入正确的手机号码");
+        }
         //检测是否被注册
         LambdaQueryWrapper<User> lambdaQueryWrapper =new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(User::getUsername, user.getUsername());
