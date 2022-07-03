@@ -1,6 +1,5 @@
 package com.example.controller;
 
-import com.example.common.R;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,16 +21,14 @@ public class WyyApiController {
     @ApiOperation("获取歌曲详情")
     public Object getDetail(String ids) {
         String url = "https://netease-cloud-music-api-theta-two-56.vercel.app/song/detail?ids=" + ids;
-        Object object = restTemplate.getForObject(url, Object.class);
-        return object;
+        return restTemplate.getForObject(url, Object.class);
     }
 
     @GetMapping("/url")
     @ApiOperation("获取音乐url")
     public Object getUrl(String id, String br) {
         String url = "https://netease-cloud-music-api-theta-two-56.vercel.app/song/url?id=" + id + "&br=" + br;
-        Object object = restTemplate.getForObject(url, Object.class);
-        return object;
+        return restTemplate.getForObject(url, Object.class);
     }
 
     @GetMapping("/search")
@@ -39,8 +36,7 @@ public class WyyApiController {
     public Object search(String keywords, String limit, String offset, String type) {
         String url = "https://netease-cloud-music-api-theta-two-56.vercel.app/search?keywords="
                 + keywords + "&limit=" + limit + "&offset=" + offset + "&type=" + type;
-        Object object = restTemplate.getForObject(url, Object.class);
-        return object;
+        return restTemplate.getForObject(url, Object.class);
     }
 
 
@@ -48,8 +44,7 @@ public class WyyApiController {
     @ApiOperation("获取歌词")
     public Object getLyric(String id) {
         String url = "https://netease-cloud-music-api-theta-two-56.vercel.app/lyric?id=" + id;
-        Object object = restTemplate.getForObject(url, Object.class);
-        return object;
+        return restTemplate.getForObject(url, Object.class);
     }
 
 
@@ -57,8 +52,7 @@ public class WyyApiController {
     @ApiOperation("获取歌手单曲")
     public Object getDanQu(String id) {
         String url = "https://netease-cloud-music-api-theta-two-56.vercel.app/artists?id=" + id;
-        Object object = restTemplate.getForObject(url, Object.class);
-        return object;
+        return restTemplate.getForObject(url, Object.class);
     }
 
 
@@ -66,8 +60,7 @@ public class WyyApiController {
     @ApiOperation("轮播图")
     public Object getBanner(int type) {
         String url = "https://netease-cloud-music-api-theta-two-56.vercel.app/banner?type=" + type;
-        Object object = restTemplate.getForObject(url, Object.class);
-        return object;
+        return restTemplate.getForObject(url, Object.class);
     }
 
 
@@ -75,8 +68,7 @@ public class WyyApiController {
     @ApiOperation("获取歌手列表")
     public Object getArtists(int type, int area) {
         String url = "https://netease-cloud-music-api-theta-two-56.vercel.app/artist/list?type=" + type + "&area=" + area;
-        Object object = restTemplate.getForObject(url, Object.class);
-        return object;
+        return restTemplate.getForObject(url, Object.class);
     }
 
 
@@ -84,8 +76,7 @@ public class WyyApiController {
     @ApiOperation("获取歌单分类")
     public Object getCatList() {
         String url = "https://netease-cloud-music-api-theta-two-56.vercel.app/playlist/catlist";
-        Object object = restTemplate.getForObject(url, Object.class);
-        return object;
+        return restTemplate.getForObject(url, Object.class);
     }
 
 
@@ -93,8 +84,7 @@ public class WyyApiController {
     @ApiOperation("获取歌单详情")
     public Object getSlDetail(String id) {
         String url = "https://netease-cloud-music-api-theta-two-56.vercel.app/playlist/detail?id=" + id;
-        Object object = restTemplate.getForObject(url, Object.class);
-        return object;
+        return restTemplate.getForObject(url, Object.class);
     }
 }
 
