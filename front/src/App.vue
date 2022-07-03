@@ -12,7 +12,15 @@
 import Header from './components/Header.vue'
 
 export default {
+	name: 'App',
+	created() {
 
+	},
+	methods: {
+		getHash() {
+			return location.hash
+		},
+	},
 	components: {
 		Header,
 	}
@@ -21,7 +29,6 @@ export default {
 
 <style lang="less" scoped>
 .container {
-	background-color: red;
 	margin: 0 auto;
 	width: 1000px;
 }

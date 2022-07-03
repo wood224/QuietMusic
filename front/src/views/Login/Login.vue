@@ -1,5 +1,6 @@
 <template>
     <div class="login">
+        <button class="goBack" @click="goBack">&lt;&lt;返回</button>
         <h2>登录/注册</h2>
         <div class="container" :class="{ 'right-panel-active': isRightActive }">
             <div class="form-container sign-up-container">
@@ -132,6 +133,10 @@ export default {
     },
     methods: {
         ...mapMutations(['setUserInfo']),
+
+        goBack() {
+            this.$router.back()
+        },
 
         moveRight() {
             // this.$refs.container.classList.remove('right-panel-active')
@@ -341,8 +346,9 @@ export default {
 }
 
 .login {
-    background: linear-gradient(to left top, #0083fe, #00fff0);
     display: flex;
+    position: relative;
+    background: linear-gradient(to left top, #0083fe, #00fff0);
     justify-content: center;
     align-items: center;
     flex-direction: column;
@@ -423,6 +429,15 @@ input {
     padding: 12px 15px;
     margin: 8px 0;
     width: 100%;
+}
+
+.goBack {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 10px 20px;
+    font-size: 18px;
+    border-radius: 30px;
 }
 
 .container {

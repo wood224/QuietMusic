@@ -1,14 +1,13 @@
 <template>
     <div>
-        <el-empty description="Home" />
+        <el-empty description="Singer" />
     </div>
 </template>
 
 <script>
 export default {
-    name: 'Home',
-    methods: {
-    },
+    name: 'Singer',
+
 }
 </script>
 
