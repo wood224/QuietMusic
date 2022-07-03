@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import { mapMutations } from "vuex"
+import { mapMutations, mapState } from "vuex"
 
 export default {
     name: 'Header',
@@ -59,6 +59,9 @@ export default {
     mounted() {
         //判断登录状态
         this.userInfo = JSON.parse(localStorage.getItem('userInfo'))
+    },
+    computed: {
+        ...mapState(['searchSongs'])
     },
     watch: {
         $route(to) {
@@ -106,7 +109,7 @@ export default {
         }
     },
     methods: {
-        ...mapMutations(['getSearchSongs']),
+        ...mapMutations(['setSearchSongs']),
 
         logout() {
             localStorage.clear()
@@ -127,6 +130,14 @@ export default {
             this.$router.push('/singer')
         },
 
+        getTime(duration) {
+            let ss = Math.ceil(duration / 1000 % 60)
+            ss = ss < 10 ? '0' + ss : ss
+            let mm = Math.floor(duration / 1000 / 60)
+            mm = mm < 10 ? '0' + mm : mm
+            return mm + ':' + ss
+        },
+
         async search() {
             if (this.input === '') return
             const { data: res } = await this.$http.get('/search', {
@@ -134,7 +145,10 @@ export default {
                     keywords: this.input
                 }
             })
-            this.getSearchSongs(res.result.songs)
+            this.setSearchSongs(res.result.songs)
+            this.searchSongs.forEach(item => {
+                item.duration = this.getTime(item.duration)
+            })
             this.$router.push('/search')
         }
     },

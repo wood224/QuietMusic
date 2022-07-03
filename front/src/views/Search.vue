@@ -1,50 +1,64 @@
 <template>
     <div>
-        <el-table :data="songs" height="700" style="width: 100%">
-            <el-table-column prop="name" label="歌曲名" width="200" />
-            <el-table-column label="歌手" width="180">
-                <template slot-scope="scope">
+        <el-table :data="searchSongs" height="600" style="width: 100%" @cell-click="play">
+            <el-table-column prop="name" label="歌曲名" width="300" />
+            <el-table-column label="歌手" width="300">
+                <template v-slot:default="scope">
                     <span v-for="item in scope.row.artists" :key="item.id">
-                        {{ item.name }}
+                        {{ item.name }}&nbsp;
                     </span>
                 </template>
             </el-table-column>
             <el-table-column prop="album.name" label="专辑" />
             <el-table-column prop="duration" label="时长" />
         </el-table>
+        <audio :src="songUrl" autoplay></audio>
     </div>
 </template>
 
 <script>
-import { mapState } from "vuex"
+import { mapState, mapMutations } from "vuex"
+import { toRaw } from '@vue/reactivity'
 
 export default {
     name: 'Search',
     data() {
         return {
-            songs: []
+            songUrl: ''
         }
     },
     computed: {
         ...mapState(['searchSongs'])
     },
     created() {
-        this.songs = this.searchSongs
-        this.songs.forEach(item => {
-            item.duration = this.getTime(item.duration)
-        })
+
     },
     methods: {
-        getTime(duration) {
-            let ss = Math.ceil(duration / 1000 % 60)
-            ss = ss < 10 ? '0' + ss : ss
-            let mm = Math.floor(duration / 1000 / 60)
-            mm = mm < 10 ? '0' + mm : mm
-            return mm + ':' + ss
-        }
+        ...mapMutations(['setMusicInfo']),
+
+        async play(row) {
+            const data = toRaw(row)
+            const songId = data.id
+            const { data: res1 } = await this.$http.get('/song/url', {
+                params: {
+                    id: songId
+                }
+            })
+            this.songUrl = res1.data[0].url
+            const { data: res2 } = await this.$http.get('/song/detail', {
+                params: {
+                    ids: songId
+                }
+            })
+            this.setMusicInfo(res2.songs[0])
+
+        },
     },
 }
 </script>
 
-<style lang="less" scoped>
+<style lang="less">
+.el-table tr {
+    cursor: pointer;
+}
 </style>

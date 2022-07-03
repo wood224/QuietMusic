@@ -2,14 +2,18 @@ import { createStore } from 'vuex'
 
 export default createStore({
   state: {
-    searchSongs: []
+    searchSongs: [],
+    musicInfo: {}
   },
   getters: {
 
   },
   mutations: {
-    getSearchSongs(state, songs) {
+    setSearchSongs(state, songs) {
       state.searchSongs = songs
+    },
+    setMusicInfo(state, musicInfo) {
+      state.musicInfo = musicInfo
     }
   },
   actions: {
