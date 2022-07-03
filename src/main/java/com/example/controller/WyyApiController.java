@@ -27,15 +27,27 @@ public class WyyApiController {
     @GetMapping("/url")
     @ApiOperation("获取音乐url")
     public Object getUrl(String id, String br) {
-        String url = "https://netease-cloud-music-api-theta-two-56.vercel.app/song/url?id=" + id + "&br=" + br;
+        String brkey = null;
+        if(br!=null)
+            brkey="&br="+br;
+        String url = "https://netease-cloud-music-api-theta-two-56.vercel.app/song/url?id=" + id + brkey;
         return restTemplate.getForObject(url, Object.class);
     }
 
     @GetMapping("/search")
     @ApiOperation("搜索")
     public Object search(String keywords, String limit, String offset, String type) {
+        String limitkey=null;
+        String offsetkey=null;
+        String typekey=null;
+        if(limit!=null)
+            limitkey="&limit="+limit;
+        if(offset!=null)
+            offsetkey="&offset="+offset;
+        if(type!=null)
+            typekey="&type="+type;
         String url = "https://netease-cloud-music-api-theta-two-56.vercel.app/search?keywords="
-                + keywords + "&limit=" + limit + "&offset=" + offset + "&type=" + type;
+                + keywords + limitkey+offsetkey+typekey;
         return restTemplate.getForObject(url, Object.class);
     }
 
@@ -58,16 +70,24 @@ public class WyyApiController {
 
     @GetMapping("/banner")
     @ApiOperation("轮播图")
-    public Object getBanner(int type) {
-        String url = "https://netease-cloud-music-api-theta-two-56.vercel.app/banner?type=" + type;
+    public Object getBanner(Integer type) {
+        String typekey="?type="+type;
+        String url = "https://netease-cloud-music-api-theta-two-56.vercel.app/banner" + typekey;
         return restTemplate.getForObject(url, Object.class);
     }
 
 
     @GetMapping("/artistlist")
     @ApiOperation("获取歌手列表")
-    public Object getArtists(int type, int area) {
-        String url = "https://netease-cloud-music-api-theta-two-56.vercel.app/artist/list?type=" + type + "&area=" + area;
+    public Object getArtists(Integer type, Integer area) {
+        String keys=null;
+        if(type==null&&area!=null)
+            keys="?area="+area;
+        else if(type!=null&&area==null)
+            keys="?type="+type;
+        else if (type!=null&&area!=null)
+            keys="?type=" + type + "&area=" + area;
+        String url = "https://netease-cloud-music-api-theta-two-56.vercel.app/artist/list"+keys;
         return restTemplate.getForObject(url, Object.class);
     }
 
