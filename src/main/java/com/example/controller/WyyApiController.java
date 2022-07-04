@@ -111,7 +111,7 @@ public class WyyApiController {
 
     @GetMapping("/musiccheck")
     @ApiOperation("音乐是否可用")
-    public Object getMCheck(String id) {
+    public Object getMCheck(Integer id) {
         String url = "https://netease-cloud-music-api-theta-two-56.vercel.app/check/music?id=" + id;
         return restTemplate.getForObject(url, Object.class);
     }
