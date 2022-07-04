@@ -1,13 +1,16 @@
 package com.example.controller;
 
+import com.example.common.R;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+@Slf4j
 @RestController
 @RequestMapping("/song")
 @Api(tags = "转网易云接口")
@@ -113,7 +116,12 @@ public class WyyApiController {
     @ApiOperation("音乐是否可用")
     public Object getMCheck(Integer id) {
         String url = "https://netease-cloud-music-api-theta-two-56.vercel.app/check/music?id=" + id;
-        return restTemplate.getForObject(url, Object.class);
+        try {
+            restTemplate.getForObject(url, Object.class);
+            return R.success("有版权");
+        }catch (Exception e){
+            return R.nferror("亲爱的，暂无版权");
+        }
     }
 }
 
