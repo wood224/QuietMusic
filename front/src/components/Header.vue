@@ -140,7 +140,7 @@ export default {
 
         async search() {
             if (this.input === '') return
-            const { data: res } = await this.$http.get('/search', {
+            const { data: res } = await this.$http.get('/song/search', {
                 params: {
                     keywords: this.input
                 }
@@ -149,6 +149,7 @@ export default {
             this.searchSongs.forEach(item => {
                 item.duration = this.getTime(item.duration)
             })
+            this.input = ''
             this.$router.push('/search')
         }
     },
@@ -157,20 +158,22 @@ export default {
 
 <style lang="less" scoped>
 .header {
+    position: fixed;
+    top: 0;
     display: flex;
     height: 90px;
+    width: 100%;
     padding: 0 20px;
     // background: skyblue;
-    background-color: rgba(109, 213, 250, 0.2);
-    justify-content: space-between;
+    background-color: rgb(109, 213, 250);
+    justify-content: space-around;
     align-items: center;
     color: black;
     font-size: 20px;
     line-height: 30px;
+    z-index: 999;
 
     .menu {
-        margin-left: 200px;
-
         ul {
             display: flex;
             justify-content: space-around;
@@ -193,7 +196,6 @@ export default {
             }
 
             li {
-                margin: 0 40px;
                 width: 150px;
                 height: 50px;
                 text-align: center;
@@ -201,7 +203,7 @@ export default {
 
                 &:hover {
                     a {
-                        color: #6DD5FA;
+                        color: white;
                     }
 
                 }
@@ -239,14 +241,16 @@ export default {
         }
 
         .login {
-            background-color: #6DD5FA;
+            display: flex;
+            background-color: white;
+            border-radius: 30px;
             width: 100px;
-            height: 100%;
-            text-align: center;
+            height: 50%;
+            justify-content: center;
+            align-items: center;
 
             a {
                 color: #000046;
-                line-height: 90px;
             }
         }
 

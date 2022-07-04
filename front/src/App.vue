@@ -31,11 +31,11 @@ export default {
 
 <style lang="less" scoped>
 .app {
-	background-color: rgb(240, 239, 239);
-}
 
-.container {
-	margin: 0 auto;
-	width: 1000px;
+	.container {
+		padding-top: 90px;
+		margin: 0 auto;
+		width: 1000px;
+	}
 }
 </style>

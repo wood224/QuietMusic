@@ -3,7 +3,8 @@ import { createStore } from 'vuex'
 export default createStore({
   state: {
     searchSongs: [],
-    musicInfo: {}
+    musicInfo: {},
+    musicUrl: ''
   },
   getters: {
 
@@ -14,6 +15,9 @@ export default createStore({
     },
     setMusicInfo(state, musicInfo) {
       state.musicInfo = musicInfo
+    },
+    setMusicUrl(state, url) {
+      state.musicUrl = url
     }
   },
   actions: {
