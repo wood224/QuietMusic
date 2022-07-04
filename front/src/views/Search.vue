@@ -45,7 +45,7 @@ export default {
                 }
             })
             if (res.code !== 200) {
-                return alert('抱歉, 该歌暂无版权')
+                return ElMessage.warning('抱歉, 该歌暂无版权')
             }
             axios.all([
                 this.$http.get('song/detail', {

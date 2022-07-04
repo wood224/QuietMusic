@@ -18,7 +18,9 @@ app.config.globalProperties.$http = axios
 let loading
 function startLoading() {
     loading = ElLoading.service({
-        lock: true
+        lock: true,
+        text: '加载中...(如果长时间未响应, 请刷新页面后重试)',
+        background: 'rgba(0, 0, 0, 0.7)',
     })
 }
 function endLoading() {
