@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.example.common.R;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -144,7 +145,7 @@ public class WyyApiController {
             offsetkey="&offset="+offset;
         String url = "https://netease-cloud-music-api-theta-two-56.vercel.app/playlist/track/all?id="
                 + id + limitkey+offsetkey;
-        return restTemplate.getForObject(url, Object.class);
+        return JSON.toJSON(restTemplate.getForObject(url, Object.class));
     }
 
     @GetMapping("/hqplaylist")
