@@ -327,11 +327,11 @@ export default {
                     password: this.password
                 })
                 if (res.code === 200) {
-                    alert('注册成功')
+                    ElMessage.success('注册成功')
                     this.password = ''
                     this.moveRight()
                 } else {
-                    alert(res.msg)
+                    ElMessage.error(res.msg)
                 }
             }
         }
