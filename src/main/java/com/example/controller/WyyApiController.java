@@ -145,7 +145,7 @@ public class WyyApiController {
             offsetkey="&offset="+offset;
         String url = "https://netease-cloud-music-api-theta-two-56.vercel.app/playlist/track/all?id="
                 + id + limitkey+offsetkey;
-        return JSON.toJSON(restTemplate.getForObject(url, Object.class));
+        return restTemplate.getForEntity(url, Object.class).getBody();
     }
 
     @GetMapping("/hqplaylist")
