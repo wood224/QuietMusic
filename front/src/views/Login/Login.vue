@@ -4,7 +4,7 @@
         <h2>登录/注册</h2>
         <div class="container" :class="{ 'right-panel-active': isRightActive }">
             <div class="form-container sign-up-container">
-                <form action="">
+                <form action="" @keydown.enter="signIn">
                     <h1>注册</h1>
                     <input type="text" placeholder="请输入用户名" v-model="name" @blur="validateName(name)">
                     <div class="alertError" v-show="alertName">
@@ -53,7 +53,7 @@
                 </form>
             </div>
             <div class="form-container sign-in-container">
-                <form action="">
+                <form action="" @keydown.enter="signIn">
                     <h1>登录</h1>
                     <div class="mode">
                         <span @click="modeName">用户名登录</span>

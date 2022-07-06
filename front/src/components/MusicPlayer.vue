@@ -1,11 +1,11 @@
 <template>
     <div class="music-container" :class="{ 'play': isPlaying }" ref="musicContainer">
         <div class="music-info">
-            <div class="music-img">
+            <div class="music-img" @click="goSongDetails">
                 <img :src="songInfo.picUrl" alt="" @error="picNull(songInfo)">
             </div>
             <div class="music-control">
-                <div class="music-name">
+                <div class="music-name" @click="goSongDetails">
                     <span class="name">{{ songInfo.name }}</span>
                     <span class="singer" v-for="(item, index) in songInfo.ar" :key="index">
                         <span v-if="index !== 0">/</span>{{ item.name }}
@@ -68,10 +68,13 @@ export default {
             },
             isPlaying: false,       //是否在播放
             isMute: false,          //是否静音
-            progress: {},           //DOM元素
-            audio: {},              //DOM元素
-            musicContainer: {},     //DOM元素
-            volume: {},             //DOM元素
+
+            ////DOM元素
+            audio: {},
+            musicContainer: {},
+            volume: {},
+            progress: {},
+
             tempVolume: 0,          //临时音量
             currentDuration: '',    //音频播放位置
             testSongList: [],
@@ -83,6 +86,11 @@ export default {
         this.audio = this.$refs.audio
         this.musicContainer = this.$refs.musicContainer
         this.audio.volume = 0.5
+        const songInfo = JSON.parse(localStorage.getItem('songInfo'))
+        if (songInfo !== null) {
+            this.songInfo = songInfo
+            if (this.songInfo.url !== '') this.isPlaying = true
+        }
     },
     computed: {
         ...mapState(['musicInfo', 'musicUrl'])
@@ -102,9 +110,18 @@ export default {
             // console.log(url)
             this.songInfo.url = url
             if (this.songInfo.url !== '') this.isPlaying = true
+        },
+        songInfo: {
+            handler() {
+                localStorage.setItem('songInfo', JSON.stringify(this.songInfo))
+            },
+            deep: true
         }
     },
     methods: {
+        getHash() {
+            return location.hash.slice(1) || '/'
+        },
 
         //毫秒转为时分格式
         getTime(duration) {
@@ -199,6 +216,14 @@ export default {
             } else {
                 this.audio.volume = this.tempVolume
             }
+        },
+
+        //前往音乐详情页面
+        goSongDetails() {
+            const hash = this.getHash()
+            if (this.songInfo.url !== '' && hash !== '/Songdetails') this.$router.push('/Songdetails')
+            else this.$router.go(-1)
+
         }
     },
 }
@@ -223,13 +248,15 @@ export default {
         height: 100%;
 
         .music-img {
+            display: flex;
+            justify-items: center;
             width: 100px;
             height: 100%;
             cursor: pointer;
 
             img {
                 height: 100%;
-                object-fit: contain;
+                object-fit: cover;
                 border-radius: 50%;
                 animation: imgRotate 5s linear infinite;
                 animation-play-state: paused;
@@ -318,7 +345,7 @@ export default {
                     background-color: gray;
                     border-radius: 5px;
                     margin: 10px 0;
-                    width: 100%;
+                    width: 88%;
                     height: 6px;
                     cursor: pointer;
 

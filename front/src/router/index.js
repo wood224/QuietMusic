@@ -4,6 +4,7 @@ import Rank from '../views/Rank.vue'
 import Song from '../views/Song.vue'
 import Singer from '../views/Singer.vue'
 import Search from '../views/Search.vue'
+import SongDetails from '../views/SongDetails.vue'
 
 const routes = [
   {
@@ -29,6 +30,10 @@ const routes = [
   {
     path: '/search',
     component: Search
+  },
+  {
+    path: '/songDetails',
+    component: SongDetails
   }
 ]
 

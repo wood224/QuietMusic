@@ -1,9 +1,7 @@
 <template>
 	<div class="app">
 		<Header></Header>
-		<div class="container">
-			<router-view></router-view>
-		</div>
+		<router-view></router-view>
 		<MusicPlayer></MusicPlayer>
 	</div>
 </template>
@@ -30,12 +28,4 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.app {
-
-	.container {
-		padding-top: 90px;
-		margin: 0 auto;
-		width: 1000px;
-	}
-}
 </style>

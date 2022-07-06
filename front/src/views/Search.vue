@@ -1,17 +1,29 @@
 <template>
-    <div>
-        <el-table :data="searchSongs" height="620" style="width: 100%" @cell-click="play">
-            <el-table-column prop="name" label="歌曲名" width="300" />
-            <el-table-column label="歌手" width="300">
-                <template v-slot:default="scope">
-                    <span v-for="item in scope.row.artists" :key="item.id">
-                        {{ item.name }}&nbsp;
-                    </span>
-                </template>
-            </el-table-column>
-            <el-table-column prop="album.name" label="专辑" />
-            <el-table-column prop="duration" label="时长" />
-        </el-table>
+    <div class="search-container">
+        <div>
+            <el-tabs type="border-card">
+                <el-tab-pane label="单曲">
+                    <div>
+                        <el-table :data="searchSongs" height="540" style="width: 100%" @cell-click="play">
+                            <el-table-column prop="name" label="歌曲名" width="300" />
+                            <el-table-column label="歌手" width="300">
+                                <template v-slot:default="scope">
+                                    <span v-for="item in scope.row.artists" :key="item.id">
+                                        {{ item.name }}&nbsp;
+                                    </span>
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="album.name" label="专辑" />
+                            <el-table-column prop="duration" label="时长" />
+                        </el-table>
+                    </div>
+                </el-tab-pane>
+                <el-tab-pane label="歌手"></el-tab-pane>
+                <el-tab-pane label="歌单"></el-tab-pane>
+                <el-tab-pane label="专辑"></el-tab-pane>
+            </el-tabs>
+        </div>
+
     </div>
 </template>
 
@@ -24,7 +36,7 @@ export default {
     name: 'Search',
     data() {
         return {
-            songInfo: {}
+
         }
     },
     computed: {
@@ -32,6 +44,9 @@ export default {
     },
     created() {
 
+    },
+    mounted() {
+        this.songInfo = JSON.parse(localStorage.getItem('songInfo'))
     },
     methods: {
         ...mapMutations(['setMusicInfo', 'setMusicUrl']),
@@ -63,6 +78,7 @@ export default {
                 this.setMusicInfo(info.data.songs[0])
                 // console.log(url.data.data[0])
                 this.setMusicUrl(url.data.data[0].url)
+                localStorage.setItem('songInfo', JSON.stringify(this.songInfo))
             }))
 
             // axios.all([
@@ -88,7 +104,12 @@ export default {
 </script>
 
 <style lang="less">
-.el-table tr {
-    cursor: pointer;
+.search-container {
+    width: 1000px;
+    margin: 0 auto;
+
+    .el-table tr {
+        cursor: pointer;
+    }
 }
 </style>
