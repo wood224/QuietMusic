@@ -1,14 +1,19 @@
 <template>
     <div>
-        <el-empty description="Home" />
+        <Banner></Banner>
     </div>
 </template>
 
 <script>
+import Banner from '../components/Banner.vue'
+
 export default {
     name: 'Home',
     methods: {
     },
+    components: {
+        Banner
+    }
 }
 </script>
 

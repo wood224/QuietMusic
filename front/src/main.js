@@ -4,6 +4,8 @@ import router from './router'
 import store from './store'
 import axios from 'axios'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+import bootstrapcss from './assets/bootstrap/css/bootstrap.min.css'
+import bootstrapjs from './assets/bootstrap/js/bootstrap.bundle.min'
 
 const app = createApp(App)
 
@@ -41,7 +43,6 @@ axios.interceptors.response.use(response => {
     return Promise.reject(error)
 })
 
-app.use(store)
-app.use(router)
+app.use(store).use(router)
 
 app.mount('#app')

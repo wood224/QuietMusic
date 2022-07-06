@@ -1,5 +1,5 @@
 <template>
-    <div class="header">
+    <nav class="navbar navbar-light bg-primary">
         <div class="menu">
             <ul>
                 <li id="home" @click="goHome" :class="{ bgWihte: classBgWihte[0] }">
@@ -29,23 +29,30 @@
                 <a href="login.html">登录</a>
             </div>
             <div v-else class="userInfo">
-                <div class="userName">{{ userInfo.name }}, 欢迎您</div>
-                <div class="userMenu">
-                    <ul>
-                        <li>功能1</li>
-                        <li>功能2</li>
-                        <li>功能3</li>
-                        <li>功能4</li>
-                        <li @click="logout">退出登录</li>
-                    </ul>
-                </div>
+                <el-dropdown size="large">
+                    <span class="el-dropdown-link">
+                        {{ userInfo.name }}, 欢迎您
+                        <el-icon class="el-icon--right">
+                            <arrow-down />
+                        </el-icon>
+                    </span>
+                    <template #dropdown>
+                        <el-dropdown-menu>
+                            <el-dropdown-item>Action 1</el-dropdown-item>
+                            <el-dropdown-item>Action 2</el-dropdown-item>
+                            <el-dropdown-item>Action 3</el-dropdown-item>
+                            <el-dropdown-item divided @click="logout()">退出登录</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </template>
+                </el-dropdown>
             </div>
         </div>
-    </div>
+    </nav>
 </template>
 
 <script>
 import { mapMutations, mapState } from "vuex"
+import axios from "axios"
 
 export default {
     name: 'Header',
@@ -101,7 +108,7 @@ export default {
                     }
                 }
             }
-            else if (to.path === '/search') {
+            else {
                 for (let i = 0; i < this.classBgWihte.length; i++) {
                     this.classBgWihte[i] = false
                 }
@@ -112,9 +119,10 @@ export default {
         ...mapMutations(['setSearchSongs']),
 
         logout() {
-            localStorage.clear()
+            localStorage.removeItem('userInfo')
             //返回主页
-            location.href = 'index.html'
+            this.userInfo = JSON.parse(localStorage.getItem('userInfo'))
+
         },
 
         goHome() {
@@ -140,6 +148,19 @@ export default {
 
         async search() {
             if (this.input === '') return
+            // axios.get('https://netease-cloud-music-api-theta-two-56.vercel.app/search', {
+            //     params: {
+            //         keywords: this.input
+            //     }
+            // })
+            //     .then(res => {
+            //         console.log(res)
+            //         this.setSearchSongs(res.data.result.songs)
+
+            //     })
+            //     .catch(err => {
+            //         console.error(err)
+            //     })
             const { data: res } = await this.$http.get('/song/search', {
                 params: {
                     keywords: this.input
@@ -156,21 +177,8 @@ export default {
 }
 </script>
 
-<style lang="less" scoped>
-.header {
-    position: fixed;
-    top: 0;
-    display: flex;
-    height: 90px;
-    width: 100%;
-    padding: 0 20px;
-    // background: skyblue;
-    background-color: rgb(109, 213, 250);
-    justify-content: space-around;
-    align-items: center;
-    color: black;
-    font-size: 20px;
-    line-height: 30px;
+<style lang="less">
+.navbar.navbar-light {
     z-index: 999;
 
     .menu {
@@ -204,6 +212,7 @@ export default {
                 &:hover {
                     a {
                         color: white;
+                        text-decoration: none;
                     }
 
                 }
@@ -229,6 +238,7 @@ export default {
     }
 
     .user {
+        position: relative;
         display: flex;
         height: 100%;
         align-items: center;
@@ -246,31 +256,28 @@ export default {
             border-radius: 30px;
             width: 100px;
             height: 50%;
-            justify-content: center;
             align-items: center;
+            text-align: center;
 
             a {
+                width: 100%;
                 color: #000046;
+                text-decoration: none;
             }
         }
 
         .userInfo {
-            .userName {
-                line-height: 90px;
+            .el-dropdown-link {
+                font-size: 20px;
+                color: black;
             }
         }
+    }
+}
 
-        .userMenu {
-            display: none;
-            color: black;
-            box-shadow: 2px 2px 10px #D3D3D3;
-
-            li {
-                &:hover {
-                    background-color: #F0F0F5;
-                }
-            }
-        }
+.el-dropdown-menu--large {
+    .el-dropdown-menu__item {
+        font-size: 16px;
     }
 }
 </style>
