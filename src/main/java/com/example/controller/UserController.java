@@ -112,18 +112,21 @@ public class UserController {
         //添加条件
         LambdaQueryWrapper<User> lambdaQueryWrapper =new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(user.getUsername()!=null,User::getUsername,user.getUsername());
-        String password = user.getPassword()+user.getUsername();
-        password= DigestUtils.md5DigestAsHex(password.getBytes());
-        lambdaQueryWrapper.eq(User::getPassword,password);
         lambdaQueryWrapper.eq(user.getPhone()!=null,User::getPhone,user.getPhone());
         //获取用户
         User userh= userService.getOne(lambdaQueryWrapper);
+
         if (userh!=null)
         {
             if(userh.getStatus()==0)
                 return R.error("用户封禁中!");
-            request.getSession().setAttribute("user",userh.getId());
-            return R.success(userh);
+            String password = user.getPassword()+userh.getUsername();
+            password= DigestUtils.md5DigestAsHex(password.getBytes());
+            if(password.equals(userh.getPassword())) {
+                request.getSession().setAttribute("user", userh.getId());
+                return R.success(userh);
+            }
+            return R.error("登陆失败，请检查用户名或密码是否正确！");
         }
         return R.error("登陆失败，请检查用户名或密码是否正确！");
     }
