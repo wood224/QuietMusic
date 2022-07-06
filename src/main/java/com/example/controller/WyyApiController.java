@@ -1,10 +1,12 @@
 package com.example.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.example.common.R;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -85,13 +87,14 @@ public class WyyApiController {
     @GetMapping("/artistlist")
     @ApiOperation("获取歌手列表")
     public Object getArtists(Integer type, Integer area) {
-        String keys="";
-        if(type==null&&area!=null)
-            keys="?area="+area;
-        else if(type!=null&&area==null)
-            keys="?type="+type;
-        else if (type!=null&&area!=null)
-            keys="?type=" + type + "&area=" + area;
+        String keys="?";
+        String typeKey="type="+type+"&";
+        String areaKey="area="+area+"&";
+        if(type!=null)
+            keys += typeKey;
+        if(area!=null)
+            keys += areaKey;
+        keys = keys.substring(0,keys.length()-1);
         String url = "https://netease-cloud-music-api-theta-two-56.vercel.app/artist/list"+keys;
         return restTemplate.getForObject(url, Object.class);
     }
@@ -122,6 +125,49 @@ public class WyyApiController {
         }catch (Exception e){
             return R.nferror("亲爱的，暂无版权");
         }
+    }
+
+    @GetMapping("/hqtags")
+    @ApiOperation("获取精品歌单标签列表")
+    public Object getHQTags() {
+        String url = "https://netease-cloud-music-api-theta-two-56.vercel.app/playlist/highquality/tags";
+        return restTemplate.getForObject(url, Object.class);
+    }
+
+    @GetMapping("/playlistall")
+    @ApiOperation("获取歌单所有歌曲")
+    public Object getPlaylistAll(Integer id, String limit, String offset) {
+        String limitkey="";
+        String offsetkey="";;
+        if(limit!=null)
+            limitkey="&limit="+limit;
+        if(offset!=null)
+            offsetkey="&offset="+offset;
+        String url = "https://netease-cloud-music-api-theta-two-56.vercel.app/playlist/track/all?id="
+                + id + limitkey+offsetkey;
+        return restTemplate.getForEntity(url, Object.class).getBody();
+    }
+
+    @GetMapping("/hqplaylist")
+    @ApiOperation("获取精品歌单")
+    public Object getHQPlaylist(String cat,Integer limit,Integer before) {
+
+        String keys="?";
+        String catKey="cat="+cat+"&";
+        String limitKey="limit="+limit+"&";
+        String beforeKey="before="+before+"&";
+        if(cat!=null)
+            keys += catKey;
+        if(limit!=null)
+            keys+=limitKey;
+        if (before!=null)
+            keys+=beforeKey;
+        keys=keys.substring(0,keys.length()-1);
+
+
+        String url = "https://netease-cloud-music-api-theta-two-56.vercel.app/top/playlist/highquality"+keys;
+
+        return restTemplate.getForObject(url, Object.class);
     }
 }
 
