@@ -2,9 +2,12 @@ import { createStore } from 'vuex'
 
 export default createStore({
   state: {
-    searchSongs: [],
-    musicInfo: {},
-    musicUrl: ''
+    searchSongs: [],      //搜索列表
+    musicInfo: {},        //音乐信息
+    musicUrl: '',         //音乐 url
+    musicPlayerId: -1,    //传给 MusicPlayer 组件的 id
+    searchKeywords: '',   //搜索的关键词
+    banners: [],           //轮播图
   },
   getters: {
 
@@ -18,6 +21,15 @@ export default createStore({
     },
     setMusicUrl(state, url) {
       state.musicUrl = url
+    },
+    setMusicPlayerId(state, id) {
+      state.musicPlayerId = id
+    },
+    setSearchKeywords(state, keywords) {
+      state.searchKeywords = keywords
+    },
+    setBanners(state, banners) {
+      state.banners = banners
     }
   },
   actions: {
