@@ -1,7 +1,7 @@
 <template>
     <div class="search-container">
-        <el-tabs type="border-card">
-            <el-tab-pane label="单曲">
+        <el-tabs type="border-card" @tab-click="handleClick" v-model="activeName">
+            <el-tab-pane label="单曲" name="searchSingle">
                 <el-table :data="searchSongs" height="540" style="width: 100%" @cell-click="play" v-loading="loading"
                     element-loading-background="rgba(122, 122, 122, 0.2)"
                     element-loading-text="加载中...(如果长时间未响应, 请刷新页面后重试)">
@@ -17,9 +17,26 @@
                     <el-table-column prop="duration" label="时长" />
                 </el-table>
             </el-tab-pane>
-            <el-tab-pane label="歌手"></el-tab-pane>
-            <el-tab-pane label="歌单"></el-tab-pane>
-            <el-tab-pane label="专辑"></el-tab-pane>
+            <el-tab-pane label="歌手" name="searchSinger" v-loading="loading"
+                element-loading-background="rgba(122, 122, 122, 0.4)" element-loading-text="加载中...(如果长时间未响应, 请刷新页面后重试)">
+                <ul class="singerList">
+                    <li v-for="item in singerLsit" :key="item.id">
+                        <div class="singer">
+                            <div class="pic">
+                                <img :src="item.picUrl" alt="">
+                            </div>
+                            <div class="singerInfo">
+                                <span>{{ item.name }}</span>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+
+            </el-tab-pane>
+            <el-tab-pane label="歌单" name="searchList">
+            </el-tab-pane>
+            <el-tab-pane label="专辑" name="searchAlbum">
+            </el-tab-pane>
         </el-tabs>
     </div>
 </template>
@@ -35,7 +52,10 @@ export default {
         return {
             loading: false,
             keywords: '',
-            songList: []
+            activeName: 'searchSingle',
+            songList: [],
+            singerLsit: [],
+            type: 1
         }
     },
     computed: {
@@ -49,7 +69,8 @@ export default {
         },
         keywords: {
             handler() {
-                this.getSearchList(this.keywords)
+                if (this.type === 1) return this.getSearchList(this.keywords)
+                if (this.type === 100) return this.searchSinger()
             }
         }
     },
@@ -101,6 +122,54 @@ export default {
                 return ElMessage.warning('抱歉, 该歌暂无版权')
             }
             this.setMusicPlayerId(song.id)
+        },
+
+        //搜索单曲
+        async searchSingle() {
+            this.loading = true
+            const { data: res } = await this.$http.get('/song/search', {
+                params: {
+                    keywords: this.keywords,
+                    type: 1
+                }
+            })
+            if (res.code === 200) {
+                this.songLsit = res.result.songs
+            }
+            this.loading = false
+        },
+
+        //搜索歌手
+        async searchSinger() {
+            this.loading = true
+            const { data: res } = await this.$http.get('/song/search', {
+                params: {
+                    keywords: this.keywords,
+                    type: 100
+                }
+            })
+            if (res.code === 200) {
+                this.singerLsit = res.result.artists
+            }
+            this.loading = false
+        },
+
+        //搜索歌单
+        searchList() { },
+
+        //搜索专辑
+        searchAlbum() { },
+
+        handleClick(tab, event) {
+            // console.log(tab.props.name)
+            if (tab.props.name === 'searchSingle') {
+                this.type = 1
+                return this.getSearchList(this.keywords)
+            }
+            if (tab.props.name === 'searchSinger') {
+                this.type = 100
+                return this.searchSinger()
+            }
         }
     },
 }
@@ -113,6 +182,40 @@ export default {
 
     .el-table tr {
         cursor: pointer;
+    }
+
+    .el-tabs {
+        .el-tabs__content {
+            .singerList {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                height: 540px;
+                overflow: auto;
+
+                .singer {
+                    width: 140px;
+                    cursor: pointer;
+
+                    .pic {
+                        height: 140px;
+
+                        img {
+                            width: 100%;
+                            height: 100%;
+                            object-fit: cover;
+                        }
+
+                        // background-color: hotpink;
+                    }
+
+                    .singerInfo {
+                        height: 30px;
+                        // background-color: skyblue;
+                    }
+                }
+            }
+        }
     }
 }
 </style>

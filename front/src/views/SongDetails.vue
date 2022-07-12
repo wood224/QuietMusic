@@ -47,7 +47,9 @@ export default {
 }
 
 .song-details-container {
-    height: 940px;
+    position: relative;
+    height: 630px;
+    overflow: hidden;
 
     .content {
         position: absolute;
