@@ -1,5 +1,6 @@
 <template>
-    <div class="music-container" :class="{ 'play': isPlaying }" ref="musicContainer">
+    <div class="music-container" :class="{ 'play': isPlaying }" ref="musicContainer" v-loading="loading"
+        element-loading-background="rgba(122, 122, 122, 0.8)" element-loading-text="加载中...(如果长时间未响应, 请刷新页面后重试)">
         <div class="music-info">
             <div class="music-img" @click="goSongDetails">
                 <img :src="songInfo.picUrl" alt="" @error="picNull(songInfo)">
@@ -25,7 +26,7 @@
                     </div>
                     <div class="volume-info">
                         <button @click="setMute">
-                            <i class="fas fa-volume-off" v-show="isMute"></i>
+                            <i class="fas fa-volume-mute" v-show="isMute"></i>
                             <i class="fas fa-volume-down" v-show="!isMute"></i>
                         </button>
                         <div class="volume-container" @click="setVolume($event)" v-show="!isMute">
@@ -34,7 +35,7 @@
                     </div>
                     <div class="action">
                         <button>
-                            <i class="fas fa-list"></i>
+                            <i class="fas fa-sliders-h"></i>
                         </button>
                     </div>
                 </div>
@@ -52,7 +53,8 @@
 </template>
 
 <script>
-import { mapState } from "vuex"
+import { mapState, mapMutations } from "vuex"
+import axios from "axios"
 
 export default {
     name: 'MusicPlayer',
@@ -78,6 +80,8 @@ export default {
             tempVolume: 0,          //临时音量
             currentDuration: '',    //音频播放位置
             testSongList: [],
+
+            loading: false
         }
     },
     mounted() {
@@ -89,11 +93,12 @@ export default {
         const songInfo = JSON.parse(localStorage.getItem('songInfo'))
         if (songInfo !== null) {
             this.songInfo = songInfo
+            // if (this.musicPlayerId !== this.songInfo.id) this.setMusicPlayerId(this.songInfo.id)
             if (this.songInfo.url !== '') this.isPlaying = true
         }
     },
     computed: {
-        ...mapState(['musicInfo', 'musicUrl'])
+        ...mapState(['musicInfo', 'musicUrl', 'musicPlayerId'])
     },
     watch: {
         musicInfo: function () {
@@ -109,23 +114,49 @@ export default {
             const url = JSON.parse(JSON.stringify(this.musicUrl))
             // console.log(url)
             this.songInfo.url = url
-            if (this.songInfo.url !== '') this.isPlaying = true
+            if (this.songInfo.url !== '') {
+                this.isPlaying = true
+            }
+            localStorage.setItem('songInfo', JSON.stringify(this.songInfo))
+
         },
-        songInfo: {
+        musicPlayerId: {
             handler() {
-                localStorage.setItem('songInfo', JSON.stringify(this.songInfo))
+                this.loading = true
+                axios.all([
+                    this.$http.get('song/detail', {
+                        params: {
+                            ids: this.musicPlayerId
+                        }
+                    }),
+                    this.$http.get('song/url', {
+                        params: {
+                            id: this.musicPlayerId
+                        }
+                    })
+                ]).then(axios.spread((info, url) => {
+                    // console.log(info.data.songs[0])
+                    this.setMusicInfo(info.data.songs[0])
+                    // console.log(url.data.data[0])
+                    this.setMusicUrl(url.data.data[0].url)
+                    this.loading = false
+                })).catch(err => {
+                    console.error(err)
+                    this.loading = false
+                })
             },
-            deep: true
         }
     },
     methods: {
+        ...mapMutations(['setMusicInfo', 'setMusicUrl', 'setMusicPlayerId']),
+
         getHash() {
             return location.hash.slice(1) || '/'
         },
 
         //毫秒转为时分格式
         getTime(duration) {
-            let ss = Math.ceil(duration / 1000 % 60)
+            let ss = Math.floor(duration / 1000 % 60)
             ss = ss < 10 ? '0' + ss : ss
             let mm = Math.floor(duration / 1000 / 60)
             mm = mm < 10 ? '0' + mm : mm
@@ -134,7 +165,7 @@ export default {
 
         //获取currentDuration
         getCurrentDuration(currentDuration) {
-            let ss = Math.ceil(currentDuration % 60)
+            let ss = Math.floor(currentDuration % 60)
             ss = ss < 10 ? '0' + ss : ss
             let mm = Math.floor(currentDuration / 60)
             mm = mm < 10 ? '0' + mm : mm

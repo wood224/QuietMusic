@@ -301,7 +301,7 @@ export default {
                     localStorage.setItem("userInfo", JSON.stringify(userInfo))
                     this.setUserInfo(userInfo)
                 } else {
-                    return alert(res.msg)
+                    return ElMessage.error(res.msg)
                 }
             }
         },

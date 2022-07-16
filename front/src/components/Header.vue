@@ -116,13 +116,12 @@ export default {
         }
     },
     methods: {
-        ...mapMutations(['setSearchSongs']),
+        ...mapMutations(['setSearchKeywords']),
 
         logout() {
             localStorage.removeItem('userInfo')
             //返回主页
             this.userInfo = JSON.parse(localStorage.getItem('userInfo'))
-
         },
 
         goHome() {
@@ -138,40 +137,11 @@ export default {
             this.$router.push('/singer')
         },
 
-        getTime(duration) {
-            let ss = Math.ceil(duration / 1000 % 60)
-            ss = ss < 10 ? '0' + ss : ss
-            let mm = Math.floor(duration / 1000 / 60)
-            mm = mm < 10 ? '0' + mm : mm
-            return mm + ':' + ss
-        },
-
         async search() {
             if (this.input === '') return
-            // axios.get('https://netease-cloud-music-api-theta-two-56.vercel.app/search', {
-            //     params: {
-            //         keywords: this.input
-            //     }
-            // })
-            //     .then(res => {
-            //         console.log(res)
-            //         this.setSearchSongs(res.data.result.songs)
-
-            //     })
-            //     .catch(err => {
-            //         console.error(err)
-            //     })
-            const { data: res } = await this.$http.get('/song/search', {
-                params: {
-                    keywords: this.input
-                }
-            })
-            this.setSearchSongs(res.result.songs)
-            this.searchSongs.forEach(item => {
-                item.duration = this.getTime(item.duration)
-            })
+            this.setSearchKeywords(this.input)
+            this.$router.push({ path: '/search', query: { keywords: this.input } })
             this.input = ''
-            this.$router.push('/search')
         }
     },
 }
