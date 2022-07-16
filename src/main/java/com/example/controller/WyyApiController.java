@@ -15,7 +15,7 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 @RestController
 @RequestMapping("/song")
-@Api(tags = "转网易云接口")
+//@Api(tags = "转网易云接口")
 public class WyyApiController {
 
     @Autowired
