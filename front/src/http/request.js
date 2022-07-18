@@ -12,7 +12,7 @@ function startLoading() {
         fullscreen: false,
         lock: true,
         text: '加载中...(如果长时间未响应, 请刷新页面后重试)',
-        background: 'rgba(0, 0, 0, 0.7)',
+        background: 'rgba(122, 122, 122, 0.2)',
     })
 }
 function endLoading() {
