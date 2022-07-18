@@ -8,9 +8,12 @@ export default createStore({
     musicPlayerId: -1,    //传给 MusicPlayer 组件的 id
     searchKeywords: '',   //搜索的关键词
     banners: [],           //轮播图
+    baseURLCloudMusic: 'http://180.76.136.85:3000'   //网易云API默认路径
   },
   getters: {
-
+    getBaseURLCloudMusic(state) {
+      return state.baseURLCloudMusic
+    }
   },
   mutations: {
     setSearchSongs(state, songs) {

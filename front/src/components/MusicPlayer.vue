@@ -53,7 +53,7 @@
 </template>
 
 <script>
-import { mapState, mapMutations } from "vuex"
+import { mapState, mapMutations, mapGetters } from "vuex"
 import axios from "axios"
 
 export default {
@@ -98,7 +98,8 @@ export default {
         }
     },
     computed: {
-        ...mapState(['musicInfo', 'musicUrl', 'musicPlayerId'])
+        ...mapState(['musicInfo', 'musicUrl', 'musicPlayerId']),
+        ...mapGetters(['getBaseURLCloudMusic'])
     },
     watch: {
         musicInfo: function () {
@@ -124,12 +125,12 @@ export default {
             handler() {
                 this.loading = true
                 axios.all([
-                    this.$http.get('song/detail', {
+                    axios.get(this.getBaseURLCloudMusic + '/song/detail', {
                         params: {
                             ids: this.musicPlayerId
                         }
                     }),
-                    this.$http.get('song/url', {
+                    axios.get(this.getBaseURLCloudMusic + '/song/url', {
                         params: {
                             id: this.musicPlayerId
                         }
