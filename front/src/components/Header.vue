@@ -157,6 +157,7 @@ export default {
             justify-content: space-around;
             align-items: center;
             height: 100%;
+            margin-top: 1rem;
 
             .bgWihte {
                 background-color: #00A9FF;
