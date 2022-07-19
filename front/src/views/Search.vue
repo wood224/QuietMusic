@@ -1,8 +1,10 @@
 <template>
     <div class="search-container">
+        <el-input v-model="ipt" size="large" placeholder="搜索歌曲, 歌手...(按下ESC可快速清空)" :prefix-icon="Search"
+            @keyup.enter="search" @keyup.esc="ipt = ''" />
         <el-tabs type="border-card" @tab-click="handleClick" v-model="activeName">
             <el-tab-pane label="单曲" name="searchSingle">
-                <el-table :data="searchSongs" height="540" style="width: 100%" @cell-click="play">
+                <el-table :data="searchSongs" height="480" style="width: 100%" @cell-click="play">
                     <el-table-column prop="name" label="歌曲名" width="300" />
                     <el-table-column label="歌手" width="300">
                         <template v-slot:default="scope">
@@ -39,6 +41,7 @@
 </template>
 
 <script>
+import { Search } from '@element-plus/icons-vue'
 import axios from "axios"
 import { getSearch } from "../http/api"
 import { mapState, mapMutations, mapGetters } from "vuex"
@@ -48,6 +51,7 @@ export default {
     name: 'Search',
     data() {
         return {
+            ipt: '',
             keywords: '',
             activeName: 'searchSingle',
             songList: [],
@@ -67,23 +71,32 @@ export default {
         },
         keywords: {
             handler() {
+                this.ipt = this.searchKeywords
                 if (this.type === 1) return this.getSearchList(this.keywords)
                 if (this.type === 100) return this.searchSinger()
             }
-        }
+        },
     },
     created() {
         if (this.searchKeywords !== '') {
-            if (sessionStorage.getItem('keywords') !== null && this.searchKeywords === sessionStorage.getItem('keywords')) return
+            if (sessionStorage.getItem('keywords') !== null && this.searchKeywords === sessionStorage.getItem('keywords')) return this.ipt = this.searchKeywords
             this.keywords = this.searchKeywords
             sessionStorage.setItem('keywords', this.searchKeywords)
         }
+
     },
     mounted() {
-
     },
     methods: {
         ...mapMutations(['setMusicInfo', 'setMusicUrl', 'setSearchSongs', 'setMusicPlayerId', 'setSearchKeywords']),
+
+        //组件搜索框的搜索
+        async search() {
+            if (this.ipt === '') return
+            this.setSearchKeywords(this.ipt)
+            this.ipt = ''
+            // this.$router.push({ path: '/search', query: { keywords: this.ipt } })
+        },
 
         //时间格式化
         getTime(duration) {
@@ -98,10 +111,13 @@ export default {
         getSearchList(keywords) {
             getSearch(keywords, 1)
                 .then(res => {
+                    if (!res.data.result.songs) return this.setSearchSongs(null)
                     this.setSearchSongs(res.data.result.songs)
                     this.searchSongs.forEach(item => {
                         item.duration = this.getTime(item.duration)
                     })
+                }).catch(err => {
+                    console.error(err)
                 })
         },
 
@@ -124,10 +140,13 @@ export default {
         searchSingle() {
             getSearch(this.keywords, 1)
                 .then(res => {
+                    console.log(res.data)
                     this.setSearchSongs(res.data.result.songs)
                     this.searchSongs.forEach(item => {
                         item.duration = this.getTime(item.duration)
                     })
+                }).catch(err => {
+                    console.error(err)
                 })
         },
 
@@ -136,6 +155,8 @@ export default {
             getSearch(this.keywords, 100)
                 .then(res => {
                     this.singerLsit = res.data.result.artists
+                }).catch(err => {
+                    console.error(err)
                 })
         },
 
@@ -158,6 +179,11 @@ export default {
             }
         }
     },
+    setup() {
+        return {
+            Search,
+        }
+    }
 }
 </script>
 
@@ -165,6 +191,10 @@ export default {
 .search-container {
     width: 1000px;
     margin: 0 auto;
+
+    .el-input {
+        margin: 10px 0;
+    }
 
     .el-table tr {
         cursor: pointer;

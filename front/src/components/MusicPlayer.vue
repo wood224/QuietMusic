@@ -27,7 +27,8 @@
                     <div class="volume-info">
                         <button @click="setMute">
                             <i class="fas fa-volume-mute" v-show="isMute"></i>
-                            <i class="fas fa-volume-down" v-show="!isMute"></i>
+                            <i class="fas fa-volume-down" v-show="!isMute && !isloud"></i>
+                            <i class="fas fa-volume-up" v-show="!isMute && isloud"></i>
                         </button>
                         <div class="volume-container" @click="setVolume($event)" v-show="!isMute">
                             <div class="volume" ref="volume"></div>
@@ -70,6 +71,7 @@ export default {
             },
             isPlaying: false,       //是否在播放
             isMute: false,          //是否静音
+            isloud: false,          //音量是否大于60%
 
             ////DOM元素
             audio: {},
@@ -235,6 +237,7 @@ export default {
             const clickX = e.offsetX
             // console.log(width, clickX)
             const volume = (clickX / width)
+            this.isloud = volume >= 0.6 ? true : false
             this.volume.style.width = `${volume * 100}%`
             this.audio.volume = volume
         },
