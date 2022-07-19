@@ -1,6 +1,6 @@
 <template>
     <div class="search-container">
-        <el-input v-model="ipt" size="large" placeholder="搜索歌曲, 歌手...(按下ESC可快速清空)" :prefix-icon="Search"
+        <el-input v-model="ipt" size="large" placeholder="搜索歌曲, 歌手...(按下ESC可快速清空)" clearable :prefix-icon="Search"
             @keyup.enter="search" @keyup.esc="ipt = ''" />
         <el-tabs type="border-card" @tab-click="handleClick" v-model="activeName">
             <el-tab-pane label="单曲" name="searchSingle">
