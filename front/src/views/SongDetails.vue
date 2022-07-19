@@ -19,7 +19,7 @@ export default {
         }
     },
     computed: {
-        ...mapState(['musicInfo'])
+        ...mapState(['musicInfo']),
     },
     mounted() {
         this.SongDetailsContainer = this.$refs.SongDetailsContainer

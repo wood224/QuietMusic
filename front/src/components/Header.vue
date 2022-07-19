@@ -17,11 +17,11 @@
             </ul>
         </div>
         <div class="search">
-            <el-icon>
+            <el-icon @click="search">
                 <Search />
             </el-icon>
             <div class="ipt">
-                <el-input v-model="input" placeholder="搜索歌曲, 歌手" clearable @keyup.enter="search" />
+                <el-input v-model="input" placeholder="搜索歌曲, 歌手..." @keyup.enter="search" @keyup.esc="input = ''" />
             </div>
         </div>
         <div class="user">
@@ -141,7 +141,6 @@ export default {
             if (this.input === '') return
             this.setSearchKeywords(this.input)
             this.$router.push({ path: '/search', query: { keywords: this.input } })
-            this.input = ''
         }
     },
 }
@@ -157,6 +156,7 @@ export default {
             justify-content: space-around;
             align-items: center;
             height: 100%;
+            margin-top: 1rem;
 
             .bgWihte {
                 background-color: #00A9FF;
@@ -199,11 +199,12 @@ export default {
     .search {
         display: flex;
         // background-color: #6DD5FA;
-        height: 50px;
+        // height: 50px;
         align-items: center;
 
         .el-icon {
             font-size: 28px;
+            cursor: pointer;
         }
     }
 

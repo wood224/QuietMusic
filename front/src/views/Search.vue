@@ -1,10 +1,10 @@
 <template>
     <div class="search-container">
+        <el-input v-model="ipt" size="large" placeholder="搜索歌曲, 歌手...(按下ESC可快速清空)" clearable :prefix-icon="Search"
+            @keyup.enter="search" @keyup.esc="ipt = ''" />
         <el-tabs type="border-card" @tab-click="handleClick" v-model="activeName">
             <el-tab-pane label="单曲" name="searchSingle">
-                <el-table :data="searchSongs" height="540" style="width: 100%" @cell-click="play" v-loading="loading"
-                    element-loading-background="rgba(122, 122, 122, 0.2)"
-                    element-loading-text="加载中...(如果长时间未响应, 请刷新页面后重试)">
+                <el-table :data="searchSongs" height="480" style="width: 100%" @cell-click="play">
                     <el-table-column prop="name" label="歌曲名" width="300" />
                     <el-table-column label="歌手" width="300">
                         <template v-slot:default="scope">
@@ -17,8 +17,7 @@
                     <el-table-column prop="duration" label="时长" />
                 </el-table>
             </el-tab-pane>
-            <el-tab-pane label="歌手" name="searchSinger" v-loading="loading"
-                element-loading-background="rgba(122, 122, 122, 0.4)" element-loading-text="加载中...(如果长时间未响应, 请刷新页面后重试)">
+            <el-tab-pane label="歌手" name="searchSinger">
                 <ul class="singerList">
                     <li v-for="item in singerLsit" :key="item.id">
                         <div class="singer">
@@ -42,24 +41,27 @@
 </template>
 
 <script>
+import { Search } from '@element-plus/icons-vue'
 import axios from "axios"
-import { mapState, mapMutations } from "vuex"
+import { getSearch } from "../http/api"
+import { mapState, mapMutations, mapGetters } from "vuex"
 import { toRaw } from '@vue/reactivity'
 
 export default {
     name: 'Search',
     data() {
         return {
-            loading: false,
+            ipt: '',
             keywords: '',
             activeName: 'searchSingle',
             songList: [],
             singerLsit: [],
-            type: 1
+            type: 1,
         }
     },
     computed: {
-        ...mapState(['searchSongs', 'searchKeywords'])
+        ...mapState(['searchSongs', 'searchKeywords']),
+        ...mapGetters(['getBaseURLCloudMusic'])
     },
     watch: {
         searchKeywords: {
@@ -69,23 +71,32 @@ export default {
         },
         keywords: {
             handler() {
+                this.ipt = this.searchKeywords
                 if (this.type === 1) return this.getSearchList(this.keywords)
                 if (this.type === 100) return this.searchSinger()
             }
-        }
+        },
     },
     created() {
         if (this.searchKeywords !== '') {
-            if (sessionStorage.getItem('keywords') !== null && this.searchKeywords === sessionStorage.getItem('keywords')) return
+            if (sessionStorage.getItem('keywords') !== null && this.searchKeywords === sessionStorage.getItem('keywords')) return this.ipt = this.searchKeywords
             this.keywords = this.searchKeywords
             sessionStorage.setItem('keywords', this.searchKeywords)
         }
+
     },
     mounted() {
-
     },
     methods: {
         ...mapMutations(['setMusicInfo', 'setMusicUrl', 'setSearchSongs', 'setMusicPlayerId', 'setSearchKeywords']),
+
+        //组件搜索框的搜索
+        async search() {
+            if (this.ipt === '') return
+            this.setSearchKeywords(this.ipt)
+            this.ipt = ''
+            // this.$router.push({ path: '/search', query: { keywords: this.ipt } })
+        },
 
         //时间格式化
         getTime(duration) {
@@ -97,61 +108,56 @@ export default {
         },
 
         //获取搜索列表
-        async getSearchList(keywords) {
-            this.loading = true
-            const { data: res } = await this.$http.get('/song/search', {
-                params: {
-                    keywords: keywords
-                }
-            })
-            this.setSearchSongs(res.result.songs)
-            this.searchSongs.forEach(item => {
-                item.duration = this.getTime(item.duration)
-            })
-            this.loading = false
+        getSearchList(keywords) {
+            getSearch(keywords, 1)
+                .then(res => {
+                    if (!res.data.result.songs) return this.setSearchSongs(null)
+                    this.setSearchSongs(res.data.result.songs)
+                    this.searchSongs.forEach(item => {
+                        item.duration = this.getTime(item.duration)
+                    })
+                }).catch(err => {
+                    console.error(err)
+                })
         },
 
-        async play(row) {
+        //播放歌曲
+        play(row) {
             const song = toRaw(row)
-            const { data: res } = await this.$http.get('/song/musiccheck', {
+            axios.get(this.getBaseURLCloudMusic + '/check/music', {
                 params: {
                     id: song.id
                 }
+            }).then(res => {
+                if (res.data.success !== true) {
+                    return ElMessage.warning('抱歉, 该歌暂无版权')
+                }
+                this.setMusicPlayerId(song.id)
             })
-            if (res.code !== 200) {
-                return ElMessage.warning('抱歉, 该歌暂无版权')
-            }
-            this.setMusicPlayerId(song.id)
         },
 
         //搜索单曲
-        async searchSingle() {
-            this.loading = true
-            const { data: res } = await this.$http.get('/song/search', {
-                params: {
-                    keywords: this.keywords,
-                    type: 1
-                }
-            })
-            if (res.code === 200) {
-                this.songLsit = res.result.songs
-            }
-            this.loading = false
+        searchSingle() {
+            getSearch(this.keywords, 1)
+                .then(res => {
+                    console.log(res.data)
+                    this.setSearchSongs(res.data.result.songs)
+                    this.searchSongs.forEach(item => {
+                        item.duration = this.getTime(item.duration)
+                    })
+                }).catch(err => {
+                    console.error(err)
+                })
         },
 
         //搜索歌手
-        async searchSinger() {
-            this.loading = true
-            const { data: res } = await this.$http.get('/song/search', {
-                params: {
-                    keywords: this.keywords,
-                    type: 100
-                }
-            })
-            if (res.code === 200) {
-                this.singerLsit = res.result.artists
-            }
-            this.loading = false
+        searchSinger() {
+            getSearch(this.keywords, 100)
+                .then(res => {
+                    this.singerLsit = res.data.result.artists
+                }).catch(err => {
+                    console.error(err)
+                })
         },
 
         //搜索歌单
@@ -160,6 +166,7 @@ export default {
         //搜索专辑
         searchAlbum() { },
 
+        //搜索模式切换
         handleClick(tab, event) {
             // console.log(tab.props.name)
             if (tab.props.name === 'searchSingle') {
@@ -172,6 +179,11 @@ export default {
             }
         }
     },
+    setup() {
+        return {
+            Search,
+        }
+    }
 }
 </script>
 
@@ -179,6 +191,10 @@ export default {
 .search-container {
     width: 1000px;
     margin: 0 auto;
+
+    .el-input {
+        margin: 10px 0;
+    }
 
     .el-table tr {
         cursor: pointer;
