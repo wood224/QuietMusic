@@ -149,7 +149,7 @@ export default {
         }
     },
     methods: {
-        ...mapMutations(['setMusicInfo', 'setMusicUrl', 'setMusicPlayerId']),
+        ...mapMutations(['setMusicInfo', 'setMusicUrl', 'setMusicPlayerId', 'setLyricCurrent']),
 
         getHash() {
             return location.hash.slice(1) || '/'
@@ -206,6 +206,7 @@ export default {
                 duration,
                 currentTime,
             } = e.target
+            this.setLyricCurrent(parseInt(currentTime))
             this.currentDuration = this.getCurrentDuration(currentTime)
             const progressPercent = (currentTime / duration) * 100
             //进度条

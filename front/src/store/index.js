@@ -7,7 +7,8 @@ export default createStore({
     musicUrl: '',         //音乐 url
     musicPlayerId: -1,    //传给 MusicPlayer 组件的 id
     searchKeywords: '',   //搜索的关键词
-    banners: [],           //轮播图
+    banners: [],          //轮播图
+    lyricCurrent: 0       //歌词当前时间
   },
   getters: {
   },
@@ -29,6 +30,9 @@ export default createStore({
     },
     setBanners(state, banners) {
       state.banners = banners
+    },
+    setLyricCurrent(state, current) {
+      state.lyricCurrent = current
     }
   },
   actions: {

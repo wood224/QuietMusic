@@ -1,15 +1,21 @@
 <template>
     <div class="song-details-container" ref="SongDetailsContainer">
         <div class="content">
-            <div class="lyric" ref="lyric">
-                <ul>
-                    <li v-for="item in musicLyric" :key="item.key">
-                        {{ item }}
-                    </li>
-                </ul>
+            <div class="left"></div>
+            <div class="right">
+                <div class="title"></div>
+                <div class="detail"></div>
+                <div class="lyric">
+                    <ul ref="lyricView">
+                        <li v-for="(item, key, index) in musicLyric" :key="key"
+                            :class="{ currentRow: index == currentRow }">
+                            {{ item }}
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
-        <div class="blurBgMask">这里是遮罩层</div>
+        <div class="blurBgMask"></div>
         <div class="blurBg" ref="blurBg"></div>
     </div>
 </template>
@@ -33,14 +39,20 @@ export default {
                 alName: '',
                 alPicUrl: '',
             },
+
+            //dom对象
             SongDetailsContainer: {},
-            blurBg: {},
-            bgi: '',
-            musicLyric: {}
+            lyricView: {},
+
+            blurBg: {},     //模糊背景
+            bgi: '',        //背景图片路径
+            musicLyric: {},  //音乐歌词
+
+            currentRow: -1    //当前歌词播放行数
         }
     },
     computed: {
-        ...mapState(['musicInfo']),
+        ...mapState(['musicInfo', 'lyricCurrent']),
     },
     created() {
         const info = JSON.parse(localStorage.getItem('songInfo'))
@@ -56,12 +68,13 @@ export default {
         this.getLyric()
     },
     mounted() {
+        this.lyricView = this.$refs.lyricView
         this.SongDetailsContainer = this.$refs.SongDetailsContainer
         this.blurBg = this.$refs.blurBg
         const songInfo = JSON.parse(localStorage.getItem('songInfo'))
         if (songInfo !== null)
             if (songInfo.picUrl !== '' && songInfo.id !== -1)
-                this.bgi = songInfo.picUrl
+                this.bgi = songInfo.alPicUrl
     },
     watch: {
         bgi: {
@@ -69,9 +82,16 @@ export default {
                 this.blurBg.style.backgroundImage = `url("${this.bgi}")`
             },
         },
-        musicLyric: {
+        lyricCurrent: {
             handler() {
-
+                Object.keys(this.musicLyric).forEach((key, index) => {
+                    if (this.lyricCurrent == key) {
+                        this.currentRow = index
+                        if (index >= 5) {
+                            this.lyricView.style.top = -30 * (index - 5) + 'px'
+                        }
+                    }
+                })
             }
         }
     },
@@ -92,7 +112,6 @@ export default {
                             lrcObj[arr[0]] = arr[1]
                         }
                     })
-
                     this.musicLyric = lrcObj
                 })
         }
@@ -101,27 +120,53 @@ export default {
 </script>
 
 <style lang="less" scoped>
-* {
-    overflow: hidden;
-}
-
 .song-details-container {
     position: relative;
     height: 630px;
     overflow: hidden;
 
     .content {
+        display: flex;
         position: absolute;
         width: 840px;
         height: 100%;
         left: 50%;
         margin-left: -420px;
         z-index: 100;
+
+        .left {
+            width: 40%;
+            height: 100%;
+        }
+
+        .right {
+            width: 60%;
+
+            .lyric {
+                position: relative;
+                height: 100%;
+
+                ul {
+                    position: absolute;
+
+                    li {
+                        height: 25px;
+                        margin: 5px 0;
+                    }
+
+                    .currentRow {
+                        font-size: 20px;
+                        color: #08C7DA;
+                    }
+                }
+
+            }
+        }
     }
 
     .blurBgMask {
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.35);
+        background-color: rgba(0, 0, 0, 0.7);
         z-index: 10;
     }
 
