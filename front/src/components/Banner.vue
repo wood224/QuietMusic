@@ -11,6 +11,7 @@
 
 <script>
 import axios from 'axios'
+import { getBannerApi } from "../http/api"
 import { mapGetters } from 'vuex'
 
 export default {
@@ -42,7 +43,7 @@ export default {
         getBanner() {
             // const { data: res } = await this.$http.get('/banner')
             // this.banners = res.banners
-            axios.get(this.getBaseURLCloudMusic + '/banner')
+            getBannerApi()
                 .then(res => {
                     this.banners = res.data.banners
                 })

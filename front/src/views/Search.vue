@@ -1,8 +1,31 @@
 <template>
     <div class="search-container">
-        <el-input v-model="ipt" size="large" placeholder="搜索歌曲, 歌手...(按下ESC可快速清空)" clearable :prefix-icon="Search"
-            @keyup.enter="search" @keyup.esc="ipt = ''" />
-        <el-tabs type="border-card" @tab-click="handleClick" v-model="activeName">
+        <!-- <el-input v-model="ipt" size="large" placeholder="搜索歌曲, 歌手...(按下ESC可快速清空)" clearable @keyup.enter="search"
+            @keyup.esc="ipt = ''">
+            <template #prefix>
+                <el-icon class="el-input__icon">
+                    <Search />
+                </el-icon>
+            </template>
+        </el-input> -->
+        <div class="mt-4 search-box">
+            <el-input v-model="ipt" placeholder="搜索歌曲, 歌手...(按下ESC可快速清空)" clearable class="input-with-select"
+                @keyup.enter="search" @keyup.esc="ipt = ''">
+                <template #prepend>
+                    <el-button :icon="Search" @click="search" />
+                </template>
+                <template #append>
+                    <el-select v-model="typeWords" placeholder="Select" style="width: 115px"
+                        @change="searchBoxhandlerClick">
+                        <el-option label="单曲" value="1" />
+                        <el-option label="歌手" value="100" />
+                        <el-option label="歌单" value="1000" />
+                        <el-option label="专辑" value="10" />
+                    </el-select>
+                </template>
+            </el-input>
+        </div>
+        <el-tabs type="border-card" @tab-click="tableHandlerClick" v-model="activeName">
             <el-tab-pane label="单曲" name="searchSingle">
                 <el-table :data="searchSongs" height="480" style="width: 100%" @cell-click="play">
                     <el-table-column prop="name" label="歌曲名" width="300" />
@@ -42,9 +65,9 @@
 
 <script>
 import { Search } from '@element-plus/icons-vue'
-import axios from "axios"
-import { getSearch } from "../http/api"
-import { mapState, mapMutations, mapGetters } from "vuex"
+import { getTime } from "../fun"
+import { getSearchApi, getCheckMusic } from "../http/api"
+import { mapState, mapMutations } from "vuex"
 import { toRaw } from '@vue/reactivity'
 
 export default {
@@ -56,12 +79,14 @@ export default {
             activeName: 'searchSingle',
             songList: [],
             singerLsit: [],
+
+            //搜索模式
             type: 1,
+            typeWords: '单曲'
         }
     },
     computed: {
         ...mapState(['searchSongs', 'searchKeywords']),
-        ...mapGetters(['getBaseURLCloudMusic'])
     },
     watch: {
         searchKeywords: {
@@ -72,14 +97,43 @@ export default {
         keywords: {
             handler() {
                 this.ipt = this.searchKeywords
-                if (this.type === 1) return this.getSearchList(this.keywords)
-                if (this.type === 100) return this.searchSinger()
+                if (this.type === 1)
+                    return this.searchSingle()
+                if (this.type === 100)
+                    return this.searchSinger()
+                if (this.type === 1000)
+                    return this.activeName = 'searchList'
+                if (this.type === 10)
+                    return this.activeName = 'searchAlbum'
             }
         },
+        type: {
+            handler() {
+                if (this.type === 1) {
+                    this.typeWords = '单曲'
+                    this.activeName = 'searchSingle'
+                }
+                else if (this.type === 100) {
+                    this.typeWords = '歌手'
+                    this.activeName = 'searchSinger'
+                }
+                else if (this.type === 1000) {
+                    this.typeWords = '歌单'
+                    this.activeName = 'searchList'
+                }
+                else if (this.type === 10) {
+                    this.typeWords = '专辑'
+                    this.activeName = 'searchAlbum'
+                }
+            }
+        }
     },
     created() {
         if (this.searchKeywords !== '') {
-            if (sessionStorage.getItem('keywords') !== null && this.searchKeywords === sessionStorage.getItem('keywords')) return this.ipt = this.searchKeywords
+            if (sessionStorage.getItem('keywords') !== null && this.searchKeywords === sessionStorage.getItem('keywords')) {
+                this.ipt = this.searchKeywords
+                this.keywords = this.searchKeywords
+            }
             this.keywords = this.searchKeywords
             sessionStorage.setItem('keywords', this.searchKeywords)
         }
@@ -91,30 +145,23 @@ export default {
         ...mapMutations(['setMusicInfo', 'setMusicUrl', 'setSearchSongs', 'setMusicPlayerId', 'setSearchKeywords']),
 
         //组件搜索框的搜索
-        async search() {
+        search() {
             if (this.ipt === '') return
-            this.setSearchKeywords(this.ipt)
+            this.keywords = this.ipt
             this.ipt = ''
+            this.setSearchKeywords(this.keywords)
+            sessionStorage.setItem('keywords', this.searchKeywords)
             // this.$router.push({ path: '/search', query: { keywords: this.ipt } })
-        },
-
-        //时间格式化
-        getTime(duration) {
-            let ss = Math.floor(duration / 1000 % 60)
-            ss = ss < 10 ? '0' + ss : ss
-            let mm = Math.floor(duration / 1000 / 60)
-            mm = mm < 10 ? '0' + mm : mm
-            return mm + ':' + ss
         },
 
         //获取搜索列表
         getSearchList(keywords) {
-            getSearch(keywords, 1)
+            getSearchApi(keywords, 1)
                 .then(res => {
                     if (!res.data.result.songs) return this.setSearchSongs(null)
                     this.setSearchSongs(res.data.result.songs)
                     this.searchSongs.forEach(item => {
-                        item.duration = this.getTime(item.duration)
+                        item.duration = getTime(item.duration)
                     })
                 }).catch(err => {
                     console.error(err)
@@ -124,26 +171,23 @@ export default {
         //播放歌曲
         play(row) {
             const song = toRaw(row)
-            axios.get(this.getBaseURLCloudMusic + '/check/music', {
-                params: {
-                    id: song.id
-                }
-            }).then(res => {
-                if (res.data.success !== true) {
-                    return ElMessage.warning('抱歉, 该歌暂无版权')
-                }
-                this.setMusicPlayerId(song.id)
-            })
+            getCheckMusic(song.id)
+                .then(res => {
+                    if (res.data.success !== true) {
+                        return ElMessage.warning('抱歉, 该歌暂无版权')
+                    }
+                    this.setMusicPlayerId(song.id)
+                })
         },
 
         //搜索单曲
         searchSingle() {
-            getSearch(this.keywords, 1)
+            if (this.keywords === '') return
+            getSearchApi(this.keywords, 1)
                 .then(res => {
-                    console.log(res.data)
                     this.setSearchSongs(res.data.result.songs)
                     this.searchSongs.forEach(item => {
-                        item.duration = this.getTime(item.duration)
+                        item.duration = getTime(item.duration)
                     })
                 }).catch(err => {
                     console.error(err)
@@ -152,7 +196,8 @@ export default {
 
         //搜索歌手
         searchSinger() {
-            getSearch(this.keywords, 100)
+            if (this.keywords === '') return
+            getSearchApi(this.keywords, 100)
                 .then(res => {
                     this.singerLsit = res.data.result.artists
                 }).catch(err => {
@@ -166,17 +211,22 @@ export default {
         //搜索专辑
         searchAlbum() { },
 
-        //搜索模式切换
-        handleClick(tab, event) {
+        //表单搜索模式切换
+        tableHandlerClick(tab, event) {
             // console.log(tab.props.name)
             if (tab.props.name === 'searchSingle') {
                 this.type = 1
-                return this.getSearchList(this.keywords)
+                this.getSearchList(this.keywords)
             }
-            if (tab.props.name === 'searchSinger') {
+            else if (tab.props.name === 'searchSinger') {
                 this.type = 100
-                return this.searchSinger()
+                this.searchSinger()
             }
+        },
+
+        //搜索框搜索模式切换
+        searchBoxhandlerClick(val) {
+            this.type = parseInt(val)
         }
     },
     setup() {
@@ -192,7 +242,7 @@ export default {
     width: 1000px;
     margin: 0 auto;
 
-    .el-input {
+    .search-box {
         margin: 10px 0;
     }
 

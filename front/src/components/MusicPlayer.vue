@@ -3,7 +3,7 @@
         element-loading-background="rgba(122, 122, 122, 0.8)" element-loading-text="加载中...(如果长时间未响应, 请刷新页面后重试)">
         <div class="music-info">
             <div class="music-img" @click="goSongDetails">
-                <img :src="songInfo.picUrl" alt="" @error="picNull(songInfo)">
+                <img :src="songInfo.alPicUrl" alt="" @error="picNull(songInfo)">
             </div>
             <div class="music-control">
                 <div class="music-name" @click="goSongDetails">
@@ -54,7 +54,9 @@
 </template>
 
 <script>
-import { mapState, mapMutations, mapGetters } from "vuex"
+import { getTime } from "../fun"
+import { getMusicDetail, getMusicUrl } from "../http/api"
+import { mapState, mapMutations } from "vuex"
 import axios from "axios"
 
 export default {
@@ -66,8 +68,10 @@ export default {
                 name: '',
                 ar: [],
                 url: '',
-                picUrl: '',
-                duration: ''
+                duration: '',
+                alId: -1,
+                alName: '',
+                alPicUrl: '',
             },
             isPlaying: false,       //是否在播放
             isMute: false,          //是否静音
@@ -101,7 +105,6 @@ export default {
     },
     computed: {
         ...mapState(['musicInfo', 'musicUrl', 'musicPlayerId']),
-        ...mapGetters(['getBaseURLCloudMusic'])
     },
     watch: {
         musicInfo: function () {
@@ -110,8 +113,11 @@ export default {
             this.songInfo.id = info.id
             this.songInfo.name = info.name
             this.songInfo.ar = info.ar
-            this.songInfo.duration = this.getTime(info.dt)
-            this.songInfo.picUrl = info.al.picUrl
+            this.songInfo.duration = getTime(info.dt)
+            const album = info.al
+            this.songInfo.alId = album.id
+            this.songInfo.alName = album.name
+            this.songInfo.alPicUrl = album.picUrl
         },
         musicUrl: function () {
             const url = JSON.parse(JSON.stringify(this.musicUrl))
@@ -127,16 +133,8 @@ export default {
             handler() {
                 this.loading = true
                 axios.all([
-                    axios.get(this.getBaseURLCloudMusic + '/song/detail', {
-                        params: {
-                            ids: this.musicPlayerId
-                        }
-                    }),
-                    axios.get(this.getBaseURLCloudMusic + '/song/url', {
-                        params: {
-                            id: this.musicPlayerId
-                        }
-                    })
+                    getMusicDetail(this.musicPlayerId),
+                    getMusicUrl(this.musicPlayerId)
                 ]).then(axios.spread((info, url) => {
                     // console.log(info.data.songs[0])
                     this.setMusicInfo(info.data.songs[0])
@@ -155,15 +153,6 @@ export default {
 
         getHash() {
             return location.hash.slice(1) || '/'
-        },
-
-        //毫秒转为时分格式
-        getTime(duration) {
-            let ss = Math.floor(duration / 1000 % 60)
-            ss = ss < 10 ? '0' + ss : ss
-            let mm = Math.floor(duration / 1000 / 60)
-            mm = mm < 10 ? '0' + mm : mm
-            return mm + ':' + ss
         },
 
         //获取currentDuration

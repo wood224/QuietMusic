@@ -9,7 +9,6 @@ const service = axios.create({
 let loading
 function startLoading() {
     loading = ElLoading.service({
-        fullscreen: false,
         lock: true,
         text: '加载中...(如果长时间未响应, 请刷新页面后重试)',
         background: 'rgba(122, 122, 122, 0.2)',

@@ -68,9 +68,15 @@ export default {
         this.userInfo = JSON.parse(localStorage.getItem('userInfo'))
     },
     computed: {
-        ...mapState(['searchSongs'])
+        ...mapState(['searchSongs', 'searchKeywords']),
     },
     watch: {
+        searchKeywords: {
+            handler() {
+                this.input = this.searchKeywords
+            }
+        },
+
         $route(to) {
             if (to.path === '/home') {
                 for (let i = 0; i < this.classBgWihte.length; i++) {
@@ -140,7 +146,7 @@ export default {
         async search() {
             if (this.input === '') return
             this.setSearchKeywords(this.input)
-            this.$router.push({ path: '/search', query: { keywords: this.input } })
+            this.$router.push('/search')
         }
     },
 }

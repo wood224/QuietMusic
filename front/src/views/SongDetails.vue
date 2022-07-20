@@ -1,31 +1,63 @@
 <template>
     <div class="song-details-container" ref="SongDetailsContainer">
-        <div class="content"></div>
+        <div class="content">
+            <div class="lyric" ref="lyric">
+                <ul>
+                    <li v-for="item in musicLyric" :key="item.key">
+                        {{ item }}
+                    </li>
+                </ul>
+            </div>
+        </div>
         <div class="blurBgMask">这里是遮罩层</div>
         <div class="blurBg" ref="blurBg"></div>
     </div>
 </template>
 
 <script>
+import { getLyricApi } from "../http/api"
+import { getTime } from "../fun"
 import { mapState } from "vuex"
 
 export default {
     name: 'SongDetails',
     data() {
         return {
+            songInfo: {
+                id: -1,
+                name: '',
+                ar: [],
+                url: '',
+                duration: '',
+                alId: -1,
+                alName: '',
+                alPicUrl: '',
+            },
             SongDetailsContainer: {},
             blurBg: {},
-            bgi: ''
+            bgi: '',
+            musicLyric: {}
         }
     },
     computed: {
         ...mapState(['musicInfo']),
     },
+    created() {
+        const info = JSON.parse(localStorage.getItem('songInfo'))
+        // console.log(info)
+        this.songInfo.id = info.id
+        this.songInfo.name = info.name
+        this.songInfo.ar = info.ar
+        this.songInfo.duration = getTime(info.dt)
+        this.songInfo.alId = info.alId
+        this.songInfo.alName = info.alName
+        this.songInfo.alPicUrl = info.alPicUrl
+
+        this.getLyric()
+    },
     mounted() {
         this.SongDetailsContainer = this.$refs.SongDetailsContainer
         this.blurBg = this.$refs.blurBg
-        // const info = JSON.parse(JSON.stringify(this.musicInfo))
-        // if (info.al.picUrl !== '' && info.id !== -1) this.bgi = info.al.picUrl
         const songInfo = JSON.parse(localStorage.getItem('songInfo'))
         if (songInfo !== null)
             if (songInfo.picUrl !== '' && songInfo.id !== -1)
@@ -36,6 +68,33 @@ export default {
             handler() {
                 this.blurBg.style.backgroundImage = `url("${this.bgi}")`
             },
+        },
+        musicLyric: {
+            handler() {
+
+            }
+        }
+    },
+    methods: {
+        //获取歌词
+        getLyric() {
+            if (this.songInfo.id === -1) return
+            getLyricApi(this.songInfo.id)
+                .then(res => {
+                    let lyricArr = res.data.lrc.lyric.split('[').slice(1)
+                    let lrcObj = {}
+                    lyricArr.forEach(item => {
+                        let arr = item.split(']')
+                        let m = parseInt(arr[0].split(':')[0])
+                        let s = parseInt(arr[0].split(':')[1])
+                        arr[0] = m * 60 + s
+                        if (arr[1] !== '\n') {        //去除换行符
+                            lrcObj[arr[0]] = arr[1]
+                        }
+                    })
+
+                    this.musicLyric = lrcObj
+                })
         }
     },
 }
