@@ -1,10 +1,32 @@
 <template>
     <div class="song-details-container" ref="SongDetailsContainer">
         <div class="content">
-            <div class="left"></div>
+            <div class="left">
+                <div class="pic">
+                    <img :src="songInfo.alPicUrl" alt="" @error="picNull(songInfo)">
+                </div>
+            </div>
             <div class="right">
-                <div class="title"></div>
-                <div class="detail"></div>
+                <div class="title">
+                    <h3>{{ songInfo.name }}</h3>
+                </div>
+                <div class="detail">
+                    <div class="singer">
+                        <span class="fontColor">歌手:</span>
+                        <span v-for="(item, index) in songInfo.ar" :key="item.id">
+                            <span v-if="index !== 0">
+                                /
+                            </span>
+                            {{ item.name }}
+                        </span>
+                    </div>
+                    <div class="album">
+                        <span class="fontColor">专辑:</span>
+                        <span>
+                            {{ songInfo.alName }}
+                        </span>
+                    </div>
+                </div>
                 <div class="lyric">
                     <ul ref="lyricView">
                         <li v-for="(item, key, index) in musicLyric" :key="key"
@@ -84,13 +106,15 @@ export default {
         },
         lyricCurrent: {
             handler() {
+                let lastKey = -1
                 Object.keys(this.musicLyric).forEach((key, index) => {
-                    if (this.lyricCurrent == key) {
-                        this.currentRow = index
+                    if (this.lyricCurrent >= lastKey && this.lyricCurrent < key) {
+                        this.currentRow = index - 1
                         if (index >= 5) {
                             this.lyricView.style.top = -30 * (index - 5) + 'px'
                         }
                     }
+                    lastKey = key
                 })
             }
         }
@@ -114,7 +138,12 @@ export default {
                     })
                     this.musicLyric = lrcObj
                 })
-        }
+        },
+
+        //光盘图片为空时显示默认图片
+        picNull(item) {
+            item.picUrl = require('@/assets/DefaultCD.png')
+        },
     },
 }
 </script>
@@ -131,23 +160,51 @@ export default {
         width: 840px;
         height: 100%;
         left: 50%;
+        margin-top: 2vw;
         margin-left: -420px;
         z-index: 100;
+        color: white;
 
         .left {
             width: 40%;
             height: 100%;
+
+            .pic {
+                width: 300px;
+                padding: 0 40px 40px;
+
+                img {
+                    width: 100%;
+                }
+            }
         }
 
         .right {
             width: 60%;
 
+            .title {
+                margin-top: 1vw;
+            }
+
+            .detail {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 20px;
+                margin-bottom: 20px;
+
+                .fontColor {
+                    color: #ffffff94;
+                }
+            }
+
             .lyric {
                 position: relative;
                 height: 100%;
+                overflow: hidden;
 
                 ul {
                     position: absolute;
+                    transition: 0.3s;
 
                     li {
                         height: 25px;
@@ -156,7 +213,7 @@ export default {
 
                     .currentRow {
                         font-size: 20px;
-                        color: #08C7DA;
+                        color: skyblue;
                     }
                 }
 
@@ -179,7 +236,7 @@ export default {
         width: 100%;
         height: 100%;
         filter: blur(20px);
-        opacity: .6;
+        opacity: 0.6;
         z-index: 9;
     }
 }

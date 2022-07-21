@@ -14,20 +14,11 @@
                 <template #prepend>
                     <el-button :icon="Search" @click="search" />
                 </template>
-                <template #append>
-                    <el-select v-model="typeWords" placeholder="Select" style="width: 115px"
-                        @change="searchBoxhandlerClick">
-                        <el-option label="单曲" value="1" />
-                        <el-option label="歌手" value="100" />
-                        <el-option label="歌单" value="1000" />
-                        <el-option label="专辑" value="10" />
-                    </el-select>
-                </template>
             </el-input>
         </div>
         <el-tabs type="border-card" @tab-click="tableHandlerClick" v-model="activeName">
             <el-tab-pane label="单曲" name="searchSingle">
-                <el-table :data="searchSongs" height="480" style="width: 100%" @cell-click="play">
+                <el-table :data="searchSongs" height="480" style="width: 100%" @cell-click="play" stripe>
                     <el-table-column prop="name" label="歌曲名" width="300" />
                     <el-table-column label="歌手" width="300">
                         <template v-slot:default="scope">
@@ -82,7 +73,6 @@ export default {
 
             //搜索模式
             type: 1,
-            typeWords: '单曲'
         }
     },
     computed: {
@@ -223,11 +213,6 @@ export default {
                 this.searchSinger()
             }
         },
-
-        //搜索框搜索模式切换
-        searchBoxhandlerClick(val) {
-            this.type = parseInt(val)
-        }
     },
     setup() {
         return {

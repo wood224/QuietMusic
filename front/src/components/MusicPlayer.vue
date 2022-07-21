@@ -217,6 +217,7 @@ export default {
         setProgress(e) {
             const width = e.currentTarget.clientWidth
             const clickX = e.offsetX
+            this.setLyricCurrent(parseInt(clickX))
             const duration = this.audio.duration
             this.audio.currentTime = (clickX / width) * duration
         },
@@ -245,6 +246,7 @@ export default {
 
         //前往音乐详情页面
         goSongDetails() {
+            if (this.songInfo.url === '') return
             const hash = this.getHash()
             if (this.songInfo.url !== '' && hash !== '/Songdetails') this.$router.push('/Songdetails')
             else this.$router.go(-1)
@@ -302,8 +304,8 @@ export default {
                 cursor: pointer;
 
                 .name {
-                    font-size: 20px;
-                    margin-right: 150px;
+                    font-size: 1.2vw;
+                    margin-right: 7.5vw;
                 }
 
                 .singer {
@@ -320,8 +322,8 @@ export default {
                     // height: 30px;
                     border: 0;
                     background-color: rgba(0, 0, 0, 0);
-                    padding: 0 10px;
-                    margin: 0 20px;
+                    padding: 0 0.5vw;
+                    margin: 0 1vw;
                     font-size: 20px;
                     color: #0decfc;
                     cursor: pointer;
