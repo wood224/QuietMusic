@@ -127,6 +127,9 @@ export default {
             this.keywords = this.searchKeywords
             sessionStorage.setItem('keywords', this.searchKeywords)
         }
+        if (this.type === 1 && this.songList.length === 0 && sessionStorage.getItem('keywords') !== null) {
+            this.setSearchKeywords(sessionStorage.getItem('keywords'))
+        }
 
     },
     mounted() {

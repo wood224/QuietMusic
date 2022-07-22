@@ -7,24 +7,26 @@
                 </div>
             </div>
             <div class="right">
-                <div class="title">
-                    <h3>{{ songInfo.name }}</h3>
-                </div>
-                <div class="detail">
-                    <div class="singer">
-                        <span class="fontColor">歌手:</span>
-                        <span v-for="(item, index) in songInfo.ar" :key="item.id">
-                            <span v-if="index !== 0">
-                                /
-                            </span>
-                            {{ item.name }}
-                        </span>
+                <div class="info">
+                    <div class="title">
+                        <h3>{{ songInfo.name }}</h3>
                     </div>
-                    <div class="album">
-                        <span class="fontColor">专辑:</span>
-                        <span>
-                            {{ songInfo.alName }}
-                        </span>
+                    <div class="detail">
+                        <div class="singer">
+                            <span class="fontColor">歌手:</span>
+                            <span v-for="(item, index) in songInfo.ar" :key="item.id">
+                                <span v-if="index !== 0">
+                                    /
+                                </span>
+                                {{ item.name }}
+                            </span>
+                        </div>
+                        <div class="album">
+                            <span class="fontColor">专辑:</span>
+                            <span>
+                                {{ songInfo.alName }}
+                            </span>
+                        </div>
                     </div>
                 </div>
                 <div class="lyric">
@@ -45,7 +47,7 @@
 <script>
 import { getLyricApi } from "../http/api"
 import { getTime } from "../fun"
-import { mapState } from "vuex"
+import { mapState, mapMutations } from "vuex"
 
 export default {
     name: 'SongDetails',
@@ -74,7 +76,7 @@ export default {
         }
     },
     computed: {
-        ...mapState(['musicInfo', 'lyricCurrent']),
+        ...mapState(['musicInfo', 'lyricCurrent', 'lastKey']),
     },
     created() {
         const info = JSON.parse(localStorage.getItem('songInfo'))
@@ -106,20 +108,23 @@ export default {
         },
         lyricCurrent: {
             handler() {
-                let lastKey = -1
                 Object.keys(this.musicLyric).forEach((key, index) => {
-                    if (this.lyricCurrent >= lastKey && this.lyricCurrent < key) {
+                    if (this.lyricCurrent >= this.lastKey && this.lyricCurrent < key) {
                         this.currentRow = index - 1
                         if (index >= 5) {
                             this.lyricView.style.top = -30 * (index - 5) + 'px'
+                        } else {
+                            this.lyricView.style.top = 0
                         }
                     }
-                    lastKey = key
+                    this.setLastKey(key)
                 })
             }
         }
     },
     methods: {
+        ...mapMutations(['setLastKey']),
+
         //获取歌词
         getLyric() {
             if (this.songInfo.id === -1) return
@@ -182,18 +187,24 @@ export default {
         .right {
             width: 60%;
 
-            .title {
-                margin-top: 1vw;
-            }
+            .info {
+                padding: 0 10px;
+                border-radius: 10px;
+                background-color: rgba(87, 87, 87, 0.1);
 
-            .detail {
-                display: flex;
-                justify-content: space-between;
-                margin-top: 20px;
-                margin-bottom: 20px;
+                .title {
+                    margin-top: 1vw;
+                }
 
-                .fontColor {
-                    color: #ffffff94;
+                .detail {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-top: 20px;
+                    margin-bottom: 20px;
+
+                    .fontColor {
+                        color: #ffffff94;
+                    }
                 }
             }
 
@@ -201,6 +212,9 @@ export default {
                 position: relative;
                 height: 100%;
                 overflow: hidden;
+                padding: 0 10px;
+                border-radius: 10px;
+                background-color: rgba(87, 87, 87, 0.1);
 
                 ul {
                     position: absolute;

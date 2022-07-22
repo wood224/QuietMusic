@@ -15,28 +15,38 @@
                 <div class="btns">
                     <div class="nav">
                         <button id="prev" @click="prevSong">
-                            <i class="fas fa-backward"></i>
+                            <i class="fa fa-backward"></i>
                         </button>
                         <button id="play" @click="playFun">
-                            <i class="fas" :class="[isPlaying ? 'fa-pause' : 'fa-play']"></i>
+                            <i class="fa" :class="[isPlaying ? 'fa-pause' : 'fa-play']"></i>
                         </button>
                         <button id="next" @click="nextSong">
-                            <i class="fas fa-forward"></i>
+                            <i class="fa fa-forward"></i>
                         </button>
                     </div>
                     <div class="volume-info">
                         <button @click="setMute">
-                            <i class="fas fa-volume-mute" v-show="isMute"></i>
-                            <i class="fas fa-volume-down" v-show="!isMute && !isloud"></i>
-                            <i class="fas fa-volume-up" v-show="!isMute && isloud"></i>
+                            <i class="fa fa-volume-mute" v-show="isMute"></i>
+                            <i class="fa fa-volume-down" v-show="!isMute && !isloud"></i>
+                            <i class="fa fa-volume-up" v-show="!isMute && isloud"></i>
                         </button>
                         <div class="volume-container" @click="setVolume($event)" v-show="!isMute">
                             <div class="volume" ref="volume"></div>
                         </div>
                     </div>
+                    <!-- 操作按钮组 -->
                     <div class="action">
+                        <!-- 循环按钮 -->
+                        <el-tooltip class="box-item" effect="light" content="开启/关闭单曲循环" placement="top">
+                            <button @click="setLoop">
+                                <i class="fa fa-long-arrow-right" v-show="!isLoop"></i>
+                                <i class="fa fa-refresh" v-show="isLoop"></i>
+                            </button>
+                        </el-tooltip>
+
+                        <!-- 列表按钮 -->
                         <button>
-                            <i class="fas fa-sliders-h"></i>
+                            <i class="fa fa-list"></i>
                         </button>
                     </div>
                 </div>
@@ -49,7 +59,8 @@
                 </div>
             </div>
         </div>
-        <audio :src="songInfo.url" autoplay ref="audio" @ended="pauseSong" @timeupdate="updateProgress"></audio>
+        <audio :src="songInfo.url" autoplay ref="audio" @ended="pauseSong" @timeupdate="updateProgress"
+            :loop="isLoop"></audio>
     </div>
 </template>
 
@@ -76,6 +87,7 @@ export default {
             isPlaying: false,       //是否在播放
             isMute: false,          //是否静音
             isloud: false,          //音量是否大于60%
+            isLoop: false,          //是否开启单曲循环
 
             ////DOM元素
             audio: {},
@@ -95,8 +107,13 @@ export default {
         this.volume = this.$refs.volume
         this.audio = this.$refs.audio
         this.musicContainer = this.$refs.musicContainer
-        this.audio.volume = 0.5
+
         const songInfo = JSON.parse(localStorage.getItem('songInfo'))
+        const volume = localStorage.getItem('volume')
+        this.isloud = volume >= 0.6 ? true : false
+        this.volume.style.width = `${volume * 100}%`
+        this.audio.volume = volume
+
         if (songInfo !== null) {
             this.songInfo = songInfo
             // if (this.musicPlayerId !== this.songInfo.id) this.setMusicPlayerId(this.songInfo.id)
@@ -229,6 +246,7 @@ export default {
             // console.log(width, clickX)
             const volume = (clickX / width)
             this.isloud = volume >= 0.6 ? true : false
+            localStorage.setItem('volume', volume)
             this.volume.style.width = `${volume * 100}%`
             this.audio.volume = volume
         },
@@ -250,7 +268,11 @@ export default {
             const hash = this.getHash()
             if (this.songInfo.url !== '' && hash !== '/Songdetails') this.$router.push('/Songdetails')
             else this.$router.go(-1)
+        },
 
+        //开启/关闭单曲循环
+        setLoop() {
+            this.isLoop = !this.isLoop
         }
     },
 }
