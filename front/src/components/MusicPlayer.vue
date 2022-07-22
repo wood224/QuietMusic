@@ -223,7 +223,7 @@ export default {
                 duration,
                 currentTime,
             } = e.target
-            this.setLyricCurrent(parseInt(currentTime))
+            this.setLyricCurrent(parseFloat(currentTime).toFixed(2))
             this.currentDuration = this.getCurrentDuration(currentTime)
             const progressPercent = (currentTime / duration) * 100
             //进度条
@@ -234,7 +234,7 @@ export default {
         setProgress(e) {
             const width = e.currentTarget.clientWidth
             const clickX = e.offsetX
-            this.setLyricCurrent(parseInt(clickX))
+            this.setLyricCurrent(parseFloat(clickX).toFixed(2))
             const duration = this.audio.duration
             this.audio.currentTime = (clickX / width) * duration
         },

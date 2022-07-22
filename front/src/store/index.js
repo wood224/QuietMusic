@@ -8,8 +8,8 @@ export default createStore({
     musicPlayerId: -1,    //传给 MusicPlayer 组件的 id
     searchKeywords: '',   //搜索的关键词
     banners: [],          //轮播图
-    lyricCurrent: 0,       //歌词当前时间
-    lastKey: -1           //上一句歌词破防时间
+    lyricCurrent: 0.00,     //歌词当前时间
+    lastKey: 0.00           //上一句歌词播放时间
   },
   getters: {
   },

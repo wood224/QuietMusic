@@ -72,7 +72,9 @@ export default {
             bgi: '',        //背景图片路径
             musicLyric: {},  //音乐歌词
 
-            currentRow: -1    //当前歌词播放行数
+            lyricLength: 0,     //歌词对象长度(属性数量)
+
+            currentRow: 0,     //当前歌词播放行数
         }
     },
     computed: {
@@ -90,6 +92,7 @@ export default {
         this.songInfo.alPicUrl = info.alPicUrl
 
         this.getLyric()
+
     },
     mounted() {
         this.lyricView = this.$refs.lyricView
@@ -109,15 +112,18 @@ export default {
         lyricCurrent: {
             handler() {
                 Object.keys(this.musicLyric).forEach((key, index) => {
-                    if (this.lyricCurrent >= this.lastKey && this.lyricCurrent < key) {
+                    if (parseFloat(this.lyricCurrent) >= parseFloat(this.lastKey) && parseFloat(this.lyricCurrent) < parseFloat(key)) {
                         this.currentRow = index - 1
                         if (index >= 5) {
                             this.lyricView.style.top = -30 * (index - 5) + 'px'
                         } else {
                             this.lyricView.style.top = 0
                         }
+                    } else if (this.lyricCurrent >= parseFloat(key)) {
+                        this.currentRow = index
+                        this.lyricView.style.top = -30 * (index - 5) + 'px'
                     }
-                    this.setLastKey(key)
+                    this.setLastKey(parseFloat(key).toFixed(2))
                 })
             }
         }
@@ -134,14 +140,15 @@ export default {
                     let lrcObj = {}
                     lyricArr.forEach(item => {
                         let arr = item.split(']')
-                        let m = parseInt(arr[0].split(':')[0])
-                        let s = parseInt(arr[0].split(':')[1])
-                        arr[0] = m * 60 + s
+                        let m = parseFloat(arr[0].split(':')[0])
+                        let s = parseFloat(arr[0].split(':')[1])
+                        arr[0] = parseFloat(m * 60 + s).toFixed(2)
                         if (arr[1] !== '\n') {        //去除换行符
                             lrcObj[arr[0]] = arr[1]
                         }
                     })
                     this.musicLyric = lrcObj
+                    this.lyricLength = Object.keys(this.musicLyric).length
                 })
         },
 
@@ -210,7 +217,7 @@ export default {
 
             .lyric {
                 position: relative;
-                height: 100%;
+                height: 450px;
                 overflow: hidden;
                 padding: 0 10px;
                 border-radius: 10px;
