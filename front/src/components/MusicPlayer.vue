@@ -59,7 +59,7 @@
                 </div>
             </div>
         </div>
-        <audio :src="songInfo.url" autoplay ref="audio" @ended="pauseSong" @timeupdate="updateProgress"
+        <audio :src="songInfo.url" ref="audio" :autoplay="isPlaying" @ended="pauseSong" @timeupdate="updateProgress"
             :loop="isLoop"></audio>
     </div>
 </template>
@@ -117,7 +117,6 @@ export default {
         if (songInfo !== null) {
             this.songInfo = songInfo
             // if (this.musicPlayerId !== this.songInfo.id) this.setMusicPlayerId(this.songInfo.id)
-            if (this.songInfo.url !== '') this.isPlaying = true
         }
     },
     computed: {
@@ -331,6 +330,7 @@ export default {
                 }
 
                 .singer {
+                    font-size: 1vw;
                     color: black;
                 }
             }
