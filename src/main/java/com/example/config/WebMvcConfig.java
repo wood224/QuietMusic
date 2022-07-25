@@ -54,7 +54,7 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
     public Docket createRestApi(){
         return new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo())
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("com.example.controller"))
+                .apis(RequestHandlerSelectors.basePackage("com.example.test"))
                 .paths(PathSelectors.any())
                 .build();
     }
