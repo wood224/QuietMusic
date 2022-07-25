@@ -8,6 +8,7 @@ const Components = require('unplugin-vue-components/webpack')
 const { ElementPlusResolver } = require('unplugin-vue-components/resolvers')
 
 module.exports = {
+  lintOnSave: false,
   pages: {
     index: {
       entry: './src/main.js',

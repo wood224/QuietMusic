@@ -3,7 +3,7 @@
         element-loading-background="rgba(122, 122, 122, 0.8)" element-loading-text="加载中...(如果长时间未响应, 请刷新页面后重试)">
         <div class="music-info">
             <div class="music-img" @click="goSongDetails">
-                <img :src="songInfo.picUrl" alt="" @error="picNull(songInfo)">
+                <img :src="songInfo.alPicUrl" alt="" @error="picNull(songInfo)">
             </div>
             <div class="music-control">
                 <div class="music-name" @click="goSongDetails">
@@ -15,28 +15,38 @@
                 <div class="btns">
                     <div class="nav">
                         <button id="prev" @click="prevSong">
-                            <i class="fas fa-backward"></i>
+                            <i class="fa fa-backward"></i>
                         </button>
                         <button id="play" @click="playFun">
-                            <i class="fas" :class="[isPlaying ? 'fa-pause' : 'fa-play']"></i>
+                            <i class="fa" :class="[isPlaying ? 'fa-pause' : 'fa-play']"></i>
                         </button>
                         <button id="next" @click="nextSong">
-                            <i class="fas fa-forward"></i>
+                            <i class="fa fa-forward"></i>
                         </button>
                     </div>
                     <div class="volume-info">
                         <button @click="setMute">
-                            <i class="fas fa-volume-mute" v-show="isMute"></i>
-                            <i class="fas fa-volume-down" v-show="!isMute && !isloud"></i>
-                            <i class="fas fa-volume-up" v-show="!isMute && isloud"></i>
+                            <i class="fa fa-volume-mute" v-show="isMute"></i>
+                            <i class="fa fa-volume-down" v-show="!isMute && !isloud"></i>
+                            <i class="fa fa-volume-up" v-show="!isMute && isloud"></i>
                         </button>
                         <div class="volume-container" @click="setVolume($event)" v-show="!isMute">
                             <div class="volume" ref="volume"></div>
                         </div>
                     </div>
+                    <!-- 操作按钮组 -->
                     <div class="action">
+                        <!-- 循环按钮 -->
+                        <el-tooltip class="box-item" effect="light" content="开启/关闭单曲循环" placement="top">
+                            <button @click="setLoop">
+                                <i class="fa fa-long-arrow-right" v-show="!isLoop"></i>
+                                <i class="fa fa-refresh" v-show="isLoop"></i>
+                            </button>
+                        </el-tooltip>
+
+                        <!-- 列表按钮 -->
                         <button>
-                            <i class="fas fa-sliders-h"></i>
+                            <i class="fa fa-list"></i>
                         </button>
                     </div>
                 </div>
@@ -49,12 +59,15 @@
                 </div>
             </div>
         </div>
-        <audio :src="songInfo.url" autoplay ref="audio" @ended="pauseSong" @timeupdate="updateProgress"></audio>
+        <audio :src="songInfo.url" ref="audio" :autoplay="isPlaying" @ended="pauseSong" @timeupdate="updateProgress"
+            :loop="isLoop"></audio>
     </div>
 </template>
 
 <script>
-import { mapState, mapMutations, mapGetters } from "vuex"
+import { getTime } from "../fun"
+import { getMusicDetail, getMusicUrl } from "../http/api"
+import { mapState, mapMutations } from "vuex"
 import axios from "axios"
 
 export default {
@@ -66,12 +79,15 @@ export default {
                 name: '',
                 ar: [],
                 url: '',
-                picUrl: '',
-                duration: ''
+                duration: '',
+                alId: -1,
+                alName: '',
+                alPicUrl: '',
             },
             isPlaying: false,       //是否在播放
             isMute: false,          //是否静音
             isloud: false,          //音量是否大于60%
+            isLoop: false,          //是否开启单曲循环
 
             ////DOM元素
             audio: {},
@@ -91,17 +107,20 @@ export default {
         this.volume = this.$refs.volume
         this.audio = this.$refs.audio
         this.musicContainer = this.$refs.musicContainer
-        this.audio.volume = 0.5
+
         const songInfo = JSON.parse(localStorage.getItem('songInfo'))
+        const volume = localStorage.getItem('volume')
+        this.isloud = volume >= 0.6 ? true : false
+        this.volume.style.width = `${volume * 100}%`
+        this.audio.volume = volume
+
         if (songInfo !== null) {
             this.songInfo = songInfo
             // if (this.musicPlayerId !== this.songInfo.id) this.setMusicPlayerId(this.songInfo.id)
-            if (this.songInfo.url !== '') this.isPlaying = true
         }
     },
     computed: {
         ...mapState(['musicInfo', 'musicUrl', 'musicPlayerId']),
-        ...mapGetters(['getBaseURLCloudMusic'])
     },
     watch: {
         musicInfo: function () {
@@ -110,8 +129,11 @@ export default {
             this.songInfo.id = info.id
             this.songInfo.name = info.name
             this.songInfo.ar = info.ar
-            this.songInfo.duration = this.getTime(info.dt)
-            this.songInfo.picUrl = info.al.picUrl
+            this.songInfo.duration = getTime(info.dt)
+            const album = info.al
+            this.songInfo.alId = album.id
+            this.songInfo.alName = album.name
+            this.songInfo.alPicUrl = album.picUrl
         },
         musicUrl: function () {
             const url = JSON.parse(JSON.stringify(this.musicUrl))
@@ -127,16 +149,8 @@ export default {
             handler() {
                 this.loading = true
                 axios.all([
-                    axios.get(this.getBaseURLCloudMusic + '/song/detail', {
-                        params: {
-                            ids: this.musicPlayerId
-                        }
-                    }),
-                    axios.get(this.getBaseURLCloudMusic + '/song/url', {
-                        params: {
-                            id: this.musicPlayerId
-                        }
-                    })
+                    getMusicDetail(this.musicPlayerId),
+                    getMusicUrl(this.musicPlayerId)
                 ]).then(axios.spread((info, url) => {
                     // console.log(info.data.songs[0])
                     this.setMusicInfo(info.data.songs[0])
@@ -151,19 +165,10 @@ export default {
         }
     },
     methods: {
-        ...mapMutations(['setMusicInfo', 'setMusicUrl', 'setMusicPlayerId']),
+        ...mapMutations(['setMusicInfo', 'setMusicUrl', 'setMusicPlayerId', 'setLyricCurrent']),
 
         getHash() {
             return location.hash.slice(1) || '/'
-        },
-
-        //毫秒转为时分格式
-        getTime(duration) {
-            let ss = Math.floor(duration / 1000 % 60)
-            ss = ss < 10 ? '0' + ss : ss
-            let mm = Math.floor(duration / 1000 / 60)
-            mm = mm < 10 ? '0' + mm : mm
-            return mm + ':' + ss
         },
 
         //获取currentDuration
@@ -217,6 +222,7 @@ export default {
                 duration,
                 currentTime,
             } = e.target
+            this.setLyricCurrent(parseFloat(currentTime).toFixed(2))
             this.currentDuration = this.getCurrentDuration(currentTime)
             const progressPercent = (currentTime / duration) * 100
             //进度条
@@ -227,6 +233,7 @@ export default {
         setProgress(e) {
             const width = e.currentTarget.clientWidth
             const clickX = e.offsetX
+            this.setLyricCurrent(parseFloat(clickX).toFixed(2))
             const duration = this.audio.duration
             this.audio.currentTime = (clickX / width) * duration
         },
@@ -238,6 +245,7 @@ export default {
             // console.log(width, clickX)
             const volume = (clickX / width)
             this.isloud = volume >= 0.6 ? true : false
+            localStorage.setItem('volume', volume)
             this.volume.style.width = `${volume * 100}%`
             this.audio.volume = volume
         },
@@ -255,10 +263,15 @@ export default {
 
         //前往音乐详情页面
         goSongDetails() {
+            if (this.songInfo.url === '') return
             const hash = this.getHash()
             if (this.songInfo.url !== '' && hash !== '/Songdetails') this.$router.push('/Songdetails')
             else this.$router.go(-1)
+        },
 
+        //开启/关闭单曲循环
+        setLoop() {
+            this.isLoop = !this.isLoop
         }
     },
 }
@@ -312,11 +325,12 @@ export default {
                 cursor: pointer;
 
                 .name {
-                    font-size: 20px;
-                    margin-right: 150px;
+                    font-size: 1.2vw;
+                    margin-right: 7.5vw;
                 }
 
                 .singer {
+                    font-size: 1vw;
                     color: black;
                 }
             }
@@ -330,8 +344,8 @@ export default {
                     // height: 30px;
                     border: 0;
                     background-color: rgba(0, 0, 0, 0);
-                    padding: 0 10px;
-                    margin: 0 20px;
+                    padding: 0 0.5vw;
+                    margin: 0 1vw;
                     font-size: 20px;
                     color: #0decfc;
                     cursor: pointer;

@@ -7,13 +7,11 @@ export default createStore({
     musicUrl: '',         //音乐 url
     musicPlayerId: -1,    //传给 MusicPlayer 组件的 id
     searchKeywords: '',   //搜索的关键词
-    banners: [],           //轮播图
-    baseURLCloudMusic: 'http://180.76.136.85:3000'   //网易云API默认路径
+    banners: [],          //轮播图
+    lyricCurrent: 0.00,     //歌词当前时间
+    lastKey: 0.00           //上一句歌词播放时间
   },
   getters: {
-    getBaseURLCloudMusic(state) {
-      return state.baseURLCloudMusic
-    }
   },
   mutations: {
     setSearchSongs(state, songs) {
@@ -33,6 +31,12 @@ export default createStore({
     },
     setBanners(state, banners) {
       state.banners = banners
+    },
+    setLyricCurrent(state, current) {
+      state.lyricCurrent = current
+    },
+    setLastKey(state, key) {
+      state.lastKey = key
     }
   },
   actions: {
