@@ -36,7 +36,10 @@ public class ListSongsController {
     @PostMapping("/delete")
     @ApiOperation("移除歌曲")
     public R<String> deleteSong(@RequestBody ListSongs listSongs){
-        listSongsService.removeById(listSongs.getId());
+        LambdaQueryWrapper<ListSongs> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(ListSongs::getListId,listSongs.getListId());
+        lambdaQueryWrapper.eq(ListSongs::getMusicId,listSongs.getMusicId());
+        listSongsService.remove(lambdaQueryWrapper);
         return R.success("删除成功!");
     }
 
