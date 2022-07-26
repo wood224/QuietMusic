@@ -2,6 +2,35 @@
     <div class="music-container" :class="{ 'play': isPlaying }" ref="musicContainer" v-loading="loading"
         element-loading-background="rgba(122, 122, 122, 0.8)" element-loading-text="加载中...(如果长时间未响应, 请刷新页面后重试)">
         <div class="music-info">
+            <!-- 播放列表 -->
+            <div class="playlist" v-show="playlistView">
+                <div class="title">播放列表/{{ playlist.length }}
+                    <div class="close" @click="setPlaylistView">
+                        <i class="fa fa-close"></i>
+                    </div>
+                </div>
+                <div class="musicList">
+                    <li v-for="(item, index) in playlist" :key="item.id">
+                        <div class="musicList-item" @click="play(item.musicId, index)">
+                            <div class="musicList-number">{{ index + 1 }}</div>
+                            <div class="musicList-name">{{ item.musicName }}
+                                <el-tooltip class="box-item" effect="light" content="移除列表" placement="top"
+                                    :hide-after="0">
+                                    <div class="delete" @click.stop="deletePlaylistSong(item.musicId)">
+                                        <i class="fa fa-trash"></i>
+                                    </div>
+                                </el-tooltip>
+                            </div>
+                            <div class="musicList-artist textHidden">
+                                <span v-for="(name, index) in item.singerName" :key="index">
+                                    <span v-if="index !== 0">/</span>{{ name }}
+                                </span>
+                            </div>
+                            <div class="musicList-time">{{ item.time }}</div>
+                        </div>
+                    </li>
+                </div>
+            </div>
             <div class="music-img" @click="goSongDetails">
                 <img :src="songInfo.alPicUrl" alt="" @error="picNull(songInfo)">
             </div>
@@ -39,15 +68,11 @@
                     <!-- 操作按钮组 -->
                     <div class="action">
                         <!-- 循环按钮 -->
-                        <el-tooltip class="box-item" effect="light" content="开启/关闭单曲循环" placement="top">
-                            <button @click="setLoop">
-                                <i class="fa fa-long-arrow-right" v-show="!isLoop"></i>
-                                <i class="fa fa-refresh" v-show="isLoop"></i>
-                            </button>
-                        </el-tooltip>
-
-                        <!-- 列表按钮 -->
                         <button>
+                            <i class="fa fa-refresh" v-show="isListLoop"></i>
+                        </button>
+                        <!-- 列表按钮 -->
+                        <button @click="setPlaylistView">
                             <i class="fa fa-list"></i>
                         </button>
                     </div>
@@ -61,8 +86,8 @@
                 </div>
             </div>
         </div>
-        <audio :src="songInfo.url" ref="audio" :autoplay="isPlaying" @ended="pauseSong" @timeupdate="updateProgress"
-            :loop="isLoop"></audio>
+        <audio :src="songInfo.url" ref="audio" :autoplay="isPlaying" @ended="nextSong"
+            @timeupdate="updateProgress"></audio>
     </div>
 </template>
 
@@ -86,10 +111,15 @@ export default {
                 alName: '',
                 alPicUrl: '',
             },
+
+            playlist: [],           //播放列表
+
             isPlaying: false,       //是否在播放
             isMute: false,          //是否静音
             isloud: false,          //音量是否大于60%
-            isLoop: false,          //是否开启单曲循环
+            isListLoop: true,          //是否开启列表循环
+
+            playlistView: false,     //是否显示歌曲列表
 
             ////DOM元素
             audio: {},
@@ -100,6 +130,8 @@ export default {
             tempVolume: 0,          //临时音量
             currentDuration: '',    //音频播放位置
             testSongList: [],
+
+            songIndex: 0,        //播放第几首
 
             record: null,       //听歌时长到一定时间后记录播放次数
 
@@ -113,6 +145,7 @@ export default {
         this.musicContainer = this.$refs.musicContainer
 
         const songInfo = JSON.parse(localStorage.getItem('songInfo'))
+        const songIndex = JSON.parse(localStorage.getItem('songIndex'))
         const volume = localStorage.getItem('volume')
         this.isloud = volume >= 0.6 ? true : false
         this.volume.style.width = `${volume * 100}%`
@@ -122,9 +155,18 @@ export default {
             this.songInfo = songInfo
             // if (this.musicPlayerId !== this.songInfo.id) this.setMusicPlayerId(this.songInfo.id)
         }
+        if (songIndex !== null) {
+            this.songIndex = songIndex
+        } else {
+            this.songIndex = 0
+        }
+
+        this.getPlaylistSongs()
+
+
     },
     computed: {
-        ...mapState(['musicInfo', 'musicUrl', 'musicPlayerId']),
+        ...mapState(['musicInfo', 'musicUrl', 'musicPlayerId', 'playlistId']),
     },
     watch: {
         musicInfo: function () {
@@ -146,10 +188,25 @@ export default {
             const url = JSON.parse(JSON.stringify(this.musicUrl))
             // console.log(url)
             this.songInfo.url = url
-            if (this.songInfo.url !== '') {
-                this.isPlaying = true
-                this.record = setTimeout(this.recordMusic, 10000)
-            }
+            if (this.songInfo.url === '') return
+            this.isPlaying = true
+            this.record = setTimeout(this.recordMusic, 10000)
+            let artists = []
+            this.songInfo.ar.forEach(e => {
+                artists.push(e.name)
+            })
+            this.$http.post('/listsongs/add', {
+                listId: this.playlistId,
+                musicId: this.songInfo.id,
+                musicName: this.songInfo.name,
+                singerName: artists,
+                time: this.songInfo.duration
+            }).then(res => {
+                if (res.data.code === 200) {
+                    this.getPlaylistSongs()
+                }
+            })
+
             localStorage.setItem('songInfo', JSON.stringify(this.songInfo))
 
         },
@@ -172,16 +229,14 @@ export default {
                 })
             },
         },
-        // isPlaying: {
-        //     handler() {
-        //         if (this.isPlaying === true) {
-
-        //         }
-        //     }
-        // }
+        songIndex: {
+            handler() {
+                localStorage.setItem('songIndex', this.songIndex)
+            }
+        }
     },
     methods: {
-        ...mapMutations(['setMusicInfo', 'setMusicUrl', 'setMusicPlayerId', 'setLyricCurrent']),
+        ...mapMutations(['setMusicInfo', 'setMusicUrl', 'setMusicPlayerId', 'setLyricCurrent', 'setplaylistId']),
 
         getHash() {
             return location.hash.slice(1) || '/'
@@ -203,7 +258,11 @@ export default {
 
         //切换到上一首
         prevSong() {
-
+            this.songIndex--
+            if (this.songIndex < 0) {
+                this.songIndex = this.playlist.length - 1
+            }
+            this.play(this.playlist[this.songIndex].musicId, this.songIndex)
         },
 
         //播放
@@ -224,7 +283,11 @@ export default {
 
         //切换到下一首
         nextSong() {
-
+            this.songIndex++
+            if (this.songIndex > this.playlist.length - 1) {
+                this.songIndex = 0
+            }
+            this.play(this.playlist[this.songIndex].musicId, this.songIndex)
         },
 
         //播放或暂停
@@ -288,8 +351,13 @@ export default {
         },
 
         //开启/关闭单曲循环
-        setLoop() {
-            this.isLoop = !this.isLoop
+        setListLoop() {
+            this.isListLoop = !this.isListLoop
+        },
+
+        //打开/关闭歌曲列表
+        setPlaylistView() {
+            this.playlistView = !this.playlistView
         },
 
         //记录听歌次数
@@ -308,13 +376,56 @@ export default {
                 })
             }
         },
+
+        //获取列表歌曲
+        async getPlaylistSongs() {
+            const playlistId = JSON.parse(localStorage.getItem('playlistId'))
+            if (playlistId !== null) {
+                this.setplaylistId(playlistId)
+                const { data: res } = await this.$http.get('/listsongs/getsongs', {
+                    params: {
+                        id: this.playlistId
+                    }
+                })
+                this.playlist = res.data
+            } else {
+                const { data: res } = await this.$http.post('/playlist/create')
+                this.setplaylistId(res.data.id)
+                localStorage.setItem('playlistId', this.playlistId)
+            }
+        },
+
+        //移除歌曲列表中的歌曲
+        deletePlaylistSong(id) {
+            this.$http.post('/listsongs/delete', {
+                listId: this.playlistId,
+                musicId: id
+            }).then(res => {
+                if (res.data.code === 200) {
+                    this.getPlaylistSongs()
+                }
+            })
+        },
+
+        //播放歌曲列表中的歌曲
+        play(id, index) {
+            this.setMusicPlayerId(id)
+            this.songIndex = index
+        }
     },
 }
 </script>
 
 <style lang="less">
+.textHidden {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
 .fa {
     width: 20px;
+    height: 20px;
 }
 
 .music-container {
@@ -329,10 +440,96 @@ export default {
 
     .music-info {
         display: flex;
+        position: relative;
         justify-content: space-between;
         padding: 0 10px;
         width: 50%;
         height: 100%;
+
+        .playlist {
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            width: 480px;
+            height: 410px;
+            background-color: #0dc9fc;
+            z-index: 99;
+
+            .title {
+                display: flex;
+                padding: 10px;
+                background-color: #04b6ff;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 20px;
+                color: #003993;
+
+                .close {
+                    cursor: pointer;
+                }
+            }
+
+            .musicList {
+                padding: 0 10px;
+                color: #414141;
+
+                li {
+                    height: 30px;
+                    border-bottom: 1px solid #0bb0dd;
+                    cursor: pointer;
+
+                    &:hover {
+                        background-color: #73c9ff;
+
+                        .musicList-item {
+                            .musicList-name {
+                                .delete {
+                                    display: block;
+                                }
+                            }
+                        }
+                    }
+
+                    .musicList-item {
+                        display: flex;
+                        height: 100%;
+                        line-height: 30px;
+
+                        .musicList-number {
+                            width: 30px;
+                        }
+
+                        .musicList-name {
+                            display: flex;
+                            justify-content: space-between;
+                            width: 254px;
+                            color: white;
+
+                            .delete {
+                                display: none;
+                                width: 30px;
+                                height: 30px;
+                                text-align: center;
+
+                                &:hover {
+                                    color: gray;
+                                }
+                            }
+                        }
+
+                        .musicList-artist {
+                            width: 90px;
+                            font-size: 14px;
+                        }
+
+                        .musicList-time {
+                            width: 60px;
+                            font-size: 16px;
+                        }
+                    }
+                }
+            }
+        }
 
         .music-img {
             display: flex;

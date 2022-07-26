@@ -1,5 +1,6 @@
 <template>
-    <div class="banner" id="banner">
+    <div class="banner" id="banner" v-loading="loading" element-loading-text="Loading..."
+        element-loading-background="rgba(122, 122, 122, 0.4)">
         <el-carousel :interval="3000" type="card" trigger="click" v-if="banners[0]">
             <el-carousel-item v-for="item in banners" :key="item">
                 <img :src="item.imageUrl" :alt="item.typeTitle">
@@ -17,6 +18,7 @@ export default {
     data() {
         return {
             banners: [],
+            loading: false
         }
     },
     created() {
@@ -27,12 +29,15 @@ export default {
     },
     methods: {
         getBanner() {
+            this.loading = true
             getBannerApi()
                 .then(res => {
                     this.banners = res.data.banners
+                    this.loading = false
                 })
                 .catch(err => {
                     console.error(err)
+                    this.loading = false
                 })
         }
     },
