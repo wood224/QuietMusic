@@ -208,6 +208,7 @@ export default {
 
         //播放
         playSong() {
+            clearTimeout(this.record)
             if (this.songInfo.url === '' || this.songInfo.url === null) return
             this.isPlaying = true
             this.audio.play()
