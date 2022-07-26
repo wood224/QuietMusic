@@ -52,7 +52,6 @@
 
 <script>
 import { mapMutations, mapState } from "vuex"
-import axios from "axios"
 
 export default {
     name: 'Header',

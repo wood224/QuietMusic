@@ -8,9 +8,11 @@
             <div class="music-control">
                 <div class="music-name" @click="goSongDetails">
                     <span class="name">{{ songInfo.name }}</span>
-                    <span class="singer" v-for="(item, index) in songInfo.ar" :key="index">
-                        <span v-if="index !== 0">/</span>{{ item.name }}
-                    </span>
+                    <div class="singers">
+                        <span class="singer" v-for="(item, index) in songInfo.ar" :key="index">
+                            <span v-if="index !== 0">/</span>{{ item.name }}
+                        </span>
+                    </div>
                 </div>
                 <div class="btns">
                     <div class="nav">
@@ -99,6 +101,8 @@ export default {
             currentDuration: '',    //音频播放位置
             testSongList: [],
 
+            record: null,       //听歌时长到一定时间后记录播放次数
+
             loading: false
         }
     },
@@ -134,6 +138,9 @@ export default {
             this.songInfo.alId = album.id
             this.songInfo.alName = album.name
             this.songInfo.alPicUrl = album.picUrl
+            getMusicUrl(this.songInfo.id).then(res => {
+                this.setMusicUrl(res.data.data[0].url)
+            })
         },
         musicUrl: function () {
             const url = JSON.parse(JSON.stringify(this.musicUrl))
@@ -141,6 +148,7 @@ export default {
             this.songInfo.url = url
             if (this.songInfo.url !== '') {
                 this.isPlaying = true
+                this.record = setTimeout(this.recordMusic, 10000)
             }
             localStorage.setItem('songInfo', JSON.stringify(this.songInfo))
 
@@ -148,6 +156,7 @@ export default {
         musicPlayerId: {
             handler() {
                 this.loading = true
+                clearTimeout(this.record)
                 axios.all([
                     getMusicDetail(this.musicPlayerId),
                     getMusicUrl(this.musicPlayerId)
@@ -162,7 +171,14 @@ export default {
                     this.loading = false
                 })
             },
-        }
+        },
+        // isPlaying: {
+        //     handler() {
+        //         if (this.isPlaying === true) {
+
+        //         }
+        //     }
+        // }
     },
     methods: {
         ...mapMutations(['setMusicInfo', 'setMusicUrl', 'setMusicPlayerId', 'setLyricCurrent']),
@@ -192,9 +208,11 @@ export default {
 
         //播放
         playSong() {
+            clearTimeout(this.record)
             if (this.songInfo.url === '' || this.songInfo.url === null) return
             this.isPlaying = true
             this.audio.play()
+            this.record = setTimeout(this.recordMusic, 10000)
         },
 
         //暂停
@@ -272,12 +290,33 @@ export default {
         //开启/关闭单曲循环
         setLoop() {
             this.isLoop = !this.isLoop
-        }
+        },
+
+        //记录听歌次数
+        recordMusic() {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'))
+            if (userInfo === null) {
+                this.$http.post('/music/save', {
+                    musicId: this.songInfo.id,
+                    userId: null
+                })
+            } else {
+                this.$http.post('music/save', {
+                    musicId: this.songInfo.id,
+                    userId: userInfo.id
+
+                })
+            }
+        },
     },
 }
 </script>
 
 <style lang="less">
+.fa {
+    width: 20px;
+}
+
 .music-container {
     display: flex;
     position: fixed;
@@ -322,16 +361,29 @@ export default {
                 display: flex;
                 height: 28px;
                 color: white;
+
                 cursor: pointer;
 
                 .name {
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    width: 16vw;
                     font-size: 1.2vw;
-                    margin-right: 7.5vw;
+                    margin-right: 3vw;
                 }
 
-                .singer {
-                    font-size: 1vw;
+                .singers {
+                    width: 19vw;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
                     color: black;
+
+                    .singer {
+                        font-size: 1vw;
+                        color: black;
+                    }
                 }
             }
 

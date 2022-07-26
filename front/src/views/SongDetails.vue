@@ -30,6 +30,7 @@
                     </div>
                 </div>
                 <div class="lyric">
+                    <div class="lyricNull" v-if="lyricLength === 0">暂无歌词</div>
                     <ul ref="lyricView">
                         <li v-for="(item, key, index) in musicLyric" :key="key"
                             :class="{ currentRow: index == currentRow }">
@@ -162,8 +163,10 @@ export default {
 
 <style lang="less" scoped>
 .song-details-container {
+    display: flex;
+    justify-content: center;
     position: relative;
-    height: 630px;
+    height: 80vh;
     overflow: hidden;
 
     .content {
@@ -171,9 +174,7 @@ export default {
         position: absolute;
         width: 840px;
         height: 100%;
-        left: 50%;
         margin-top: 2vw;
-        margin-left: -420px;
         z-index: 100;
         color: white;
 
@@ -197,9 +198,13 @@ export default {
             .info {
                 padding: 0 10px;
                 border-radius: 10px;
-                background-color: rgba(87, 87, 87, 0.1);
+                background-color: rgba(87, 87, 87, 0.5);
 
                 .title {
+                    width: 100%;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
                     margin-top: 1vw;
                 }
 
@@ -209,9 +214,22 @@ export default {
                     margin-top: 20px;
                     margin-bottom: 20px;
 
+                    .singer {
+                        overflow: hidden;
+                        white-space: nowrap;
+                        text-overflow: ellipsis;
+                    }
+
+                    .album {
+                        overflow: hidden;
+                        white-space: nowrap;
+                        text-overflow: ellipsis;
+                    }
+
                     .fontColor {
                         color: #ffffff94;
                     }
+
                 }
             }
 
@@ -221,7 +239,13 @@ export default {
                 overflow: hidden;
                 padding: 0 10px;
                 border-radius: 10px;
-                background-color: rgba(87, 87, 87, 0.1);
+                background-color: rgba(87, 87, 87, 0.5);
+
+                .lyricNull {
+                    margin: auto 0;
+                    text-align: center;
+                    font-size: x-large;
+                }
 
                 ul {
                     position: absolute;
