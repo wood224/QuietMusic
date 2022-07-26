@@ -166,7 +166,7 @@ export default {
     display: flex;
     justify-content: center;
     position: relative;
-    height: 630px;
+    height: 80vh;
     overflow: hidden;
 
     .content {
