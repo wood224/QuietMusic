@@ -127,6 +127,25 @@ export default {
                     this.setLastKey(parseFloat(key).toFixed(2))
                 })
             }
+        },
+        musicInfo: {
+            handler() {
+                const info = this.musicInfo
+                // console.log(info)
+                this.songInfo.id = info.id
+                this.songInfo.name = info.name
+                this.songInfo.ar = info.ar
+                this.songInfo.duration = getTime(info.dt)
+                this.songInfo.alId = info.al.id
+                this.songInfo.alName = info.al.name
+                this.songInfo.alPicUrl = info.al.picUrl
+                this.getLyric()
+            }
+        },
+        songInfo: {
+            handler() {
+                this.bgi = songInfo.alPicUrl
+            }
         }
     },
     methods: {

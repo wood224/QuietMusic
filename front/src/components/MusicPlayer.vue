@@ -14,7 +14,7 @@
                         <div class="musicList-item" @click="play(item.musicId, index)">
                             <div class="musicList-number">{{ index + 1 }}</div>
                             <div class="musicList-name">{{ item.musicName }}
-                                <el-tooltip class="box-item" effect="light" content="移除列表" placement="top"
+                                <el-tooltip class="box-item" effect="light" content="移除歌曲" placement="top"
                                     :hide-after="0">
                                     <div class="delete" @click.stop="deletePlaylistSong(item.musicId)">
                                         <i class="fa fa-trash"></i>
@@ -208,7 +208,6 @@ export default {
             })
 
             localStorage.setItem('songInfo', JSON.stringify(this.songInfo))
-
         },
         musicPlayerId: {
             handler() {
@@ -227,6 +226,14 @@ export default {
                     console.error(err)
                     this.loading = false
                 })
+
+                this.songIndex = this.playlist.length + 1
+                for (let item in this.playlist) {
+                    if (this.musicPlayerId === this.playlist[item].musicId) {
+                        this.songIndex = item
+                        break
+                    }
+                }
             },
         },
         songIndex: {
@@ -258,6 +265,7 @@ export default {
 
         //切换到上一首
         prevSong() {
+            if (this.playlist.length === 1) return
             this.songIndex--
             if (this.songIndex < 0) {
                 this.songIndex = this.playlist.length - 1
@@ -283,6 +291,10 @@ export default {
 
         //切换到下一首
         nextSong() {
+            if (this.playlist.length === 1) {
+                this.audio.currentTime = 0
+                return this.audio.play()
+            }
             this.songIndex++
             if (this.songIndex > this.playlist.length - 1) {
                 this.songIndex = 0
@@ -405,6 +417,9 @@ export default {
                     this.getPlaylistSongs()
                 }
             })
+            if (this.songInfo.id === id) {
+                this.nextSong()
+            }
         },
 
         //播放歌曲列表中的歌曲
@@ -539,6 +554,7 @@ export default {
             cursor: pointer;
 
             img {
+                width: 100%;
                 height: 100%;
                 object-fit: cover;
                 border-radius: 50%;
