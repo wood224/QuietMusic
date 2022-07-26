@@ -9,7 +9,8 @@ export default createStore({
     searchKeywords: '',   //搜索的关键词
     banners: [],          //轮播图
     lyricCurrent: 0.00,     //歌词当前时间
-    lastKey: 0.00           //上一句歌词播放时间
+    lastKey: 0.00,          //上一句歌词播放时间
+    playlistId: 0,          //播放列表id
   },
   getters: {
   },
@@ -37,6 +38,9 @@ export default createStore({
     },
     setLastKey(state, key) {
       state.lastKey = key
+    },
+    setplaylistId(state, id) {
+      state.playlistId = id
     }
   },
   actions: {
