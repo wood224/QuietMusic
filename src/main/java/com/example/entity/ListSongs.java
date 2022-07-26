@@ -3,11 +3,14 @@ package com.example.entity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableLogic;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.extension.handlers.FastjsonTypeHandler;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
+@TableName(autoResultMap = true)
 public class ListSongs {
     private Integer id;
 
@@ -17,6 +20,7 @@ public class ListSongs {
 
     private String musicName;
 
+    @TableField(typeHandler = FastjsonTypeHandler.class)
     private String[] singerName;
 
     private String time;
