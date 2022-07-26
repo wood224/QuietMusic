@@ -295,7 +295,8 @@ export default {
                     let userInfo = {
                         isLogin: true,
                         manage: true,
-                        name: res.data.name
+                        name: res.data.name,
+                        id: res.data.id
                     }
                     //将表示登录状态的对象存入 localstorage 和 vuex 中
                     localStorage.setItem("userInfo", JSON.stringify(userInfo))

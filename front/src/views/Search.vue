@@ -47,6 +47,9 @@
 
             </el-tab-pane>
             <el-tab-pane label="歌单" name="searchList">
+                <el-table :data="playList" height="480" style="width: 100%" stripe>
+                    <el-table-column prop="name" label="名字" width="300" />
+                </el-table>
             </el-tab-pane>
             <el-tab-pane label="专辑" name="searchAlbum">
             </el-tab-pane>
@@ -68,8 +71,8 @@ export default {
             ipt: '',
             keywords: '',
             activeName: 'searchSingle',
-            songList: [],
-            singerLsit: [],
+            singerLsit: [],     //歌手列表
+            playList: [],       //歌单列表
 
             //搜索模式
             type: 1,
@@ -86,6 +89,7 @@ export default {
         },
         keywords: {
             handler() {
+                sessionStorage.setItem('keywords', this.searchKeywords)
                 this.ipt = this.searchKeywords
                 if (this.type === 1)
                     return this.searchSingle()
@@ -127,7 +131,7 @@ export default {
             this.keywords = this.searchKeywords
             sessionStorage.setItem('keywords', this.searchKeywords)
         }
-        if (this.type === 1 && this.songList.length === 0 && sessionStorage.getItem('keywords') !== null) {
+        if (this.type === 1 && this.searchSongs.length === 0 && sessionStorage.getItem('keywords') !== null) {
             this.setSearchKeywords(sessionStorage.getItem('keywords'))
         }
 
@@ -199,7 +203,15 @@ export default {
         },
 
         //搜索歌单
-        searchList() { },
+        searchList() {
+            if (this.keywords === '') return
+            getSearchApi(this.keywords, 1000)
+                .then(res => {
+                    this.playList = res.data.result.playlists
+                }).catch(err => {
+                    console.error(err)
+                })
+        },
 
         //搜索专辑
         searchAlbum() { },
@@ -210,10 +222,12 @@ export default {
             if (tab.props.name === 'searchSingle') {
                 this.type = 1
                 this.getSearchList(this.keywords)
-            }
-            else if (tab.props.name === 'searchSinger') {
+            } else if (tab.props.name === 'searchSinger') {
                 this.type = 100
                 this.searchSinger()
+            } else if (tab.props.name === 'searchList') {
+                this.type = 1000
+                this.searchList()
             }
         },
     },
