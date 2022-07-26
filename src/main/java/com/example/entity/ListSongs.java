@@ -15,6 +15,12 @@ public class ListSongs {
 
     private Integer musicId;
 
+    private String musicName;
+
+    private String[] singerName;
+
+    private String time;
+
     //创建时间
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
