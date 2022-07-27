@@ -8,12 +8,14 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
+ * 实体类
  * 用户信息
  */
 @Data
 public class User {
     private static final long serialVersionUID = 1L;
 
+    //id
     private Integer id;
 
     //昵称

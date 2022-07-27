@@ -26,6 +26,7 @@ public class CollectController {
     public R<List<Collect>> getCollect(@PathVariable Integer id){
         LambdaQueryWrapper<Collect> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Collect::getUserId,id);
+        lambdaQueryWrapper.orderByAsc(Collect::getCreateTime);
         List<Collect> list = collectService.list(lambdaQueryWrapper);
         if (list==null)
             return R.error("清去收藏一首歌吧~");
