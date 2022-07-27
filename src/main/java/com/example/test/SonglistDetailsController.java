@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/Songlistdetails")
+@RequestMapping("/songlistdetails")
 @Api(tags = "歌单内歌曲接口")
 public class SonglistDetailsController {
 
