@@ -8,9 +8,11 @@ export default createStore({
     musicPlayerId: -1,    //当前播放的音乐 id
     searchKeywords: '',   //搜索的关键词
     banners: [],          //轮播图
-    lyricCurrent: 0.00,     //歌词当前时间
-    lastKey: 0.00,          //上一句歌词播放时间
-    playlistId: 0,          //播放列表 id
+    lyricCurrent: 0.00,   //歌词当前时间
+    lastKey: 0.00,        //上一句歌词播放时间
+    playlistId: 0,        //播放列表 id
+    playlist: [],         //播放列表歌曲
+    songListId: 0,        //歌单 id
   },
   getters: {
   },
@@ -39,8 +41,14 @@ export default createStore({
     setLastKey(state, key) {
       state.lastKey = key
     },
-    setplaylistId(state, id) {
+    setPlaylistId(state, id) {
       state.playlistId = id
+    },
+    setPlaylist(state, playlist) {
+      state.playlist = playlist
+    },
+    setSongListId(state, id) {
+      state.songListId = id
     }
   },
   actions: {

@@ -38,7 +38,7 @@
                     </span>
                     <template #dropdown>
                         <el-dropdown-menu>
-                            <el-dropdown-item>Action 1</el-dropdown-item>
+                            <el-dropdown-item>个人主页</el-dropdown-item>
                             <el-dropdown-item>Action 2</el-dropdown-item>
                             <el-dropdown-item>Action 3</el-dropdown-item>
                             <el-dropdown-item divided @click="logout()">退出登录</el-dropdown-item>
