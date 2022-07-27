@@ -44,4 +44,13 @@ public class SonglistDetailsController {
         return R.success(list);
     }
 
+    @DeleteMapping("/delall")
+    @ApiOperation("清空歌单")
+    public R<String> delall(Integer id){
+        LambdaQueryWrapper<SonglistDetails> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(SonglistDetails::getListId,id);
+        songlistDetailsService.remove(lambdaQueryWrapper);
+        return R.success("清空成功");
+    }
+
 }

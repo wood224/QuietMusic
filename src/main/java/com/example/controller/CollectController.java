@@ -3,6 +3,7 @@ package com.example.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.common.R;
 import com.example.entity.Collect;
+import com.example.entity.ListSongs;
 import com.example.service.CollectService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -53,6 +54,15 @@ public class CollectController {
     public R<String> deleted(Integer id){
         collectService.removeById(id);
         return R.success("删除成功");
+    }
+
+    @DeleteMapping("/delall")
+    @ApiOperation("清空收藏列表")
+    public R<String> delall(Integer id){
+        LambdaQueryWrapper<Collect> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(Collect::getUserId,id);
+        collectService.remove(lambdaQueryWrapper);
+        return R.success("清空成功");
     }
 
 }
