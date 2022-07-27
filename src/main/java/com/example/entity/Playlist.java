@@ -7,8 +7,13 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * 实体类
+ * 播放列表
+ */
 @Data
 public class Playlist {
+    //id
     private Integer id;
 
     //创建时间

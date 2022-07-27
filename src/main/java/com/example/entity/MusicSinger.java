@@ -7,13 +7,20 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * 实体类
+ * 歌曲演唱者
+ */
 @Data
 public class MusicSinger {
 
+    //id
     private Integer id;
 
+    //音乐id
     private Integer musicId;
 
+    //歌手id
     private Integer singerId;
 
     //创建时间
