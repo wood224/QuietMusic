@@ -1,4 +1,4 @@
-package com.example.test;
+package com.example.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -49,6 +49,7 @@ public class ListSongsController {
     public R<List<ListSongs>> getsongs(Integer id){
         LambdaQueryWrapper<ListSongs> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(ListSongs::getListId,id);
+        lambdaQueryWrapper.orderByAsc(ListSongs::getCreateTime);
         List<ListSongs> list = listSongsService.list(lambdaQueryWrapper);
 
         return R.success(list);
