@@ -1,19 +1,25 @@
 <template>
     <div class="music-container" :class="{ 'play': isPlaying }" ref="musicContainer" v-loading="loading"
-        element-loading-background="rgba(122, 122, 122, 0.8)" element-loading-text="加载中...(如果长时间未响应, 请刷新页面后重试)">
+        element-loading-background="rgba(122, 122, 122, 0.8)" element-loading-text="加载中...(如果长时间未响应, 请刷新页面后重试)"
+        @click="playlistView = false">
         <div class="music-info">
             <!-- 播放列表 -->
             <div class="playlist" v-show="playlistView">
                 <div class="title">播放列表/{{ playlist.length }}
+                    <el-tooltip class="box-item" effect="light" content="清空列表" placement="top">
+                        <div class="clear" @click.stop="clearPlaylist">
+                            <i class="fa fa-trash"></i>
+                        </div>
+                    </el-tooltip>
                     <div class="close" @click="setPlaylistView">
                         <i class="fa fa-close"></i>
                     </div>
                 </div>
                 <div class="musicList">
                     <li v-for="(item, index) in playlist" :key="item.id">
-                        <div class="musicList-item" @click="play(item.musicId, index)">
+                        <div class="musicList-item" @click.stop="play(item.musicId, index)">
                             <div class="musicList-number">{{ index + 1 }}</div>
-                            <div class="musicList-name">{{ item.musicName }}
+                            <div class="musicList-name textHidden">{{ item.musicName }}
                                 <el-tooltip class="box-item" effect="light" content="移除歌曲" placement="top"
                                     :hide-after="0">
                                     <div class="delete" @click.stop="deletePlaylistSong(item.musicId)">
@@ -72,7 +78,7 @@
                             <i class="fa fa-refresh" v-show="isListLoop"></i>
                         </button>
                         <!-- 列表按钮 -->
-                        <button @click="setPlaylistView">
+                        <button @click.stop="setPlaylistView">
                             <i class="fa fa-list"></i>
                         </button>
                     </div>
@@ -112,14 +118,14 @@ export default {
                 alPicUrl: '',
             },
 
-            playlist: [],           //播放列表
+            // playlist: [],           //播放列表
 
             isPlaying: false,       //是否在播放
             isMute: false,          //是否静音
             isloud: false,          //音量是否大于60%
-            isListLoop: true,          //是否开启列表循环
+            isListLoop: true,       //是否开启列表循环
 
-            playlistView: false,     //是否显示歌曲列表
+            playlistView: false,    //是否显示歌曲列表
 
             ////DOM元素
             audio: {},
@@ -129,7 +135,6 @@ export default {
 
             tempVolume: 0,          //临时音量
             currentDuration: '',    //音频播放位置
-            testSongList: [],
 
             songIndex: 0,        //播放第几首
 
@@ -153,6 +158,9 @@ export default {
 
         if (songInfo !== null) {
             this.songInfo = songInfo
+            getMusicUrl(songInfo.id).then(res => {
+                this.setMusicUrl(res.data.data[0].url)
+            })
             // if (this.musicPlayerId !== this.songInfo.id) this.setMusicPlayerId(this.songInfo.id)
         }
         if (songIndex !== null) {
@@ -166,11 +174,12 @@ export default {
 
     },
     computed: {
-        ...mapState(['musicInfo', 'musicUrl', 'musicPlayerId', 'playlistId']),
+        ...mapState(['musicInfo', 'musicUrl', 'musicPlayerId', 'playlistId', 'playlist']),
     },
     watch: {
         musicInfo: function () {
             const info = JSON.parse(JSON.stringify(this.musicInfo))
+            if (info === null) return
             // console.log(info)
             this.songInfo.id = info.id
             this.songInfo.name = info.name
@@ -191,21 +200,7 @@ export default {
             if (this.songInfo.url === '') return
             this.isPlaying = true
             this.record = setTimeout(this.recordMusic, 10000)
-            let artists = []
-            this.songInfo.ar.forEach(e => {
-                artists.push(e.name)
-            })
-            this.$http.post('/listsongs/add', {
-                listId: this.playlistId,
-                musicId: this.songInfo.id,
-                musicName: this.songInfo.name,
-                singerName: artists,
-                time: this.songInfo.duration
-            }).then(res => {
-                if (res.data.code === 200) {
-                    this.getPlaylistSongs()
-                }
-            })
+            this.addPlaylistSong()
 
             localStorage.setItem('songInfo', JSON.stringify(this.songInfo))
         },
@@ -217,9 +212,7 @@ export default {
                     getMusicDetail(this.musicPlayerId),
                     getMusicUrl(this.musicPlayerId)
                 ]).then(axios.spread((info, url) => {
-                    // console.log(info.data.songs[0])
                     this.setMusicInfo(info.data.songs[0])
-                    // console.log(url.data.data[0])
                     this.setMusicUrl(url.data.data[0].url)
                     this.loading = false
                 })).catch(err => {
@@ -236,6 +229,11 @@ export default {
                 }
             },
         },
+        playlist: {
+            handler() {
+                this.getPlaylistSongs()
+            }
+        },
         songIndex: {
             handler() {
                 localStorage.setItem('songIndex', this.songIndex)
@@ -243,7 +241,7 @@ export default {
         }
     },
     methods: {
-        ...mapMutations(['setMusicInfo', 'setMusicUrl', 'setMusicPlayerId', 'setLyricCurrent', 'setplaylistId']),
+        ...mapMutations(['setMusicInfo', 'setMusicUrl', 'setMusicPlayerId', 'setLyricCurrent', 'setPlaylistId', 'setPlaylist']),
 
         getHash() {
             return location.hash.slice(1) || '/'
@@ -265,7 +263,7 @@ export default {
 
         //切换到上一首
         prevSong() {
-            if (this.playlist.length === 1) return
+            if (this.playlist.length <= 1) return
             this.songIndex--
             if (this.songIndex < 0) {
                 this.songIndex = this.playlist.length - 1
@@ -291,7 +289,7 @@ export default {
 
         //切换到下一首
         nextSong() {
-            if (this.playlist.length === 1) {
+            if (this.playlist.length <= 1) {
                 this.audio.currentTime = 0
                 return this.audio.play()
             }
@@ -393,18 +391,33 @@ export default {
         async getPlaylistSongs() {
             const playlistId = JSON.parse(localStorage.getItem('playlistId'))
             if (playlistId !== null) {
-                this.setplaylistId(playlistId)
+                this.setPlaylistId(playlistId)
                 const { data: res } = await this.$http.get('/listsongs/getsongs', {
                     params: {
                         id: this.playlistId
                     }
                 })
-                this.playlist = res.data
+                this.setPlaylist(res.data)
             } else {
                 const { data: res } = await this.$http.post('/playlist/create')
-                this.setplaylistId(res.data.id)
+                this.setPlaylistId(res.data.id)
                 localStorage.setItem('playlistId', this.playlistId)
             }
+        },
+
+        //添加歌曲到歌曲列表
+        addPlaylistSong() {
+            let artists = []
+            this.songInfo.ar.forEach(e => {
+                artists.push(e.name)
+            })
+            this.$http.post('/listsongs/add', {
+                listId: this.playlistId,
+                musicId: this.songInfo.id,
+                musicName: this.songInfo.name,
+                singerName: artists,
+                time: this.songInfo.duration
+            })
         },
 
         //移除歌曲列表中的歌曲
@@ -420,6 +433,15 @@ export default {
             if (this.songInfo.id === id) {
                 this.nextSong()
             }
+        },
+
+        //清空播放列表
+        clearPlaylist() {
+            this.$http.delete('/listsongs/delall', {
+                params: {
+                    id: this.playlistId
+                }
+            })
         },
 
         //播放歌曲列表中的歌曲
@@ -479,14 +501,20 @@ export default {
                 font-size: 20px;
                 color: #003993;
 
+                .clear {
+                    cursor: pointer;
+                }
+
                 .close {
                     cursor: pointer;
                 }
             }
 
             .musicList {
+                height: 360px;
                 padding: 0 10px;
                 color: #414141;
+                overflow: auto;
 
                 li {
                     height: 30px;

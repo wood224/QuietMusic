@@ -5,6 +5,7 @@ import Song from '../views/Song.vue'
 import Singer from '../views/Singer.vue'
 import Search from '../views/Search.vue'
 import SongDetails from '../views/SongDetails.vue'
+import SongList from '../views/SongList.vue'
 
 const routes = [
   {
@@ -34,6 +35,10 @@ const routes = [
   {
     path: '/songDetails',
     component: SongDetails
+  },
+  {
+    path: '/songList',
+    component: SongList
   }
 ]
 

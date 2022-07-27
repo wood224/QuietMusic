@@ -9,7 +9,7 @@
             </el-input>
         </div>
         <el-tabs type="border-card" @tab-click="tableHandlerClick" v-model="activeName" v-loading="loading"
-            element-loading-text="Loading..." element-loading-background="rgba(122, 122, 122, 0.4)">
+            element-loading-text="Loading..." element-loading-background="rgba(224, 224, 224, 0.4)">
             <el-tab-pane label="单曲" name="searchSingle">
                 <el-table :data="searchSongs" height="480" style="width: 100%" @cell-click="play" stripe>
                     <el-table-column prop="name" label="歌曲名" width="300" />
@@ -79,7 +79,7 @@ export default {
             activeName: 'searchSingle',
             singerLsit: [],     //歌手列表
             playList: [],       //歌单列表
-            albumList: [],          //专辑列表
+            albumList: [],      //专辑列表
 
             //搜索模式
             type: 1,
@@ -148,7 +148,7 @@ export default {
     mounted() {
     },
     methods: {
-        ...mapMutations(['setMusicInfo', 'setMusicUrl', 'setSearchSongs', 'setMusicPlayerId', 'setSearchKeywords']),
+        ...mapMutations(['setMusicInfo', 'setMusicUrl', 'setSearchSongs', 'setMusicPlayerId', 'setSearchKeywords', 'setSongListId']),
 
         //组件搜索框的搜索
         search() {
@@ -265,8 +265,10 @@ export default {
 
         //进入歌单详情
         playlistDetail(row) {
-            const playlist = toRaw(row)
-            console.log(playlist.id)
+            const songList = toRaw(row)
+            this.$router.push('songList')
+            this.setSongListId(songList.id)
+            sessionStorage.setItem('songListId', songList.id)
         }
     },
     setup() {
