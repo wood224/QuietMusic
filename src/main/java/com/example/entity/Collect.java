@@ -7,13 +7,18 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * 实体类
+ * 收藏歌曲
+ */
 @Data
 public class Collect {
 
+    //id
     private Integer Id;
-
+    //用户id
     private Integer userId;
-
+    //音乐id
     private Integer musicId;
 
     //创建时间

@@ -9,11 +9,16 @@ import lombok.Data;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * 实体类
+ * 歌曲
+ */
 @Data
 public class Music {
-
+    //音乐id
     private Integer id;
 
+    //播放次数
     private Integer views;
 
     //创建时间

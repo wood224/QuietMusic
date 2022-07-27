@@ -1,9 +1,10 @@
-package com.example.test;
+package com.example.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.common.R;
 import com.example.entity.ListSongs;
+import com.example.entity.SonglistDetails;
 import com.example.service.ListSongsService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -43,12 +44,22 @@ public class ListSongsController {
         return R.success("删除成功!");
     }
 
+    @DeleteMapping("/delall")
+    @ApiOperation("清空播放列表")
+    public R<String> delall(Integer id){
+        LambdaQueryWrapper<ListSongs> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(ListSongs::getListId,id);
+        listSongsService.remove(lambdaQueryWrapper);
+        return R.success("清空成功");
+    }
+
 
     @GetMapping("/getsongs")
     @ApiOperation("获取列表歌曲")
     public R<List<ListSongs>> getsongs(Integer id){
         LambdaQueryWrapper<ListSongs> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(ListSongs::getListId,id);
+        lambdaQueryWrapper.orderByAsc(ListSongs::getCreateTime);
         List<ListSongs> list = listSongsService.list(lambdaQueryWrapper);
 
         return R.success(list);

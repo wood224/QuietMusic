@@ -9,19 +9,25 @@ import java.time.LocalDateTime;
 
 /**
  * 实体类
- * 歌曲演唱者
+ * 歌单
  */
 @Data
-public class MusicSinger {
+public class SongList {
 
-    //id
+    //歌单id
     private Integer id;
 
-    //音乐id
-    private Integer musicId;
+    //歌单名称
+    private String name;
 
-    //歌手id
-    private Integer singerId;
+    //创建者id
+    private Integer userId;
+
+    //歌单封面url
+    private String coverImg;
+
+    //歌单描述
+    private String description;
 
     //创建时间
     @TableField(fill = FieldFill.INSERT)

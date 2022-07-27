@@ -7,13 +7,19 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * 实体类
+ * 歌手
+ */
 @Data
 public class Singer {
-
+    //歌手id
     private Integer id;
 
+    //歌手名字
     private String singerName;
 
+    //播放次数
     private Integer views;
 
     //创建时间
