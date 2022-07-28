@@ -290,17 +290,20 @@ export default {
                     }
                 }
                 if (res.code === 200) {
-                    location.href = 'index.html'
                     //记录登录状态的对象
                     let userInfo = {
                         isLogin: true,
                         manage: true,
                         name: res.data.name,
-                        id: res.data.id
+                        id: res.data.id,
+                        sex: res.data.sex,
+                        phone: res.data.phone,
+                        description: res.data.description
                     }
                     //将表示登录状态的对象存入 localstorage 和 vuex 中
                     localStorage.setItem("userInfo", JSON.stringify(userInfo))
                     this.setUserInfo(userInfo)
+                    location.href = 'index.html'
                 } else {
                     return ElMessage.error(res.msg)
                 }
