@@ -9,7 +9,7 @@
             <div class="form">
                 <el-form :model="form" :rules="rules">
                     <el-form-item label="昵称" prop="name">
-                        <el-input v-model="form.name" />
+                        <el-input v-model="form.name" clearable />
                     </el-form-item>
                     <el-form-item label="性别">
                         <el-radio-group v-model="form.sex">
@@ -19,7 +19,7 @@
                         </el-radio-group>
                     </el-form-item>
                     <el-form-item label="电话" prop="phone">
-                        <el-input v-model="form.phone" />
+                        <el-input v-model="form.phone" clearable />
                     </el-form-item>
                     <el-form-item label="简介">
                         <el-input v-model="form.description" maxlength="80" show-word-limit type="textarea" />
