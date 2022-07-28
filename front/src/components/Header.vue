@@ -65,7 +65,8 @@ export default {
     mounted() {
         //判断登录状态
         if (localStorage.getItem('userInfo') !== null) {
-            this.getUserDetail()
+            const id = JSON.parse(localStorage.getItem('userInfo')).id
+            this.getUserDetail(id)
         }
     },
     computed: {
@@ -154,8 +155,8 @@ export default {
             this.$router.push('/search')
         },
 
-        getUserDetail() {
-            this.$http.get(`/user/${this.userInfo.id}`)
+        getUserDetail(id) {
+            this.$http.get(`/user/${id}`)
                 .then(res => {
                     this.userDetail = res.data.data
                     let userInfo = {
