@@ -38,7 +38,7 @@
                     </span>
                     <template #dropdown>
                         <el-dropdown-menu>
-                            <el-dropdown-item>个人主页</el-dropdown-item>
+                            <el-dropdown-item @click="goUserHome">个人主页</el-dropdown-item>
                             <el-dropdown-item>Action 2</el-dropdown-item>
                             <el-dropdown-item>Action 3</el-dropdown-item>
                             <el-dropdown-item divided @click="logout()">退出登录</el-dropdown-item>
@@ -52,22 +52,22 @@
 
 <script>
 import { mapMutations, mapState } from "vuex"
+import { getHash } from "../fun"
 
 export default {
     name: 'Header',
     data() {
         return {
-            userInfo: {},
             classBgWihte: [false, false, false, false],
             input: ''
         }
     },
     mounted() {
         //判断登录状态
-        this.userInfo = JSON.parse(localStorage.getItem('userInfo'))
+        this.setUserInfo(JSON.parse(localStorage.getItem('userInfo')))
     },
     computed: {
-        ...mapState(['searchSongs', 'searchKeywords']),
+        ...mapState(['searchSongs', 'searchKeywords', 'userInfo']),
     },
     watch: {
         searchKeywords: {
@@ -121,12 +121,13 @@ export default {
         }
     },
     methods: {
-        ...mapMutations(['setSearchKeywords']),
+        ...mapMutations(['setSearchKeywords', 'setUserInfo']),
 
         logout() {
             localStorage.removeItem('userInfo')
             //返回主页
-            this.userInfo = JSON.parse(localStorage.getItem('userInfo'))
+            this.setUserInfo(JSON.parse(localStorage.getItem('userInfo')))
+            if ((getHash().slice(0, 9)) === '/userHome') this.$router.go(-1)
         },
 
         goHome() {
@@ -140,6 +141,9 @@ export default {
         },
         goSinger() {
             this.$router.push('/singer')
+        },
+        goUserHome() {
+            this.$router.push('/userHome/?id=' + this.userInfo.id)
         },
 
         async search() {

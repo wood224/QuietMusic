@@ -2,6 +2,7 @@ import { createStore } from 'vuex'
 
 export default createStore({
   state: {
+    userInfo: {},         //用户信息
     searchSongs: [],      //搜索列表
     musicInfo: {},        //音乐信息
     musicUrl: '',         //音乐 url
@@ -17,6 +18,9 @@ export default createStore({
   getters: {
   },
   mutations: {
+    setUserInfo(state, userInfo) {
+      state.userInfo = userInfo
+    },
     setSearchSongs(state, songs) {
       state.searchSongs = songs
     },

@@ -6,6 +6,7 @@ import Singer from '../views/Singer.vue'
 import Search from '../views/Search.vue'
 import SongDetails from '../views/SongDetails.vue'
 import SongList from '../views/SongList.vue'
+import UserHome from '../views/UserHome.vue'
 
 const routes = [
   {
@@ -39,6 +40,17 @@ const routes = [
   {
     path: '/songList',
     component: SongList
+  },
+  {
+    path: '/userHome',
+    component: UserHome,
+    beforeEnter: (to, from, next) => {
+      if (localStorage.getItem('userInfo') !== null) {
+        next()
+      } else {
+        return location.href = 'login.html'
+      }
+    }
   }
 ]
 

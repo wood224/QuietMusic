@@ -14,7 +14,7 @@
                 <el-table :data="searchSongs" height="480" style="width: 100%" @cell-click="play" stripe>
                     <el-table-column prop="name" label="歌曲名" width="300" />
                     <el-table-column label="歌手" width="300">
-                        <template v-slot:default="scope">
+                        <template #default="scope">
                             <span v-for="item in scope.row.artists" :key="item.name">
                                 {{ item.name }}&nbsp;
                             </span>

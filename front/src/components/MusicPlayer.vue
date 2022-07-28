@@ -502,10 +502,12 @@ export default {
                 color: #003993;
 
                 .clear {
+                    text-align: center;
                     cursor: pointer;
                 }
 
                 .close {
+                    height: 30px;
                     cursor: pointer;
                 }
             }

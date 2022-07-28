@@ -29,7 +29,7 @@
                 <el-table :data="songList">
                     <el-table-column prop="name" label="歌曲名" />
                     <el-table-column label="歌手" width="300">
-                        <template v-slot:default="scope">
+                        <template #default="scope">
                             <span v-for="item in scope.row.ar" :key="item.id">
                                 {{ item.name }}&nbsp;
                             </span>
