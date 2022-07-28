@@ -64,7 +64,9 @@ export default {
     },
     mounted() {
         //判断登录状态
-        this.setUserInfo(JSON.parse(localStorage.getItem('userInfo')))
+        if (localStorage.getItem('userInfo') !== null) {
+            this.getUserDetail()
+        }
     },
     computed: {
         ...mapState(['searchSongs', 'searchKeywords', 'userInfo']),
@@ -150,7 +152,28 @@ export default {
             if (this.input === '') return
             this.setSearchKeywords(this.input)
             this.$router.push('/search')
-        }
+        },
+
+        getUserDetail() {
+            this.$http.get(`/user/${this.userInfo.id}`)
+                .then(res => {
+                    this.userDetail = res.data.data
+                    let userInfo = {
+                        isLogin: true,
+                        manage: true,
+                        name: res.data.data.name,
+                        id: res.data.data.id,
+                        sex: res.data.data.sex,
+                        phone: res.data.data.phone,
+                        description: res.data.data.description
+                    }
+                    //将表示登录状态的对象存入 localstorage 和 vuex 中
+                    localStorage.setItem("userInfo", JSON.stringify(userInfo))
+                    this.setUserInfo(userInfo)
+                }).catch((err) => {
+                    console.error(err)
+                })
+        },
     },
 }
 </script>
