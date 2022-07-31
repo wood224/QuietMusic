@@ -49,6 +49,7 @@ export default createStore({
       state.playlistId = id
     },
     setPlaylist(state, playlist) {
+      if (JSON.stringify(state.playlist) === JSON.stringify(playlist)) return
       state.playlist = playlist
     },
     setSongListId(state, id) {

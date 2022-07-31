@@ -232,7 +232,8 @@ export default {
         playlist: {
             handler() {
                 this.getPlaylistSongs()
-            }
+                console.log(this.playlist)
+            },
         },
         songIndex: {
             handler() {
@@ -382,7 +383,6 @@ export default {
                 this.$http.post('music/save', {
                     musicId: this.songInfo.id,
                     userId: userInfo.id
-
                 })
             }
         },
