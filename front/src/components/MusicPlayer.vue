@@ -418,8 +418,10 @@ export default {
                 musicName: this.songInfo.name,
                 singerName: artists,
                 time: this.songInfo.duration
-            }).then(() => {
-                this.getPlaylistSongs()
+            }).then(res => {
+                if (res.data.code === 200) {
+                    this.getPlaylistSongs()
+                }
             })
         },
 
@@ -443,6 +445,10 @@ export default {
             this.$http.delete('/listsongs/delall', {
                 params: {
                     id: this.playlistId
+                }
+            }).then(res => {
+                if (res.data.code === 200) {
+                    this.getPlaylistSongs()
                 }
             })
         },
