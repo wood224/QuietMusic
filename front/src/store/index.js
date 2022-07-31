@@ -1,6 +1,8 @@
 import { createStore } from 'vuex'
-import { getSearchApi, getCheckMusic } from "../http/api"
+import { getCheckMusic } from "../http/api"
 import { toRaw } from '@vue/reactivity'
+import axios from 'axios'
+
 
 export default createStore({
   state: {
@@ -72,6 +74,27 @@ export default createStore({
           // context.setMusicPlayerId(song.id)
           commit('setMusicPlayerId', song.id)
         })
+    },
+
+    //获取列表歌曲
+    async getPlaylistSongs({ commit }) {
+      const playlistId = JSON.parse(localStorage.getItem('playlistId'))
+      if (playlistId !== null) {
+        // this.setPlaylistId(playlistId)
+        commit('setPlaylistId', playlistId)
+        const { data: res } = await axios.get('/listsongs/getsongs', {
+          params: {
+            id: playlistId
+          }
+        })
+        // this.setPlaylist(res.data)
+        commit('setPlaylist', res.data)
+      } else {
+        const { data: res } = await axios.post('/playlist/create')
+        // this.setPlaylistId(res.data.id)
+        commit('setPlaylistId', res.data.id)
+        localStorage.setItem('playlistId', res.data.id)
+      }
     },
   },
   modules: {

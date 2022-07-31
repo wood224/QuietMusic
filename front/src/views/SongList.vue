@@ -85,7 +85,7 @@ export default {
     },
     methods: {
         ...mapMutations(['setSongListId', 'setPlaylistId', 'setPlaylist']),
-        ...mapActions(['play']),
+        ...mapActions(['play', 'getPlaylistSongs']),
 
         //添加歌单所有歌曲到歌曲列表
         addAllPlaylistSong() {
@@ -104,6 +104,10 @@ export default {
                                 musicName: songInfo.name,
                                 singerName: artists,
                                 time: songInfo.dt
+                            }).then(res => {
+                                if (res.data.code === 200) {
+                                    this.getPlaylistSongs()
+                                }
                             })
                         }
                     })
