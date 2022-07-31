@@ -100,7 +100,7 @@
 <script>
 import { getTime } from "../fun"
 import { getMusicDetail, getMusicUrl } from "../http/api"
-import { mapState, mapMutations } from "vuex"
+import { mapState, mapMutations, mapActions } from "vuex"
 import axios from "axios"
 
 export default {
@@ -231,11 +231,11 @@ export default {
                 }
             },
         },
-        // playlist: {
-        //     handler() {
-        //         this.getPlaylistSongs()
-        //     },
-        // },
+        playlist: {
+            handler() {
+                this.getPlaylistSongs()
+            },
+        },
         songIndex: {
             handler() {
                 localStorage.setItem('songIndex', this.songIndex)
@@ -244,6 +244,7 @@ export default {
     },
     methods: {
         ...mapMutations(['setMusicInfo', 'setMusicUrl', 'setMusicPlayerId', 'setLyricCurrent', 'setPlaylistId', 'setPlaylist']),
+        ...mapActions(['getPlaylistSongs']),
 
         getHash() {
             return location.hash.slice(1) || '/'
@@ -388,23 +389,23 @@ export default {
             }
         },
 
-        //获取列表歌曲
-        async getPlaylistSongs() {
-            const playlistId = JSON.parse(localStorage.getItem('playlistId'))
-            if (playlistId !== null) {
-                this.setPlaylistId(playlistId)
-                const { data: res } = await this.$http.get('/listsongs/getsongs', {
-                    params: {
-                        id: this.playlistId
-                    }
-                })
-                this.setPlaylist(res.data)
-            } else {
-                const { data: res } = await this.$http.post('/playlist/create')
-                this.setPlaylistId(res.data.id)
-                localStorage.setItem('playlistId', this.playlistId)
-            }
-        },
+        // //获取列表歌曲
+        // async getPlaylistSongs() {
+        //     const playlistId = JSON.parse(localStorage.getItem('playlistId'))
+        //     if (playlistId !== null) {
+        //         this.setPlaylistId(playlistId)
+        //         const { data: res } = await this.$http.get('/listsongs/getsongs', {
+        //             params: {
+        //                 id: this.playlistId
+        //             }
+        //         })
+        //         this.setPlaylist(res.data)
+        //     } else {
+        //         const { data: res } = await this.$http.post('/playlist/create')
+        //         this.setPlaylistId(res.data.id)
+        //         localStorage.setItem('playlistId', this.playlistId)
+        //     }
+        // },
 
         //添加歌曲到歌曲列表
         addPlaylistSong() {
