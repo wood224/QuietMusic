@@ -101,8 +101,6 @@ export default {
                 .then(res => {
                     this.userDetail = res.data.data
                     let userInfo = {
-                        isLogin: true,
-                        manage: true,
                         name: res.data.data.name,
                         id: res.data.data.id,
                         sex: res.data.data.sex,

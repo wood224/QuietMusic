@@ -155,13 +155,12 @@ export default {
             this.$router.push('/search')
         },
 
+        //更新用户详情信息
         getUserDetail(id) {
             this.$http.get(`/user/${id}`)
                 .then(res => {
                     this.userDetail = res.data.data
                     let userInfo = {
-                        isLogin: true,
-                        manage: true,
                         name: res.data.data.name,
                         id: res.data.data.id,
                         sex: res.data.data.sex,
@@ -182,6 +181,7 @@ export default {
 <style lang="less">
 .navbar.navbar-light {
     z-index: 999;
+    min-width: 1000px;
 
     .menu {
         ul {

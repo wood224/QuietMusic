@@ -174,8 +174,6 @@ export default {
                 }
             }
         }
-
-        .songs {}
     }
 }
 

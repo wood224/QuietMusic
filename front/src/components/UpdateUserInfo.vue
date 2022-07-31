@@ -59,9 +59,7 @@ export default {
         ...mapState(['userInfo'])
     },
     created() {
-        this.form.id = this.userInfo.id
-        this.form.sex = this.userInfo.sex
-        this.form.description = this.userInfo.description
+        this.form = this.userInfo
     },
     methods: {
         setUpdateView() {

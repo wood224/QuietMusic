@@ -292,8 +292,6 @@ export default {
                 if (res.code === 200) {
                     //记录登录状态的对象
                     let userInfo = {
-                        isLogin: true,
-                        manage: true,
                         name: res.data.name,
                         id: res.data.id,
                         sex: res.data.sex,
