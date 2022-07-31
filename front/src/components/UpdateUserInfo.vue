@@ -7,9 +7,9 @@
                 </el-icon>
             </div>
             <div class="form">
-                <el-form :model="form" :rules="rules">
+                <el-form :model="form" :rules="rules" ref="form">
                     <el-form-item label="昵称" prop="name">
-                        <el-input v-model="form.name" clearable />
+                        <el-input v-model="form.name" clearable maxlength="20" />
                     </el-form-item>
                     <el-form-item label="性别">
                         <el-radio-group v-model="form.sex">
@@ -50,9 +50,12 @@ export default {
                 description: '',
             },
             rules: {
-                name: [{ validator: this.validateName, trigger: 'blur' }],
+                name: [
+                    { validator: this.validateName, trigger: 'blur' },
+                ],
                 phone: [{ validator: this.validatePhone, trigger: 'blur' }],
-            }
+            },
+            ruleForms: {}
         }
     },
     computed: {
@@ -61,6 +64,16 @@ export default {
     created() {
         this.form = this.userInfo
     },
+    mounted() {
+        this.ruleForms = this.$refs.form
+    },
+    watch: {
+        userInfo: {
+            handler() {
+                this.form = this.userInfo
+            }
+        }
+    },
     methods: {
         setUpdateView() {
             this.$emit('setUpdateView', 'setUserInfo')
@@ -68,11 +81,11 @@ export default {
 
         //校验昵称
         async validateName(rule, Name, callback) {
-            const reg = /[a-zA-Z0-9\u4e00-\u9fa5]{3,30}/
+            const reg = /[a-zA-Z0-9\u4e00-\u9fa5]{3,20}/
             if (reg.test(Name)) {
                 return callback()
             }
-            callback(new Error('用户名格式不正确,请输入3-30个字母、数字、汉字'))
+            callback(new Error('用户名格式不正确,请输入3-20个字母、数字、汉字'))
         },
         //校验手机号
         async validatePhone(rule, Phone, callback) {
@@ -84,24 +97,30 @@ export default {
         },
 
         //提交修改信息
-        Submit() {
-            this.$http.put('/user/update', {
-                id: this.form.id,
-                name: this.form.name === '' ? null : this.form.name,
-                sex: this.form.sex,
-                phone: this.form.phone === '' ? null : this.form.phone,
-                description: this.form.description === '' ? '这个人很懒，没有留下任何内容' : this.form.description
-            }).then(res => {
-                if (res.data.code === 200) {
-                    ElMessage.success('修改成功!')
-                    this.$emit('getUserDetail')
+        Submit(formEl) {
+            this.ruleForms.validate(valid => {
+                if (valid) {
+                    this.$http.put('/user/update', {
+                        id: this.form.id,
+                        name: this.form.name === '' ? null : this.form.name,
+                        sex: this.form.sex,
+                        phone: this.form.phone === '' ? null : this.form.phone,
+                        description: this.form.description === '' ? '这个人很懒，没有留下任何内容' : this.form.description
+                    }).then(res => {
+                        if (res.data.code === 200) {
+                            ElMessage.success('修改成功!')
+                            this.$emit('getUserDetail')
+                        } else {
+                            ElMessage.error('修改失败!')
+                        }
+                    }).catch(err => {
+                        console.error(err)
+                    })
+                    this.setUpdateView()
                 } else {
-                    ElMessage.error('修改失败!')
+                    return
                 }
-            }).catch(err => {
-                console.error(err)
             })
-            this.setUpdateView()
         }
     },
 }

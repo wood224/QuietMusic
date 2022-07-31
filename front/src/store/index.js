@@ -1,4 +1,6 @@
 import { createStore } from 'vuex'
+import { getSearchApi, getCheckMusic } from "../http/api"
+import { toRaw } from '@vue/reactivity'
 
 export default createStore({
   state: {
@@ -19,9 +21,11 @@ export default createStore({
   },
   mutations: {
     setUserInfo(state, userInfo) {
+      if (JSON.stringify(state.userInfo) === JSON.stringify(userInfo)) return
       state.userInfo = userInfo
     },
     setSearchSongs(state, songs) {
+      if (JSON.stringify(state.songs) === JSON.stringify(songs)) return
       state.searchSongs = songs
     },
     setMusicInfo(state, musicInfo) {
@@ -57,6 +61,18 @@ export default createStore({
     }
   },
   actions: {
+    //播放歌曲
+    play({ commit }, row) {
+      const song = toRaw(row)
+      getCheckMusic(song.id)
+        .then(res => {
+          if (res.data.success !== true) {
+            return ElMessage.warning('抱歉, 该歌暂无版权')
+          }
+          // context.setMusicPlayerId(song.id)
+          commit('setMusicPlayerId', song.id)
+        })
+    },
   },
   modules: {
   }

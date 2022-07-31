@@ -47,11 +47,14 @@
                             性别
                         </div>
                     </template>
-                    <span v-if="userDetail.sex === 0">保密</span>
-                    <el-icon color="hotpink" size="20px" v-else-if="userDetail.sex === 2">
+                    <!-- <span v-if="userDetail.sex === 0">保密</span> -->
+                    <el-icon size="17px" v-if="userDetail.sex === 0">
+                        <Remove />密
+                    </el-icon>
+                    <el-icon color="hotpink" size="17px" v-else-if="userDetail.sex === 2">
                         <Female />
                     </el-icon>
-                    <el-icon color="skyblue" size="20px" v-else-if="userDetail.sex === 1">
+                    <el-icon color="skyblue" size="17px" v-else-if="userDetail.sex === 1">
                         <Male />
                     </el-icon>
                 </el-descriptions-item>
@@ -88,7 +91,6 @@ export default {
         }
     },
     computed: {
-        ...mapState(['userInfo']),
     },
     created() {
         this.getUserDetail()
@@ -97,7 +99,8 @@ export default {
         ...mapMutations(['setUserInfo']),
 
         getUserDetail() {
-            this.$http.get(`/user/${this.userInfo.id}`)
+            const userId = JSON.parse(localStorage.getItem('userInfo')).id
+            this.$http.get(`/user/${userId}`)
                 .then(res => {
                     this.userDetail = res.data.data
                     let userInfo = {

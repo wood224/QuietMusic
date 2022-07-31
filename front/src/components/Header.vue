@@ -62,7 +62,7 @@ export default {
             input: ''
         }
     },
-    mounted() {
+    created() {
         //判断登录状态
         if (localStorage.getItem('userInfo') !== null) {
             const id = JSON.parse(localStorage.getItem('userInfo')).id

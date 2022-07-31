@@ -26,7 +26,7 @@
                 </el-button>
             </div>
             <div class="songs">
-                <el-table :data="songList">
+                <el-table :data="songList" @cell-click="play">
                     <el-table-column prop="name" label="歌曲名" />
                     <el-table-column label="歌手" width="300">
                         <template #default="scope">
@@ -44,7 +44,7 @@
 </template>
 
 <script>
-import { mapState, mapMutations } from "vuex"
+import { mapState, mapMutations, mapActions } from "vuex"
 import { getPlaylistDetail } from "../http/api"
 import { getTime } from "../fun"
 import { getCheckMusic } from "../http/api"
@@ -85,6 +85,7 @@ export default {
     },
     methods: {
         ...mapMutations(['setSongListId', 'setPlaylistId', 'setPlaylist']),
+        ...mapActions(['play']),
 
         //添加歌单所有歌曲到歌曲列表
         addAllPlaylistSong() {

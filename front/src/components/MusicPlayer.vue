@@ -17,7 +17,7 @@
                 </div>
                 <div class="musicList">
                     <li v-for="(item, index) in playlist" :key="item.id">
-                        <div class="musicList-item" @click.stop="play(item.musicId, index)">
+                        <div class="musicList-item" @click.stop="playIndex(item.musicId, index)">
                             <div class="musicList-number">{{ index + 1 }}</div>
                             <div class="musicList-name textHidden">{{ item.musicName }}
                                 <el-tooltip class="box-item" effect="light" content="移除歌曲" placement="top"
@@ -198,7 +198,7 @@ export default {
             // console.log(url)
             this.songInfo.url = url
             if (this.songInfo.url === '') return
-            this.isPlaying = true
+            // this.isPlaying = true
             this.record = setTimeout(this.recordMusic, 10000)
             this.addPlaylistSong()
 
@@ -214,12 +214,14 @@ export default {
                 ]).then(axios.spread((info, url) => {
                     this.setMusicInfo(info.data.songs[0])
                     this.setMusicUrl(url.data.data[0].url)
+                    this.isPlaying = true
                     this.loading = false
                 })).catch(err => {
                     console.error(err)
                     this.loading = false
                 })
 
+                //更新播放序号 index
                 this.songIndex = this.playlist.length + 1
                 for (let item in this.playlist) {
                     if (this.musicPlayerId === this.playlist[item].musicId) {
@@ -229,12 +231,11 @@ export default {
                 }
             },
         },
-        playlist: {
-            handler() {
-                this.getPlaylistSongs()
-                console.log(this.playlist)
-            },
-        },
+        // playlist: {
+        //     handler() {
+        //         this.getPlaylistSongs()
+        //     },
+        // },
         songIndex: {
             handler() {
                 localStorage.setItem('songIndex', this.songIndex)
@@ -269,7 +270,7 @@ export default {
             if (this.songIndex < 0) {
                 this.songIndex = this.playlist.length - 1
             }
-            this.play(this.playlist[this.songIndex].musicId, this.songIndex)
+            this.playIndex(this.playlist[this.songIndex].musicId, this.songIndex)
         },
 
         //播放
@@ -298,7 +299,7 @@ export default {
             if (this.songIndex > this.playlist.length - 1) {
                 this.songIndex = 0
             }
-            this.play(this.playlist[this.songIndex].musicId, this.songIndex)
+            this.playIndex(this.playlist[this.songIndex].musicId, this.songIndex)
         },
 
         //播放或暂停
@@ -417,6 +418,8 @@ export default {
                 musicName: this.songInfo.name,
                 singerName: artists,
                 time: this.songInfo.duration
+            }).then(() => {
+                this.getPlaylistSongs()
             })
         },
 
@@ -444,8 +447,8 @@ export default {
             })
         },
 
-        //播放歌曲列表中的歌曲
-        play(id, index) {
+        //播放歌曲列表中序号为 index 的歌曲
+        playIndex(id, index) {
             this.setMusicPlayerId(id)
             this.songIndex = index
         }

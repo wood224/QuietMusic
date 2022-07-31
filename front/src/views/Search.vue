@@ -66,8 +66,8 @@
 <script>
 import { Search } from '@element-plus/icons-vue'
 import { getTime } from "../fun"
-import { getSearchApi, getCheckMusic } from "../http/api"
-import { mapState, mapMutations } from "vuex"
+import { getSearchApi } from "../http/api"
+import { mapState, mapMutations, mapActions } from "vuex"
 import { toRaw } from '@vue/reactivity'
 
 export default {
@@ -149,6 +149,7 @@ export default {
     },
     methods: {
         ...mapMutations(['setMusicInfo', 'setMusicUrl', 'setSearchSongs', 'setMusicPlayerId', 'setSearchKeywords', 'setSongListId']),
+        ...mapActions(['play']),
 
         //组件搜索框的搜索
         search() {
@@ -249,18 +250,6 @@ export default {
                 this.type = 10
                 this.searchAlbum()
             }
-        },
-
-        //播放歌曲
-        play(row) {
-            const song = toRaw(row)
-            getCheckMusic(song.id)
-                .then(res => {
-                    if (res.data.success !== true) {
-                        return ElMessage.warning('抱歉, 该歌暂无版权')
-                    }
-                    this.setMusicPlayerId(song.id)
-                })
         },
 
         //进入歌单详情
