@@ -2,23 +2,23 @@
     <div class="song-list-container">
         <div class="left">
             <div class="pic">
-                <img :src="songListDetail.coverImgUrl" alt="">
+                <img :src="albumDetail.blurPicUrl" alt="">
             </div>
             <div class="detail">
-                <span>名称：</span>{{ songListDetail.name }}
+                <span>名称：</span>{{ albumDetail.name }}
                 <br>
-                <span>创建人：</span>{{ creatorName }}
+                <span>歌手：</span>{{ creatorName }}
                 <br>
-                <span>更新时间：</span>{{ updateTime }}
+                <span>发行时间：</span>{{ publishTime }}
             </div>
             <div class="intro scrollbar">
                 <span>简介：</span>
-                <span class="description">{{ songListDetail.description }}</span>
+                <span class="description">{{ albumDetail.description }}</span>
             </div>
         </div>
         <div class="right">
             <div class="title">
-                <h6>&lt;{{ songListDetail.name }}&gt; －歌曲列表</h6>
+                <h6>&lt;{{ albumDetail.name }}&gt; －歌曲列表</h6>
                 <el-button type="primary" @click="addAllPlaylistSong">
                     <span class="text">
                         <i class="fa fa-play"></i>添加至播放列表
@@ -26,9 +26,9 @@
                 </el-button>
             </div>
             <div class="songs">
-                <el-table :data="songList" @cell-click="play" max-height="520">
-                    <el-table-column prop="name" label="歌曲名" />
-                    <el-table-column label="歌手" width="300">
+                <el-table :data="albumSongs" @cell-click="play" max-height="520">
+                    <el-table-column prop="name" label="歌曲名" width="300" />
+                    <el-table-column label="歌手" width="200">
                         <template #default="scope">
                             <span v-for="item in scope.row.ar" :key="item.id">
                                 {{ item.name }}&nbsp;
@@ -45,52 +45,54 @@
 
 <script>
 import { mapState, mapMutations, mapActions } from "vuex"
-import { getPlaylistDetail, getCheckMusic } from "../http/api"
+import { getAlbumDetail, getCheckMusic } from "../http/api"
 import { getTime } from "../fun"
 import { ElMessage } from 'element-plus'
 
 export default {
-    name: 'SongList',
+    name: 'AlbumDetail',
     data() {
         return {
-            songListDetail: {},     //歌单详情信息
-            songList: [],           //歌单中歌曲列表
-            creatorName: '',        //歌单创建作者名
-            updateTime: '',         //歌单更新时间
+            albumDetail: {},     //专辑详情信息
+            albumSongs: [],         //专辑中歌曲列表
+            creatorName: '',        //专辑创建作者名
+            publishTime: '',         //专辑更新时间
             duration: '',           //歌曲时长
 
         }
     },
     mounted() {
-        this.setSongListId(sessionStorage.getItem('songListId'))
-        getPlaylistDetail(this.songListId)
+        this.setAlbumId(sessionStorage.getItem('albumId'))
+        getAlbumDetail(this.albumId)
             .then(res => {
-                const playlisy = res.data.playlist
-                this.songListDetail = playlisy
-                this.songList = playlisy.tracks
-                this.songList.forEach(item => {
+                const data = res.data
+                this.albumDetail = data.album
+                this.albumSongs = data.songs
+                this.albumSongs.forEach(item => {
                     item.dt = getTime(item.dt)
                 })
-                this.creatorName = playlisy.creator.nickname
-                const date = new Date(playlisy.updateTime)
+                this.creatorName = data.album.artist.name
+                console.log(data.album.publishTime)
+                const date = new Date(data.album.publishTime)
                 const y = date.getFullYear()
                 const m = date.getMonth() + 1
                 const d = date.getDate()
-                this.updateTime = `${y}-${m}-${d}`
+                console.log(d)
+                this.publishTime = `${y}-${m}-${d}`
             })
 
     },
     computed: {
-        ...mapState(['songListId', 'playlistId'])
+        ...mapState(['albumId', 'playlistId'])
     },
     methods: {
-        ...mapMutations(['setSongListId', 'setPlaylistId', 'setPlaylist']),
+        ...mapMutations(['setAlbumId', 'setPlaylistId', 'setPlaylist']),
         ...mapActions(['play', 'getPlaylistSongs']),
 
-        //添加歌单所有歌曲到歌曲列表
+        //添加专辑所有歌曲到歌曲列表
         async addAllPlaylistSong() {
             let msg = ElMessage('添加中...')
-            for (let i of this.songList) {
+            for (let i of this.album) {
                 const { data: res } = await getCheckMusic(i.id)
                 if (res.success === true) {
                     let songInfo = i

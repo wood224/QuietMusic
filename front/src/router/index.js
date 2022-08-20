@@ -1,12 +1,4 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import Home from '../views/Home.vue'
-import Rank from '../views/Rank.vue'
-import Song from '../views/Song.vue'
-import Singer from '../views/Singer.vue'
-import Search from '../views/Search.vue'
-import SongDetails from '../views/SongDetails.vue'
-import SongList from '../views/SongList.vue'
-import UserHome from '../views/UserHome.vue'
 
 const routes = [
   {
@@ -15,35 +7,39 @@ const routes = [
   },
   {
     path: '/home',
-    component: Home
+    component: () => import('../views/Home.vue')
   },
   {
     path: '/rank',
-    component: Rank
+    component: () => import('../views/Rank.vue')
   },
   {
     path: '/song',
-    component: Song
+    component: () => import('../views/Song.vue')
   },
   {
     path: '/singer',
-    component: Singer
+    component: () => import('../views/Singer.vue')
   },
   {
     path: '/search',
-    component: Search
+    component: () => import('../views/Search.vue')
   },
   {
     path: '/songDetails',
-    component: SongDetails
+    component: () => import('../views/SongDetails.vue')
   },
   {
     path: '/songList',
-    component: SongList
+    component: () => import('../views/SongList.vue')
+  },
+  {
+    path: '/albumDetail',
+    component: () => import('../views/AlbumDetail.vue')
   },
   {
     path: '/userHome',
-    component: UserHome,
+    component: () => import('../views/UserHome.vue'),
     beforeEnter: (to, from, next) => {
       if (localStorage.getItem('userInfo') !== null) {
         next()
@@ -51,6 +47,10 @@ const routes = [
         return location.href = 'login.html'
       }
     }
+  },
+  {
+    path: '/singerDetail',
+    component: () => import('../views/SingerDetail.vue')
   }
 ]
 

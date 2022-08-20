@@ -35,7 +35,7 @@ export function getCheckMusic(id) {
 
 //获取音乐详情
 export function getMusicDetail(ids) {
-    return request('/song/detail', {
+    return request.get('/song/detail', {
         params: {
             ids: ids
         }
@@ -44,7 +44,7 @@ export function getMusicDetail(ids) {
 
 //获取音乐Url
 export function getMusicUrl(id) {
-    return request('/song/url', {
+    return request.get('/song/url', {
         params: {
             id: id
         }
@@ -54,6 +54,24 @@ export function getMusicUrl(id) {
 //获取歌单详情
 export function getPlaylistDetail(id) {
     return request('/playlist/detail', {
+        params: {
+            id: id
+        }
+    })
+}
+
+//获取歌手详情
+export function getSingerDetail(id) {
+    return request('/artists', {
+        params: {
+            id: id
+        }
+    })
+}
+
+//获取专辑详情
+export function getAlbumDetail(id) {
+    return request('/album', {
         params: {
             id: id
         }
