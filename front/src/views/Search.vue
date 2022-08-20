@@ -9,12 +9,12 @@
             </el-input>
         </div>
         <el-tabs type="border-card" @tab-click="tableHandlerClick" v-model="activeName" v-loading="loading"
-            element-loading-text="Loading..." element-loading-background="rgba(122, 122, 122, 0.4)">
+            element-loading-text="Loading..." element-loading-background="rgba(224, 224, 224, 0.4)">
             <el-tab-pane label="单曲" name="searchSingle">
                 <el-table :data="searchSongs" height="480" style="width: 100%" @cell-click="play" stripe>
                     <el-table-column prop="name" label="歌曲名" width="300" />
                     <el-table-column label="歌手" width="300">
-                        <template v-slot:default="scope">
+                        <template #default="scope">
                             <span v-for="item in scope.row.artists" :key="item.name">
                                 {{ item.name }}&nbsp;
                             </span>
@@ -26,7 +26,7 @@
             </el-tab-pane>
             <el-tab-pane label="歌手" name="searchSinger">
                 <ul class="singerList">
-                    <li v-for="item in singerLsit" :key="item.id">
+                    <li v-for="item in singerLsit" :key="item.id" @click="singerDetail(item.id)">
                         <div class="singer">
                             <div class="pic">
                                 <img :src="item.picUrl" alt="">
@@ -47,7 +47,7 @@
             </el-tab-pane>
             <el-tab-pane label="专辑" name="searchAlbum">
                 <ul class="albumList">
-                    <li v-for="item in albumList" :key="item.id">
+                    <li v-for="item in albumList" :key="item.id" @click="albumDetail(item.id)">
                         <div class="album">
                             <div class="pic">
                                 <img :src="item.picUrl" alt="">
@@ -66,8 +66,8 @@
 <script>
 import { Search } from '@element-plus/icons-vue'
 import { getTime } from "../fun"
-import { getSearchApi, getCheckMusic } from "../http/api"
-import { mapState, mapMutations } from "vuex"
+import { getSearchApi } from "../http/api"
+import { mapState, mapMutations, mapActions } from "vuex"
 import { toRaw } from '@vue/reactivity'
 
 export default {
@@ -76,10 +76,11 @@ export default {
         return {
             ipt: '',
             keywords: '',
-            activeName: 'searchSingle',
             singerLsit: [],     //歌手列表
             playList: [],       //歌单列表
-            albumList: [],          //专辑列表
+            albumList: [],      //专辑列表
+
+            activeName: '',     //用于取消只度警告
 
             //搜索模式
             type: 1,
@@ -88,7 +89,7 @@ export default {
         }
     },
     computed: {
-        ...mapState(['searchSongs', 'searchKeywords', 'playlistId']),
+        ...mapState(['searchSongs', 'searchKeywords', 'playlistId', 'searchActiveName']),
     },
     watch: {
         searchKeywords: {
@@ -110,26 +111,11 @@ export default {
                     return this.searchAlbum()
             }
         },
-        // type: {
-        //     handler() {
-        //         if (this.type === 1) {
-        //             this.typeWords = '单曲'
-        //             this.activeName = 'searchSingle'
-        //         }
-        //         else if (this.type === 100) {
-        //             this.typeWords = '歌手'
-        //             this.activeName = 'searchSinger'
-        //         }
-        //         else if (this.type === 1000) {
-        //             this.typeWords = '歌单'
-        //             this.activeName = 'searchList'
-        //         }
-        //         else if (this.type === 10) {
-        //             this.typeWords = '专辑'
-        //             this.activeName = 'searchAlbum'
-        //         }
-        //     }
-        // }
+        searchActiveName: {
+            handler() {
+                this.activeName = this.searchActiveName
+            }
+        }
     },
     created() {
         if (this.searchKeywords !== '') {
@@ -144,11 +130,21 @@ export default {
             this.setSearchKeywords(sessionStorage.getItem('keywords'))
         }
 
+        //设置type
+        if (this.searchActiveName === 'searchSingle') this.type = 1
+        if (this.searchActiveName === 'searchSinger') this.type = 100
+        if (this.searchActiveName === 'searchList') this.type = 1000
+        if (this.searchActiveName === 'searchAlbum') this.type = 10
+        this.activeName = this.searchActiveName
+
+
+
     },
     mounted() {
     },
     methods: {
-        ...mapMutations(['setMusicInfo', 'setMusicUrl', 'setSearchSongs', 'setMusicPlayerId', 'setSearchKeywords']),
+        ...mapMutations(['setMusicInfo', 'setMusicUrl', 'setSearchSongs', 'setMusicPlayerId', 'setSearchKeywords', 'setSearchActiveName', 'setSongListId', 'setSingerId', 'setAlbumId']),
+        ...mapActions(['play']),
 
         //组件搜索框的搜索
         search() {
@@ -238,35 +234,43 @@ export default {
             // console.log(tab.props.name)
             if (tab.props.name === 'searchSingle') {
                 this.type = 1
+                this.setSearchActiveName('searchSingle')
                 this.getSearchList(this.keywords)
             } else if (tab.props.name === 'searchSinger') {
                 this.type = 100
+                this.setSearchActiveName('searchSinger')
                 this.searchSinger()
             } else if (tab.props.name === 'searchList') {
                 this.type = 1000
+                this.setSearchActiveName('searchList')
                 this.searchList()
             } else if (tab.props.name === 'searchAlbum') {
                 this.type = 10
+                this.setSearchActiveName('searchAlbum')
                 this.searchAlbum()
             }
         },
 
-        //播放歌曲
-        play(row) {
-            const song = toRaw(row)
-            getCheckMusic(song.id)
-                .then(res => {
-                    if (res.data.success !== true) {
-                        return ElMessage.warning('抱歉, 该歌暂无版权')
-                    }
-                    this.setMusicPlayerId(song.id)
-                })
-        },
-
         //进入歌单详情
         playlistDetail(row) {
-            const playlist = toRaw(row)
-            console.log(playlist.id)
+            const songList = toRaw(row)
+            this.setSongListId(songList.id)
+            sessionStorage.setItem('songListId', songList.id)
+            this.$router.push('songList')
+        },
+
+        //进入歌手详情
+        singerDetail(id) {
+            this.setSingerId(id)
+            sessionStorage.setItem('singerId', id)
+            this.$router.push('singerDetail')
+        },
+
+        //进入专辑详情
+        albumDetail(id) {
+            this.setAlbumId(id)
+            sessionStorage.setItem('albumId', id)
+            this.$router.push('albumDetail')
         }
     },
     setup() {
@@ -295,17 +299,18 @@ export default {
             .singerList {
                 display: flex;
                 flex-wrap: wrap;
-                justify-content: space-between;
+                justify-content: flex-start;
                 height: 59vh;
                 overflow: auto;
 
                 .singer {
-                    margin-right: 1vw;
+                    margin-right: 1.28vw;
                     width: 8vw;
                     cursor: pointer;
 
                     .pic {
                         height: 8vw;
+                        box-shadow: 1px 1px 5px black;
 
                         img {
                             width: 100%;
@@ -326,17 +331,18 @@ export default {
             .albumList {
                 display: flex;
                 flex-wrap: wrap;
-                justify-content: space-between;
+                justify-content: flex-start;
                 height: 59vh;
                 overflow: auto;
 
                 .album {
-                    margin-right: 1vw;
+                    margin-right: 1.28vw;
                     width: 8vw;
                     cursor: pointer;
 
                     .pic {
                         height: 8vw;
+                        box-shadow: 1px 1px 5px black;
 
                         img {
                             width: 100%;

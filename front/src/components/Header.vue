@@ -38,7 +38,7 @@
                     </span>
                     <template #dropdown>
                         <el-dropdown-menu>
-                            <el-dropdown-item>Action 1</el-dropdown-item>
+                            <el-dropdown-item @click="goUserHome">个人主页</el-dropdown-item>
                             <el-dropdown-item>Action 2</el-dropdown-item>
                             <el-dropdown-item>Action 3</el-dropdown-item>
                             <el-dropdown-item divided @click="logout()">退出登录</el-dropdown-item>
@@ -52,22 +52,25 @@
 
 <script>
 import { mapMutations, mapState } from "vuex"
+import { getHash } from "../fun"
 
 export default {
     name: 'Header',
     data() {
         return {
-            userInfo: {},
             classBgWihte: [false, false, false, false],
             input: ''
         }
     },
-    mounted() {
+    created() {
         //判断登录状态
-        this.userInfo = JSON.parse(localStorage.getItem('userInfo'))
+        if (localStorage.getItem('userInfo') !== null) {
+            const id = JSON.parse(localStorage.getItem('userInfo')).id
+            this.getUserDetail(id)
+        }
     },
     computed: {
-        ...mapState(['searchSongs', 'searchKeywords']),
+        ...mapState(['searchSongs', 'searchKeywords', 'userInfo']),
     },
     watch: {
         searchKeywords: {
@@ -121,12 +124,13 @@ export default {
         }
     },
     methods: {
-        ...mapMutations(['setSearchKeywords']),
+        ...mapMutations(['setSearchKeywords', 'setUserInfo']),
 
         logout() {
             localStorage.removeItem('userInfo')
             //返回主页
-            this.userInfo = JSON.parse(localStorage.getItem('userInfo'))
+            this.setUserInfo(JSON.parse(localStorage.getItem('userInfo')))
+            if ((getHash().slice(0, 9)) === '/userHome') this.$router.go(-1)
         },
 
         goHome() {
@@ -141,12 +145,35 @@ export default {
         goSinger() {
             this.$router.push('/singer')
         },
+        goUserHome() {
+            this.$router.push('/userHome/?id=' + this.userInfo.id)
+        },
 
         async search() {
             if (this.input === '') return
             this.setSearchKeywords(this.input)
             this.$router.push('/search')
-        }
+        },
+
+        //更新用户详情信息
+        getUserDetail(id) {
+            this.$http.get(`/user/${id}`)
+                .then(res => {
+                    this.userDetail = res.data.data
+                    let userInfo = {
+                        name: res.data.data.name,
+                        id: res.data.data.id,
+                        sex: res.data.data.sex,
+                        phone: res.data.data.phone,
+                        description: res.data.data.description
+                    }
+                    //将表示登录状态的对象存入 localstorage 和 vuex 中
+                    localStorage.setItem("userInfo", JSON.stringify(userInfo))
+                    this.setUserInfo(userInfo)
+                }).catch((err) => {
+                    console.error(err)
+                })
+        },
     },
 }
 </script>
@@ -154,6 +181,7 @@ export default {
 <style lang="less">
 .navbar.navbar-light {
     z-index: 999;
+    min-width: 1000px;
 
     .menu {
         ul {

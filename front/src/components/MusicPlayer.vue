@@ -1,19 +1,25 @@
 <template>
     <div class="music-container" :class="{ 'play': isPlaying }" ref="musicContainer" v-loading="loading"
-        element-loading-background="rgba(122, 122, 122, 0.8)" element-loading-text="加载中...(如果长时间未响应, 请刷新页面后重试)">
+        element-loading-background="rgba(122, 122, 122, 0.8)" element-loading-text="加载中...(如果长时间未响应, 请刷新页面后重试)"
+        @click="playlistView = false">
         <div class="music-info">
             <!-- 播放列表 -->
             <div class="playlist" v-show="playlistView">
                 <div class="title">播放列表/{{ playlist.length }}
+                    <el-tooltip class="box-item" effect="light" content="清空列表" placement="top">
+                        <div class="clear" @click.stop="clearPlaylist">
+                            <i class="fa fa-trash"></i>
+                        </div>
+                    </el-tooltip>
                     <div class="close" @click="setPlaylistView">
                         <i class="fa fa-close"></i>
                     </div>
                 </div>
                 <div class="musicList">
                     <li v-for="(item, index) in playlist" :key="item.id">
-                        <div class="musicList-item" @click="play(item.musicId, index)">
+                        <div class="musicList-item" @click.stop="playIndex(item.musicId, index)">
                             <div class="musicList-number">{{ index + 1 }}</div>
-                            <div class="musicList-name">{{ item.musicName }}
+                            <div class="musicList-name textHidden">{{ item.musicName }}
                                 <el-tooltip class="box-item" effect="light" content="移除歌曲" placement="top"
                                     :hide-after="0">
                                     <div class="delete" @click.stop="deletePlaylistSong(item.musicId)">
@@ -72,7 +78,7 @@
                             <i class="fa fa-refresh" v-show="isListLoop"></i>
                         </button>
                         <!-- 列表按钮 -->
-                        <button @click="setPlaylistView">
+                        <button @click.stop="setPlaylistView">
                             <i class="fa fa-list"></i>
                         </button>
                     </div>
@@ -94,7 +100,7 @@
 <script>
 import { getTime } from "../fun"
 import { getMusicDetail, getMusicUrl } from "../http/api"
-import { mapState, mapMutations } from "vuex"
+import { mapState, mapMutations, mapActions } from "vuex"
 import axios from "axios"
 
 export default {
@@ -112,14 +118,14 @@ export default {
                 alPicUrl: '',
             },
 
-            playlist: [],           //播放列表
+            // playlist: [],           //播放列表
 
             isPlaying: false,       //是否在播放
             isMute: false,          //是否静音
             isloud: false,          //音量是否大于60%
-            isListLoop: true,          //是否开启列表循环
+            isListLoop: true,       //是否开启列表循环
 
-            playlistView: false,     //是否显示歌曲列表
+            playlistView: false,    //是否显示歌曲列表
 
             ////DOM元素
             audio: {},
@@ -129,7 +135,6 @@ export default {
 
             tempVolume: 0,          //临时音量
             currentDuration: '',    //音频播放位置
-            testSongList: [],
 
             songIndex: 0,        //播放第几首
 
@@ -153,6 +158,9 @@ export default {
 
         if (songInfo !== null) {
             this.songInfo = songInfo
+            getMusicUrl(songInfo.id).then(res => {
+                this.setMusicUrl(res.data.data[0].url)
+            })
             // if (this.musicPlayerId !== this.songInfo.id) this.setMusicPlayerId(this.songInfo.id)
         }
         if (songIndex !== null) {
@@ -166,11 +174,12 @@ export default {
 
     },
     computed: {
-        ...mapState(['musicInfo', 'musicUrl', 'musicPlayerId', 'playlistId']),
+        ...mapState(['musicInfo', 'musicUrl', 'musicPlayerId', 'playlistId', 'playlist']),
     },
     watch: {
         musicInfo: function () {
             const info = JSON.parse(JSON.stringify(this.musicInfo))
+            if (info === null) return
             // console.log(info)
             this.songInfo.id = info.id
             this.songInfo.name = info.name
@@ -189,23 +198,9 @@ export default {
             // console.log(url)
             this.songInfo.url = url
             if (this.songInfo.url === '') return
-            this.isPlaying = true
+            // this.isPlaying = true
             this.record = setTimeout(this.recordMusic, 10000)
-            let artists = []
-            this.songInfo.ar.forEach(e => {
-                artists.push(e.name)
-            })
-            this.$http.post('/listsongs/add', {
-                listId: this.playlistId,
-                musicId: this.songInfo.id,
-                musicName: this.songInfo.name,
-                singerName: artists,
-                time: this.songInfo.duration
-            }).then(res => {
-                if (res.data.code === 200) {
-                    this.getPlaylistSongs()
-                }
-            })
+            this.addPlaylistSong()
 
             localStorage.setItem('songInfo', JSON.stringify(this.songInfo))
         },
@@ -217,16 +212,16 @@ export default {
                     getMusicDetail(this.musicPlayerId),
                     getMusicUrl(this.musicPlayerId)
                 ]).then(axios.spread((info, url) => {
-                    // console.log(info.data.songs[0])
                     this.setMusicInfo(info.data.songs[0])
-                    // console.log(url.data.data[0])
                     this.setMusicUrl(url.data.data[0].url)
+                    this.isPlaying = true
                     this.loading = false
                 })).catch(err => {
                     console.error(err)
                     this.loading = false
                 })
 
+                //更新播放序号 index
                 this.songIndex = this.playlist.length + 1
                 for (let item in this.playlist) {
                     if (this.musicPlayerId === this.playlist[item].musicId) {
@@ -236,6 +231,11 @@ export default {
                 }
             },
         },
+        playlist: {
+            handler() {
+                this.getPlaylistSongs()
+            },
+        },
         songIndex: {
             handler() {
                 localStorage.setItem('songIndex', this.songIndex)
@@ -243,7 +243,8 @@ export default {
         }
     },
     methods: {
-        ...mapMutations(['setMusicInfo', 'setMusicUrl', 'setMusicPlayerId', 'setLyricCurrent', 'setplaylistId']),
+        ...mapMutations(['setMusicInfo', 'setMusicUrl', 'setMusicPlayerId', 'setLyricCurrent', 'setPlaylistId', 'setPlaylist']),
+        ...mapActions(['getPlaylistSongs']),
 
         getHash() {
             return location.hash.slice(1) || '/'
@@ -265,12 +266,12 @@ export default {
 
         //切换到上一首
         prevSong() {
-            if (this.playlist.length === 1) return
+            if (this.playlist.length <= 1) return
             this.songIndex--
             if (this.songIndex < 0) {
                 this.songIndex = this.playlist.length - 1
             }
-            this.play(this.playlist[this.songIndex].musicId, this.songIndex)
+            this.playIndex(this.playlist[this.songIndex].musicId, this.songIndex)
         },
 
         //播放
@@ -291,7 +292,7 @@ export default {
 
         //切换到下一首
         nextSong() {
-            if (this.playlist.length === 1) {
+            if (this.playlist.length <= 1) {
                 this.audio.currentTime = 0
                 return this.audio.play()
             }
@@ -299,7 +300,7 @@ export default {
             if (this.songIndex > this.playlist.length - 1) {
                 this.songIndex = 0
             }
-            this.play(this.playlist[this.songIndex].musicId, this.songIndex)
+            this.playIndex(this.playlist[this.songIndex].musicId, this.songIndex)
         },
 
         //播放或暂停
@@ -384,27 +385,45 @@ export default {
                 this.$http.post('music/save', {
                     musicId: this.songInfo.id,
                     userId: userInfo.id
-
                 })
             }
         },
 
-        //获取列表歌曲
-        async getPlaylistSongs() {
-            const playlistId = JSON.parse(localStorage.getItem('playlistId'))
-            if (playlistId !== null) {
-                this.setplaylistId(playlistId)
-                const { data: res } = await this.$http.get('/listsongs/getsongs', {
-                    params: {
-                        id: this.playlistId
-                    }
-                })
-                this.playlist = res.data
-            } else {
-                const { data: res } = await this.$http.post('/playlist/create')
-                this.setplaylistId(res.data.id)
-                localStorage.setItem('playlistId', this.playlistId)
-            }
+        // //获取列表歌曲
+        // async getPlaylistSongs() {
+        //     const playlistId = JSON.parse(localStorage.getItem('playlistId'))
+        //     if (playlistId !== null) {
+        //         this.setPlaylistId(playlistId)
+        //         const { data: res } = await this.$http.get('/listsongs/getsongs', {
+        //             params: {
+        //                 id: this.playlistId
+        //             }
+        //         })
+        //         this.setPlaylist(res.data)
+        //     } else {
+        //         const { data: res } = await this.$http.post('/playlist/create')
+        //         this.setPlaylistId(res.data.id)
+        //         localStorage.setItem('playlistId', this.playlistId)
+        //     }
+        // },
+
+        //添加歌曲到歌曲列表
+        addPlaylistSong() {
+            let artists = []
+            this.songInfo.ar.forEach(e => {
+                artists.push(e.name)
+            })
+            this.$http.post('/listsongs/add', {
+                listId: this.playlistId,
+                musicId: this.songInfo.id,
+                musicName: this.songInfo.name,
+                singerName: artists,
+                time: this.songInfo.duration
+            }).then(res => {
+                if (res.data.code === 200) {
+                    this.getPlaylistSongs()
+                }
+            })
         },
 
         //移除歌曲列表中的歌曲
@@ -422,8 +441,21 @@ export default {
             }
         },
 
-        //播放歌曲列表中的歌曲
-        play(id, index) {
+        //清空播放列表
+        clearPlaylist() {
+            this.$http.delete('/listsongs/delall', {
+                params: {
+                    id: this.playlistId
+                }
+            }).then(res => {
+                if (res.data.code === 200) {
+                    this.getPlaylistSongs()
+                }
+            })
+        },
+
+        //播放歌曲列表中序号为 index 的歌曲
+        playIndex(id, index) {
             this.setMusicPlayerId(id)
             this.songIndex = index
         }
@@ -449,6 +481,7 @@ export default {
     bottom: 0;
     justify-content: center;
     width: 100%;
+    min-width: 1000px;
     height: 100px;
     background-color: #00A9FF;
     z-index: 999;
@@ -479,14 +512,22 @@ export default {
                 font-size: 20px;
                 color: #003993;
 
+                .clear {
+                    text-align: center;
+                    cursor: pointer;
+                }
+
                 .close {
+                    height: 30px;
                     cursor: pointer;
                 }
             }
 
             .musicList {
+                height: 360px;
                 padding: 0 10px;
                 color: #414141;
+                overflow: auto;
 
                 li {
                     height: 30px;
@@ -551,6 +592,7 @@ export default {
             justify-items: center;
             width: 100px;
             height: 100%;
+            overflow: hidden;
             cursor: pointer;
 
             img {
@@ -643,8 +685,8 @@ export default {
                             background-color: #0decfc;
                             border-radius: 5px;
                             height: 100%;
-                            /* 默认音量为50% */
-                            width: 50%;
+                            /* 默认音量为0% */
+                            width: 0;
                             transition: width 0.1s linear;
                         }
                     }

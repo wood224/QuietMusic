@@ -11,7 +11,6 @@
 
 <script>
 import { getBannerApi } from "../http/api"
-import { mapGetters } from 'vuex'
 
 export default {
     name: 'Banner',

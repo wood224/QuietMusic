@@ -6,3 +6,7 @@ export function getTime(duration) {
     mm = mm < 10 ? '0' + mm : mm
     return mm + ':' + ss
 }
+
+export function getHash() {
+    return location.hash.slice(1) || '/'
+}

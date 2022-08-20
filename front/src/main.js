@@ -15,6 +15,8 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 
 axios.defaults.baseURL = 'http://180.76.136.85:8080'
 app.config.globalProperties.$http = axios
+window.axios = require('axios')
+window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest'
 
 app.use(store).use(router)
 
