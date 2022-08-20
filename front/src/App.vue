@@ -27,5 +27,43 @@ export default {
 }
 </script>
 
-<style lang="less" scoped>
+<style lang="less">
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+a {
+	text-decoration: none;
+}
+
+li {
+	list-style: none;
+}
+
+button {
+	outline: none;
+}
+
+/* 滚动条样式 */
+.scrollbar {
+	&:hover::-webkit-scrollbar-thumb {
+		background-color: rgba(150, 150, 150, 0.3);
+	}
+
+	&::-webkit-scrollbar {
+		width: 7px;
+	}
+
+	//设置滚动条
+	&::-webkit-scrollbar-thumb {
+		border-radius: 5px;
+		background-color: rgba(150, 150, 150, 0);
+
+		&:hover {
+			background-color: rgba(150, 150, 150, 0.5);
+		}
+	}
+}
 </style>

@@ -481,6 +481,7 @@ export default {
     bottom: 0;
     justify-content: center;
     width: 100%;
+    min-width: 1000px;
     height: 100px;
     background-color: #00A9FF;
     z-index: 999;
@@ -591,6 +592,7 @@ export default {
             justify-items: center;
             width: 100px;
             height: 100%;
+            overflow: hidden;
             cursor: pointer;
 
             img {
@@ -683,8 +685,8 @@ export default {
                             background-color: #0decfc;
                             border-radius: 5px;
                             height: 100%;
-                            /* 默认音量为50% */
-                            width: 50%;
+                            /* 默认音量为0% */
+                            width: 0;
                             transition: width 0.1s linear;
                         }
                     }
