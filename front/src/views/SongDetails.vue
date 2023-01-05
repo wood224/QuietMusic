@@ -185,7 +185,7 @@ export default {
     display: flex;
     justify-content: center;
     position: relative;
-    height: 80vh;
+    height: calc(100% - 198px);
     overflow: hidden;
 
     .content {
@@ -203,7 +203,7 @@ export default {
 
             .pic {
                 width: 300px;
-                padding: 0 40px 40px;
+                padding: 20px 40px 40px;
 
                 img {
                     width: 100%;
@@ -212,6 +212,8 @@ export default {
         }
 
         .right {
+            display: flex;
+            flex-direction: column;
             width: 60%;
 
             .info {
@@ -254,7 +256,8 @@ export default {
 
             .lyric {
                 position: relative;
-                height: 450px;
+                margin-top: 20px;
+                height: 54vh;
                 overflow: hidden;
                 padding: 0 10px;
                 border-radius: 10px;
@@ -273,6 +276,7 @@ export default {
                     li {
                         height: 25px;
                         margin: 5px 0;
+                        line-height: 25px;
                     }
 
                     .currentRow {

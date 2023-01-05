@@ -48,7 +48,8 @@ export default {
     .el-carousel {
         .el-carousel__container {
             img {
-                height: 18.6vw;
+                width: 100%;
+                height: 100%;
             }
         }
     }

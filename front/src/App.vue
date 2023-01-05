@@ -46,6 +46,13 @@ button {
 	outline: none;
 }
 
+.app {
+	width: 100vw;
+	height: 100vh;
+	min-width: 1200px;
+	min-height: 800px;
+}
+
 /* 滚动条样式 */
 .scrollbar {
 	&:hover::-webkit-scrollbar-thumb {
