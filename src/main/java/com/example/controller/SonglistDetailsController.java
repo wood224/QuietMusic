@@ -22,6 +22,14 @@ public class SonglistDetailsController {
     @PostMapping("/add")
     @ApiOperation("添加歌曲")
     public R<String> addSong(@RequestBody SonglistDetails songlistDetails){
+        LambdaQueryWrapper<SonglistDetails> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(SonglistDetails::getListId,songlistDetails.getListId());
+        lambdaQueryWrapper.eq(SonglistDetails::getMusicId,songlistDetails.getMusicId());
+
+        SonglistDetails songlistDetails1 = songlistDetailsService.getOne(lambdaQueryWrapper);
+        if(songlistDetails1!=null)
+            return R.error("该乐曲已在歌单中！");
+
         songlistDetailsService.save(songlistDetails);
         return R.success("添加成功!");
     }
