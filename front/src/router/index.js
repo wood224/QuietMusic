@@ -34,6 +34,10 @@ const routes = [
     component: () => import('../views/SongList.vue')
   },
   {
+    path: '/songListUser',
+    component: () => import('../views/SongListUser.vue')
+  },
+  {
     path: '/albumDetail',
     component: () => import('../views/AlbumDetail.vue')
   },
@@ -51,7 +55,7 @@ const routes = [
   {
     path: '/singerDetail',
     component: () => import('../views/SingerDetail.vue')
-  }
+  },
 ]
 
 const router = createRouter({
