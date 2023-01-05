@@ -37,12 +37,17 @@ public class AgreementController {
 
     @DeleteMapping("/unagree")
     @ApiOperation("取消点赞")
+    @Transactional
     public R<String> unagree(@RequestBody Agreement agreement){
         LambdaQueryWrapper<Agreement> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Agreement::getUserId,agreement.getUserId());
         lambdaQueryWrapper.eq(Agreement::getCommentId,agreement.getCommentId());
         lambdaQueryWrapper.eq(Agreement::getDeleted,0);
         agreementService.remove(lambdaQueryWrapper);
+
+        Comment com = commentService.getById(agreement.getCommentId());
+        com.setAgreement(com.getAgreement()-1);
+        commentService.updateById(com);
         return R.success("取消点赞成功!");
     }
 
