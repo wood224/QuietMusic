@@ -14,7 +14,7 @@
             </div>
         </div>
         <div class="songs">
-            <el-table :data="songs" stripe height="400" style="width: 100%" @cell-click="play">
+            <el-table :data="songs" stripe height="100%" style="width: 100%" @cell-click="play">
                 <el-table-column prop="name" label="歌曲名" width="400" />
                 <el-table-column label="歌手" width="300">
                     <template #default="scope">
@@ -66,8 +66,13 @@ export default {
 
 <style lang="less">
 .singer-detail-container {
-    margin: 10px auto 0;
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+    box-sizing: border-box;
+    padding-top: 10px;
     width: 1000px;
+    height: calc(100vh - 198px);
 
     .singer-detail {
         display: flex;
@@ -99,6 +104,7 @@ export default {
 
     .songs {
         margin-top: 20px;
+        height: calc(100% - 200px);
     }
 
 }

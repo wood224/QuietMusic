@@ -78,13 +78,14 @@ export default createStore({
     //播放歌曲
     play({ commit }, row) {
       const song = toRaw(row)
-      getCheckMusic(song.id)
+      const checkId = song.hasOwnProperty("musicId") ? song.musicId : song.id
+      getCheckMusic(checkId)
         .then(res => {
           if (res.data.success !== true) {
             return ElMessage.warning('抱歉, 该歌暂无版权')
           }
           // context.setMusicPlayerId(song.id)
-          commit('setMusicPlayerId', song.id)
+          commit('setMusicPlayerId', checkId)
         })
     },
 

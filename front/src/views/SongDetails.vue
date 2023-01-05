@@ -185,7 +185,7 @@ export default {
     display: flex;
     justify-content: center;
     position: relative;
-    height: calc(100% - 198px);
+    height: calc(100vh - 198px);
     overflow: hidden;
 
     .content {
@@ -227,6 +227,7 @@ export default {
                     white-space: nowrap;
                     text-overflow: ellipsis;
                     margin-top: 1vw;
+                    text-align: center;
                 }
 
                 .detail {
@@ -270,6 +271,7 @@ export default {
                 }
 
                 ul {
+                    width: 100%;
                     position: absolute;
                     transition: 0.3s;
 
@@ -277,6 +279,7 @@ export default {
                         height: 25px;
                         margin: 5px 0;
                         line-height: 25px;
+                        text-align: center;
                     }
 
                     .currentRow {
