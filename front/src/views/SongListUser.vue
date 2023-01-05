@@ -2,7 +2,7 @@
   <div class="song-list-container">
     <div class="left">
       <div class="pic">
-        <img :src="songListDetail.coverImgUrl" alt="">
+        <img :src="songListDetail.coverImg" alt="">
       </div>
       <div class="detail">
         <span>名称：</span>{{ songListDetail.name }}
@@ -27,16 +27,16 @@
       </div>
       <div class="songs">
         <el-table :data="songList" @cell-click="play" max-height="520">
-          <el-table-column prop="name" label="歌曲名" />
+          <el-table-column prop="musicName" label="歌曲名" />
           <el-table-column label="歌手" width="300">
             <template #default="scope">
-              <span v-for="item in scope.row.ar" :key="item.id">
-                {{ item.name }}&nbsp;
+              <span v-for="item in scope.row.singerName" :key="item">
+                {{ item }}&nbsp;
               </span>
             </template>
           </el-table-column>
-          <el-table-column prop="al.name" label="专辑" />
-          <el-table-column prop="dt" label="时长" />
+          <el-table-column prop="album" label="专辑" />
+          <el-table-column prop="time" label="时长" />
         </el-table>
       </div>
     </div>
@@ -46,7 +46,6 @@
 <script>
 import { mapState, mapMutations, mapActions } from "vuex"
 import { getPlaylistDetail, getCheckMusic } from "../http/api"
-import { getTime } from "../fun"
 import { ElMessage } from 'element-plus'
 
 export default {
@@ -70,13 +69,9 @@ export default {
     })
       .then(res => {
         const data = res.data.data
-        console.log(data)
         this.songListDetail = data
-        // this.songList = playlisy.tracks
-        // this.songList.forEach(item => {
-        //     item.dt = getTime(item.dt)
-        // })
-
+        this.songList = data.songs
+        console.log(this.songList);
       })
 
   },

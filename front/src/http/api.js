@@ -77,3 +77,13 @@ export function getAlbumDetail(id) {
         }
     })
 }
+
+//获取精品歌单
+export function getFinePlaylist(cat = '全部', limit = 10) {
+    return request('/top/playlist/highquality', {
+        params: {
+            cat: cat,
+            limit: limit,
+        }
+    })
+}
