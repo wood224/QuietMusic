@@ -33,20 +33,12 @@ public class MusicServiceImpl extends ServiceImpl<MusicMapper,Music> implements 
             music1.setId(id);
             super.save(music1);
         }
-        if(userId!=null) {
-            LambdaQueryWrapper<MusicRecord> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-            lambdaQueryWrapper.eq(MusicRecord::getMusicId, id);
-            lambdaQueryWrapper.eq(MusicRecord::getUserId, userId);
-            MusicRecord musicRecord = musicRecordService.getOne(lambdaQueryWrapper);
-            if (musicRecord == null) {
-                MusicRecord musicRecord1 = new MusicRecord();
-                musicRecord1.setMusicId(id);
-                musicRecord1.setUserId(userId);
-                musicRecordService.save(musicRecord1);
-            } else {
-                musicRecord.setViews(musicRecord.getViews() + 1);
-                musicRecordService.updateById(musicRecord);
-            }
-        }
+
+        MusicRecord musicRecord = new MusicRecord();
+        musicRecord.setMusicId(id);
+        musicRecord.setUserId(userId);
+        musicRecordService.save(musicRecord);
+
     }
+
 }
