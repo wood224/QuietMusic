@@ -29,6 +29,9 @@ public class SongList {
     //歌单描述
     private String description;
 
+    //歌曲总数
+    private Integer sum;
+
     //创建时间
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;

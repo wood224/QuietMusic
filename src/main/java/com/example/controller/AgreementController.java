@@ -27,9 +27,12 @@ public class AgreementController {
     @ApiOperation("点赞")
     @Transactional
     public R<String> agree(@RequestBody Agreement agreement){
-        agreementService.save(agreement);
+
 
         Comment com = commentService.getById(agreement.getCommentId());
+        if(com==null)
+            return R.error("该评论被吃掉了喵！");
+        agreementService.save(agreement);
         com.setAgreement(com.getAgreement()+1);
         commentService.updateById(com);
         return R.success("点赞成功!");

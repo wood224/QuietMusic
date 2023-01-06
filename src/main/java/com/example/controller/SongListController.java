@@ -77,6 +77,15 @@ public class SongListController {
         return R.success(list);
     }
 
+    @GetMapping("/byId")
+    @ApiOperation("根据id获取歌单")
+    public R<SongList> getById(Integer id){
+
+
+        SongList list = songListService.getById(id);
+        return R.success(list);
+    }
+
 
 
 }
