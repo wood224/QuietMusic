@@ -3,6 +3,7 @@ package com.example.entity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableLogic;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.FastjsonTypeHandler;
 import io.swagger.models.auth.In;
 import lombok.Data;
@@ -15,6 +16,7 @@ import java.time.format.DateTimeFormatter;
  * 歌曲
  */
 @Data
+@TableName(autoResultMap = true)
 public class Music {
     //音乐id
     private Integer id;
