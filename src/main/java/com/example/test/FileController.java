@@ -1,6 +1,8 @@
 package com.example.test;
 
 import com.example.common.R;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,18 +19,21 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/file")
+@Api(tags = "文件上传下载接口")
 public class FileController {
 
     @Value("${img.path}")
     private String bathPath;
 
     @PostMapping("/upload")
+    @ApiOperation("文件下载至本地")
     public R<String> upload(MultipartFile file){
 
         String originalFilename = file.getOriginalFilename();
+        assert originalFilename != null;
         String substring = originalFilename.substring(originalFilename.lastIndexOf("."));
 
-        String fileName = UUID.randomUUID()+substring;
+        String img = UUID.randomUUID()+substring;
 
         File dir = new File(bathPath);
 
@@ -37,17 +42,18 @@ public class FileController {
         }
 
         try {
-            file.transferTo(new File(bathPath+fileName));
+            file.transferTo(new File(bathPath+img));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return R.success(fileName);
+        return R.success(img);
     }
 
     @GetMapping("/download")
-    public void download(String name, HttpServletResponse response){
+    @ApiOperation("文件上传至页面")
+    public void download(String img, HttpServletResponse response){
         try {
-            FileInputStream fileInputStream = new FileInputStream(bathPath+name);
+            FileInputStream fileInputStream = new FileInputStream(bathPath+img);
 
             ServletOutputStream outputStream = response.getOutputStream();
             response.setContentType("image/jpeg");
