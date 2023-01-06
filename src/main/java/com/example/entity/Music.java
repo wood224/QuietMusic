@@ -21,7 +21,7 @@ public class Music {
     //音乐id
     private Integer id;
 
-    private String Name;
+    private String name;
 
     //歌手
     @TableField(typeHandler = FastjsonTypeHandler.class)
