@@ -31,7 +31,7 @@ public class AgreementController {
         LambdaQueryWrapper<Agreement> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Agreement::getCommentId,agreement.getCommentId());
         lambdaQueryWrapper.eq(Agreement::getUserId,agreement.getUserId());
-        if(agreementService.list(lambdaQueryWrapper)!=null)
+        if(agreementService.getOne(lambdaQueryWrapper)!=null)
             return R.error("您已点赞过该评论！");
 
 
@@ -52,6 +52,11 @@ public class AgreementController {
         lambdaQueryWrapper.eq(Agreement::getUserId,agreement.getUserId());
         lambdaQueryWrapper.eq(Agreement::getCommentId,agreement.getCommentId());
         lambdaQueryWrapper.eq(Agreement::getDeleted,0);
+
+        Agreement agreement1 = agreementService.getOne(lambdaQueryWrapper);
+        if(agreement1==null)
+            return R.error("您未点赞过该评论！");
+
         agreementService.remove(lambdaQueryWrapper);
 
         Comment com = commentService.getById(agreement.getCommentId());
