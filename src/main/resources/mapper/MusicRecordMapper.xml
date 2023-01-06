@@ -2,16 +2,16 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.example.mapper.MusicRecordMapper">
 
-    <select id="selectRankByOneTime" resultType="com.example.entity.MusicRecord">
-        select music_id,count(*) as views from music_record where TO_DAYS(Now()) - to_days(create_time) <![CDATA[<=]]> 1 GROUP BY music_id ORDER BY count(*) DESC LIMIT 100;
+    <select id="selectRankByOneTime" resultType="com.example.entity.Music">
+        SELECT music.id ,music.name,music.singer_name,music.time,music.album,a.views FROM music RIGHT JOIN (select music_id,count(*) as views from music_record where TO_DAYS(Now()) - to_days(create_time) <![CDATA[<=]]> 1 GROUP BY music_id ORDER BY count(*) DESC LIMIT 100) a ON music.id=a.music_id;
     </select>
-    <select id="selectRankBySevenTime" resultType="com.example.entity.MusicRecord">
-        select music_id,count(*) as views from music_record where TO_DAYS(Now()) - to_days(create_time) <![CDATA[<=]]> 7 GROUP BY music_id ORDER BY count(*) DESC LIMIT 100;
+    <select id="selectRankBySevenTime" resultType="com.example.entity.Music">
+        SELECT music.id ,music.name,music.singer_name,music.time,music.album,a.views FROM music RIGHT JOIN (select music_id,count(*) as views from music_record where TO_DAYS(Now()) - to_days(create_time) <![CDATA[<=]]> 7 GROUP BY music_id ORDER BY count(*) DESC LIMIT 100) a ON music.id=a.music_id;
     </select>
-    <select id="selectRankByThirtyTime" resultType="com.example.entity.MusicRecord">
-        select music_id,count(*) as views from music_record where TO_DAYS(Now()) - to_days(create_time) <![CDATA[<=]]> 30 GROUP BY music_id ORDER BY count(*) DESC LIMIT 100;
+    <select id="selectRankByThirtyTime" resultType="com.example.entity.Music">
+        SELECT music.id ,music.name,music.singer_name,music.time,music.album,a.views FROM music RIGHT JOIN (select music_id,count(*) as views from music_record where TO_DAYS(Now()) - to_days(create_time) <![CDATA[<=]]> 30 GROUP BY music_id ORDER BY count(*) DESC LIMIT 100) a ON music.id=a.music_id;
     </select>
-    <select id="selectRank" resultType="com.example.entity.MusicRecord">
-        select music_id,count(*) as views from music_record GROUP BY music_id ORDER BY count(*) DESC LIMIT 100;
+    <select id="selectRank" resultType="com.example.entity.Music">
+        SELECT music.id ,music.name,music.singer_name,music.time,music.album,a.views FROM music RIGHT JOIN (select music_id,count(*) as views from music_record GROUP BY music_id ORDER BY count(*) DESC LIMIT 100) a ON music.id=a.music_id;
     </select>
 </mapper>
