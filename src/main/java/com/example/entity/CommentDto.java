@@ -7,5 +7,5 @@ import java.util.List;
 @Data
 public class CommentDto extends Comment{
     //子评论
-    private List<Comment> comments;
+    private boolean flag = false;
 }

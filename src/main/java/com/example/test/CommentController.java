@@ -3,8 +3,10 @@ package com.example.test;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.common.R;
+import com.example.entity.Agreement;
 import com.example.entity.Comment;
 import com.example.entity.CommentDto;
+import com.example.service.AgreementService;
 import com.example.service.CommentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -26,6 +28,9 @@ public class CommentController {
 
     @Autowired
     private CommentService commentService;
+
+    @Autowired
+    private AgreementService agreementService;
 
     @PostMapping("/publish")
     @ApiOperation("发表评论")
@@ -78,12 +83,30 @@ public class CommentController {
 
     @GetMapping("/byMusic")
     @ApiOperation("获取音乐所有评论")
-    public R<List<Comment>> byMusic(Integer id) {
+    public R<List<CommentDto>> byMusic(Integer id,Integer userId) {
         LambdaQueryWrapper<Comment> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Comment::getMusicId,id);
         lambdaQueryWrapper.orderByAsc(Comment::getCreateTime);
         List<Comment> comments = commentService.list(lambdaQueryWrapper);
-        return R.success(comments);
+
+        LambdaQueryWrapper<Agreement> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(Agreement::getUserId,userId);
+        List<Agreement> agreements = agreementService.list(lqw);
+
+        Map<Integer,Agreement> map =new HashMap<>();
+        for(Agreement a:agreements){
+            map.put(a.getCommentId(),a);
+        }
+
+        List<CommentDto> commentDtos = comments.stream().map((item)->{
+            CommentDto commentDto =new CommentDto();
+            BeanUtils.copyProperties(item,commentDto);
+            if(map.containsKey(item.getId()))
+                commentDto.setFlag(true);
+            return commentDto;
+        }).toList();
+
+        return R.success(commentDtos);
     }
 
 
@@ -93,6 +116,13 @@ public class CommentController {
     {
         commentService.removeById(id);
         return R.success("删除成功");
+    }
+
+    @GetMapping("/byId")
+    @ApiOperation("根据id查询")
+    public R<Comment> byId(Integer id){
+        Comment comment = commentService.getById(id);
+        return R.success(comment);
     }
 
 }
