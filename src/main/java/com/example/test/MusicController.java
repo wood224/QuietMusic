@@ -1,4 +1,4 @@
-package com.example.controller;
+package com.example.test;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -38,8 +38,8 @@ public class MusicController {
 
     @ApiOperation("音乐总播放榜单")
     @PostMapping("/rank")
-    public R<List<MusicRecord>> rank(){
-        List<MusicRecord> records= musicRecordService.getRank();
+    public R<List<Music>> rank(){
+        List<Music> records= musicRecordService.getRank();
 
         return R.success(records);
 
@@ -47,8 +47,8 @@ public class MusicController {
 
     @ApiOperation("音乐昨日榜单")
     @PostMapping("/oneRank")
-    public R<List<MusicRecord>> oneRank(){
-        List<MusicRecord> records= musicRecordService.getOneRank();
+    public R<List<Music>> oneRank(){
+        List<Music> records= musicRecordService.getOneRank();
 
         return R.success(records);
 
@@ -56,8 +56,8 @@ public class MusicController {
 
     @ApiOperation("音乐七日榜单")
     @PostMapping("/sevenRank")
-    public R<List<MusicRecord>> sevenRank(){
-        List<MusicRecord> records= musicRecordService.getSevenRank();
+    public R<List<Music>> sevenRank(){
+        List<Music> records= musicRecordService.getSevenRank();
 
         return R.success(records);
 
@@ -65,8 +65,8 @@ public class MusicController {
 
     @ApiOperation("音乐三十日榜单")
     @PostMapping("/thirtyRank")
-    public R<List<MusicRecord>> thirtyRank(){
-        List<MusicRecord> records= musicRecordService.getThirtyRank();
+    public R<List<Music>> thirtyRank(){
+        List<Music> records= musicRecordService.getThirtyRank();
 
         return R.success(records);
 
