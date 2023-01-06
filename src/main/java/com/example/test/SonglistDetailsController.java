@@ -1,4 +1,4 @@
-package com.example.controller;
+package com.example.test;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.common.R;
@@ -60,5 +60,21 @@ public class SonglistDetailsController {
         songlistDetailsService.remove(lambdaQueryWrapper);
         return R.success("清空成功");
     }
+
+    @PostMapping("/insertAll")
+    @ApiOperation("批量插入")
+    public R<String> insertAll(@RequestBody SonglistDetails[] songlistDetails) {
+        LambdaQueryWrapper<SonglistDetails> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        for (SonglistDetails s : songlistDetails) {
+            lambdaQueryWrapper.eq(SonglistDetails::getListId, s.getListId());
+            lambdaQueryWrapper.eq(SonglistDetails::getMusicId, s.getMusicId());
+            SonglistDetails songlistDetails1 = songlistDetailsService.getOne(lambdaQueryWrapper);
+            if (songlistDetails1 != null)
+                continue;
+            songlistDetailsService.save(s);
+        }
+        return R.success("添加成功");
+    }
+
 
 }

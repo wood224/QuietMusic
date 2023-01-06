@@ -1,4 +1,4 @@
-package com.example.test;
+package com.example.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
