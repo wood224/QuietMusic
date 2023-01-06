@@ -69,9 +69,9 @@ public class SonglistDetailsController {
     @DeleteMapping("/delall")
     @ApiOperation("清空歌单")
     @Transactional
-    public R<String> delall(Integer id,Integer listId){
+    public R<String> delall(Integer listId){
         LambdaQueryWrapper<SonglistDetails> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(SonglistDetails::getListId,id);
+        lambdaQueryWrapper.eq(SonglistDetails::getListId,listId);
         songlistDetailsService.remove(lambdaQueryWrapper);
 
         songListService.updateClear(listId);
