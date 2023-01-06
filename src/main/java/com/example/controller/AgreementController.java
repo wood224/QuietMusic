@@ -28,6 +28,12 @@ public class AgreementController {
     @Transactional
     public R<String> agree(@RequestBody Agreement agreement){
 
+        LambdaQueryWrapper<Agreement> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(Agreement::getCommentId,agreement.getCommentId());
+        lambdaQueryWrapper.eq(Agreement::getUserId,agreement.getUserId());
+        if(agreementService.list(lambdaQueryWrapper)!=null)
+            return R.error("您已点赞过该评论！");
+
 
         Comment com = commentService.getById(agreement.getCommentId());
         if(com==null)
