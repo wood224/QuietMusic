@@ -40,7 +40,7 @@ public class MusicServiceImpl extends ServiceImpl<MusicMapper,Music> implements 
             super.save(music1);
         }
         MusicRecord musicRecord = new MusicRecord();
-        musicRecord.setMusicId(music.getId());
+        musicRecord.setMusicId(musicDto.getId());
         musicRecord.setUserId(musicDto.getUserId());
         musicRecordService.save(musicRecord);
 
