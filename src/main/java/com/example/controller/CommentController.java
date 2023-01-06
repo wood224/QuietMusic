@@ -16,6 +16,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +41,13 @@ public class CommentController {
     @PostMapping("/publish")
     @ApiOperation("发表评论")
     public R<String> publish(@RequestBody Comment comment){
+
+        LambdaQueryWrapper<Comment> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.ge(Comment::getCreateTime, LocalDateTime.now().minusSeconds(5));
+        List<Comment> list = commentService.list(lambdaQueryWrapper);
+        if (list!=null)
+            return R.error("发送评论过快喵！");
+
         if(comment.getReplyId()!=null)
         {
             Comment comment1= commentService.getById(comment.getReplyId());
