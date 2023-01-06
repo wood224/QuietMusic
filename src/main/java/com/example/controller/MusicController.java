@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.common.R;
 import com.example.entity.Music;
+import com.example.entity.MusicDto;
 import com.example.entity.MusicRecord;
 import com.example.mapper.MusicRecordMapper;
 import com.example.service.MusicRecordService;
@@ -29,8 +30,8 @@ public class MusicController {
 
     @ApiOperation("保存歌曲")
     @PostMapping("/save")
-    public R<String> saveMusic(@RequestBody MusicRecord musicRecord){
-        musicService.saveMusic(musicRecord.getMusicId(),musicRecord.getUserId());
+    public R<String> saveMusic(@RequestBody MusicDto musicDto){
+        musicService.saveMusic(musicDto);
         return R.success("保存成功！");
     }
 
