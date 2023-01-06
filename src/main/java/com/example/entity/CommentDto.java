@@ -8,4 +8,8 @@ import java.util.List;
 public class CommentDto extends Comment{
     //子评论
     private boolean flag = false;
+
+    private String usrName;
+
+    private String img;
 }

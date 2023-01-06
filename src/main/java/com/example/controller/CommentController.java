@@ -6,8 +6,10 @@ import com.example.common.R;
 import com.example.entity.Agreement;
 import com.example.entity.Comment;
 import com.example.entity.CommentDto;
+import com.example.entity.User;
 import com.example.service.AgreementService;
 import com.example.service.CommentService;
+import com.example.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
@@ -31,6 +33,9 @@ public class CommentController {
 
     @Autowired
     private AgreementService agreementService;
+
+    @Autowired
+    private UserService userService;
 
     @PostMapping("/publish")
     @ApiOperation("发表评论")
@@ -101,6 +106,9 @@ public class CommentController {
         List<CommentDto> commentDtos = comments.stream().map((item)->{
             CommentDto commentDto =new CommentDto();
             BeanUtils.copyProperties(item,commentDto);
+            User user = userService.getById(item.getUserId());
+            commentDto.setUsrName(user.getName());
+            commentDto.setImg(user.getImg());
             if(map.containsKey(item.getId()))
                 commentDto.setFlag(true);
             return commentDto;
