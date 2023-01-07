@@ -25,14 +25,14 @@
 							<i class="fa fa-play"></i>将歌曲添加至播放列表
 						</span>
 					</el-button>
-					<!-- <el-button type="success" @click="selectList">
+					<el-button type="success" @click="selectList">
 						<span class="text">
 							<el-icon>
 								<FolderAdd />
 							</el-icon>
 							将所有歌曲添加至歌单
 						</span>
-					</el-button> -->
+					</el-button>
 				</div>
 			</div>
 			<div class="songs">
@@ -74,6 +74,7 @@ import { getTime } from "../fun"
 import { ElMessage } from 'element-plus'
 import SongsList from "../components/SongsList.vue"
 import qs from 'qs'
+import axios from "axios"
 
 export default {
 	name: 'SongList',
@@ -199,9 +200,9 @@ export default {
 					time: getTime(item.dt)
 				})
 			}
-			this.$http.post('/songlistdetails/insertAll', {
-				songlistDetails: qs.stringify(songs),
-			}).then(res => {
+			this.$http.post('/songlistdetails/insertAll',
+				songs
+			).then(res => {
 				const data = res.data
 				if (data.code === 200) {
 					ElMessage.success('添加成功')
