@@ -7,6 +7,7 @@ import axios from 'axios'
 export default createStore({
   state: {
     userInfo: {},         //用户信息
+    userBaseImg: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg',
     searchSongs: [],      //搜索列表
     musicInfo: {},        //音乐信息
     musicUrl: '',         //音乐 url

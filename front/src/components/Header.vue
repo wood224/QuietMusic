@@ -30,18 +30,15 @@
 			</div>
 			<div v-else class="userInfo">
 				<el-dropdown size="large">
-					<span class="el-dropdown-link">
-						{{ userInfo.name }}, 欢迎您
-						<el-icon class="el-icon--right">
-							<arrow-down />
-						</el-icon>
-					</span>
+					<div class="img">
+						<img :src="userInfo.img === null ? url : userImg" alt="" />
+					</div>
 					<template #dropdown>
 						<el-dropdown-menu>
 							<el-dropdown-item @click="goUserHome">个人主页</el-dropdown-item>
-							<el-dropdown-item>Action 2</el-dropdown-item>
-							<el-dropdown-item>Action 3</el-dropdown-item>
-							<el-dropdown-item divided @click="logout()">退出登录</el-dropdown-item>
+							<!-- <el-dropdown-item>菜单 2</el-dropdown-item>
+							<el-dropdown-item>菜单 3</el-dropdown-item> -->
+							<el-dropdown-item divided @click="logout()"><span style="color:red">退出登录</span></el-dropdown-item>
 						</el-dropdown-menu>
 					</template>
 				</el-dropdown>
@@ -58,8 +55,10 @@ export default {
 	name: 'Header',
 	data() {
 		return {
+			url: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg',
 			classBgWihte: [false, false, false, false],
-			input: ''
+			input: '',
+			userImg: ''
 		}
 	},
 	created() {
@@ -77,6 +76,12 @@ export default {
 			handler() {
 				this.input = this.searchKeywords
 			}
+		},
+
+		userInfo: {
+			handler() {
+				this.getUserDetail(this.userInfo.id)
+			},
 		},
 
 		$route(to) {
@@ -158,18 +163,20 @@ export default {
 		//更新用户详情信息
 		getUserDetail(id) {
 			this.$http.get(`/user/${id}`)
-				.then(res => {
-					this.userDetail = res.data.data
+				.then(async res => {
 					let userInfo = {
 						name: res.data.data.name,
 						id: res.data.data.id,
 						sex: res.data.data.sex,
 						phone: res.data.data.phone,
-						description: res.data.data.description
+						description: res.data.data.description,
+						img: res.data.data.img
 					}
 					//将表示登录状态的对象存入 localstorage 和 vuex 中
 					localStorage.setItem("userInfo", JSON.stringify(userInfo))
 					this.setUserInfo(userInfo)
+
+					this.userImg = await this.$fun.getImg(this.userInfo.img)
 				}).catch((err) => {
 					console.error(err)
 				})
@@ -272,9 +279,25 @@ export default {
 		}
 
 		.userInfo {
-			.el-dropdown-link {
-				font-size: 20px;
-				color: black;
+			margin-right: 40px;
+			width: 40px;
+			height: 40px;
+
+			.el-dropdown {
+				width: 100%;
+				height: 100%;
+
+				.img {
+					width: 100%;
+					height: 100%;
+					border-radius: 50%;
+
+					img {
+						border-radius: 50%;
+						width: 100%;
+						height: 100%;
+					}
+				}
 			}
 		}
 	}

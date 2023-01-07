@@ -1,6 +1,6 @@
 <template>
     <div class="singer-detail-container">
-        <div class="singer-detail">
+        <div class="singer-detail" v-loading="loading">
             <div class="pic">
                 <img :src="artist.picUrl" alt="">
             </div>
@@ -14,7 +14,8 @@
             </div>
         </div>
         <div class="songs">
-            <SongsList :list="songs"></SongsList>
+            <SongsList :list="pageSongs" type="singer" :count="songs.length" @getAll="getPageSongs" v-loading="loading">
+            </SongsList>
             <!-- <el-table :data="songs" stripe height="100%" style="width: 100%" @cell-click="play">
                 <el-table-column prop="name" label="歌曲名" width="400" />
                 <el-table-column label="歌手" width="300">
@@ -43,11 +44,16 @@ export default {
         return {
             artist: {},
             songs: [],
+            pageSongs: [],
+
+            singerId: this.$route.params.id,
+
+            loading: false,
         }
     },
     created() {
-        const singerId = this.$route.params.id
-        getSingerDetail(singerId)
+        this.loading = true
+        getSingerDetail(this.singerId)
             .then(res => {
                 const data = res.data
                 this.artist = data.artist
@@ -55,13 +61,46 @@ export default {
                 this.songs.forEach(item => {
                     item.dt = getTime(item.dt)
                 })
+                this.getPageSongs(0)
+                this.loading = false
             })
     },
     computed: {
 
     },
+    watch: {
+        $route: {
+            handler(to) {
+                const path = to.path
+                if (path.slice(1, 13) !== 'singerDetail') return
+                this.singerId = this.$route.params.id;
+                this.updateSinger(this.singerId)
+            }
+        }
+    },
     methods: {
-        ...mapActions(['play'])
+        ...mapActions(['play']),
+
+        //获取分页歌曲列表
+        getPageSongs(offset) {
+            this.pageSongs = this.songs.slice(offset, offset + 10)
+        },
+
+        //更新歌手信息
+        updateSinger(id) {
+            this.loading = true
+            getSingerDetail(id)
+                .then(res => {
+                    const data = res.data
+                    this.artist = data.artist
+                    this.songs = data.hotSongs
+                    this.songs.forEach(item => {
+                        item.dt = getTime(item.dt)
+                    })
+                    this.getPageSongs(0)
+                    this.loading = false
+                })
+        }
     },
     componentes: {
         SongsList,
@@ -77,7 +116,6 @@ export default {
     box-sizing: border-box;
     padding: 10px 0;
     width: 1000px;
-    height: calc(100vh - 198px);
 
     .singer-detail {
         display: flex;

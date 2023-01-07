@@ -19,29 +19,51 @@
 		<div class="right">
 			<div class="title">
 				<h6>&lt;{{ songListDetail.name }}&gt; －歌曲列表</h6>
-				<el-button type="primary" @click="addAllPlaylistSong">
-					<span class="text">
-						<i class="fa fa-play"></i>添加至播放列表
-					</span>
-				</el-button>
+				<div class="action">
+					<el-button type="primary" @click="addAllPlaylistSong">
+						<span class="text">
+							<i class="fa fa-play"></i>将歌曲添加至播放列表
+						</span>
+					</el-button>
+					<!-- <el-button type="success" @click="selectList">
+						<span class="text">
+							<el-icon>
+								<FolderAdd />
+							</el-icon>
+							将所有歌曲添加至歌单
+						</span>
+					</el-button> -->
+				</div>
 			</div>
 			<div class="songs">
 				<SongsList :list="songList" type="songlist" @getAll="getAll" :count="songListDetail.trackCount"
 					v-loading="loading"></SongsList>
-				<!-- <el-table :data="songList" @cell-click="play" max-height="100%" :row-style="rowStyle">
-					<el-table-column prop="name" label="歌曲名" />
-					<el-table-column label="歌手" width="300">
-						<template #default="scope">
-							<span v-for="item in scope.row.ar" :key="item.id">
-								{{ item.name }}&nbsp;
-							</span>
-						</template>
-					</el-table-column>
-					<el-table-column prop="al.name" label="专辑" />
-					<el-table-column prop="dt" label="时长" />
-				</el-table> -->
 			</div>
 		</div>
+		<el-dialog v-model="loginDialogVisible" title="提示" width="30%" :align-center="true">
+			<span>请先登录</span>
+			<template #footer>
+				<span class="dialog-footer">
+					<el-button @click="loginDialogVisible = false">稍后再说</el-button>
+					<el-button type="primary" @click="login">现在登录</el-button>
+				</span>
+			</template>
+		</el-dialog>
+
+		<el-dialog v-model="collectDialogVisible" title="选择歌单" width="30%" :align-center="true">
+			<el-scrollbar>
+				<ul class="dialog-wrapper">
+					<li v-for="item in userSongList" :key="item.id" @click="addAllSonglist(item.id)">
+						<div class="songlist">
+							<div class="pic">
+								<img :src="item.coverImg" alt="">
+							</div>
+							<div class="name">{{ item.name }}</div>
+						</div>
+					</li>
+				</ul>
+			</el-scrollbar>
+		</el-dialog>
 	</div>
 </template>
 
@@ -51,6 +73,7 @@ import { getPlaylistDetail, getCheckMusic, getPlaylistAll } from "../http/api"
 import { getTime } from "../fun"
 import { ElMessage } from 'element-plus'
 import SongsList from "../components/SongsList.vue"
+import qs from 'qs'
 
 export default {
 	name: 'SongList',
@@ -62,9 +85,12 @@ export default {
 			updateTime: '',         //歌单更新时间
 			duration: '',           //歌曲时长
 
-			loading: false,
+			userSongList: [], 		  //用户歌单列表
 
-			offset: 0.
+			collectDialogVisible: false,
+			loginDialogVisible: false,
+
+			loading: false,
 		}
 	},
 	mounted() {
@@ -86,7 +112,7 @@ export default {
 				this.updateTime = `${y}-${m}-${d}`
 
 				this.loading = true
-				this.getAll(this.offset)
+				this.getAll(0)
 			})
 	},
 	computed: {
@@ -132,6 +158,65 @@ export default {
 			msg.close()
 			ElMessage.success('已将所有有版权的歌曲添加至播放列表')
 			this.getPlaylistSongs()
+		},
+
+		//选择收藏歌单
+		selectList() {
+			const userInfo = JSON.parse(localStorage.getItem('userInfo'))
+			if (userInfo !== null) {
+				this.collectDialogVisible = true
+				this.$http.get('/songlist/lists', {
+					params: {
+						id: userInfo.id,
+					}
+				}).then(res => {
+					const data = res.data.data;
+					this.userSongList = data;
+				})
+			}
+			else {
+				this.loginDialogVisible = true;
+			}
+		},
+
+		//将所有歌曲添加至歌单
+		async addAllSonglist(id) {
+			const { data } = await getPlaylistAll(this.songListDetail.id, 0, 0);
+			let songs = []
+			for (let i in data.songs) {
+				const item = data.songs[i];
+				if (item.noCopyrightRcmd) {
+					continue
+				}
+				songs.push({
+					listId: id,
+					musicId: item.id,
+					musicName: item.name,
+					singerName: item.ar.map(item => {
+						return item.name;
+					}),
+					album: item.al.name,
+					time: getTime(item.dt)
+				})
+			}
+			this.$http.post('/songlistdetails/insertAll', {
+				songlistDetails: qs.stringify(songs),
+			}).then(res => {
+				const data = res.data
+				if (data.code === 200) {
+					ElMessage.success('添加成功')
+				}
+				else {
+					ElMessage.warning(data.msg)
+				}
+				this.collectDialogVisible = false
+			})
+		},
+
+		//弹窗跳转登录
+		login() {
+			this.loginDialogVisible = false
+			return location.href = 'login.html'
 		},
 
 		//表格行样式
@@ -208,11 +293,43 @@ export default {
 				.text {
 					margin: auto;
 					font-size: 14px;
+					vertical-align: middle;
 
 					.fa {
 						height: auto;
 					}
 				}
+			}
+		}
+	}
+
+	.dialog-wrapper {
+		.songlist {
+			margin-bottom: 20px;
+			display: flex;
+			align-items: center;
+			box-sizing: border-box;
+			padding: 10px;
+			cursor: pointer;
+
+			&:hover {
+				background-color: #f2f2f2;
+			}
+
+			.pic {
+				margin-right: 20px;
+				width: 60px;
+				height: 60px;
+
+				img {
+					width: 100%;
+					height: 100%;
+					object-fit: contain;
+				}
+			}
+
+			.name {
+				font-size: 20px;
 			}
 		}
 	}
