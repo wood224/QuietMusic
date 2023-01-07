@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -10,6 +11,7 @@ import com.example.service.SongListService;
 import com.example.service.SonglistDetailsService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.util.Json;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -81,9 +83,11 @@ public class SonglistDetailsController {
     @PostMapping("/insertAll")
     @ApiOperation("批量插入")
     @Transactional
-    public R<String> insertAll(SonglistDetails[] songlistDetails) {
+    public R<String> insertAll(@RequestBody String songlistDetails) {
+        List<SonglistDetails>  list= JSON.parseArray(songlistDetails,SonglistDetails.class);
+
         LambdaQueryWrapper<SonglistDetails> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        for (SonglistDetails s : songlistDetails) {
+        for (SonglistDetails s : list) {
             lambdaQueryWrapper.eq(SonglistDetails::getListId, s.getListId());
             lambdaQueryWrapper.eq(SonglistDetails::getMusicId, s.getMusicId());
             SonglistDetails songlistDetails1 = songlistDetailsService.getOne(lambdaQueryWrapper);
