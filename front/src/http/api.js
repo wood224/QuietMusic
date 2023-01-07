@@ -60,6 +60,17 @@ export function getPlaylistDetail(id) {
     })
 }
 
+//获取歌单所有歌曲
+export function getPlaylistAll(id, limit = 10, offset = 0) {
+    return request('/playlist/track/all', {
+        params: {
+            id: id,
+            limit: limit,
+            offset: offset,
+        }
+    })
+}
+
 //获取歌手详情
 export function getSingerDetail(id) {
     return request('/artists', {
@@ -84,6 +95,16 @@ export function getFinePlaylist(cat = '全部', limit = 10) {
         params: {
             cat: cat,
             limit: limit,
+        }
+    })
+}
+
+//获取热门歌手
+export function getTopArtists(limit = 30, offset = 0) {
+    return request('/top/artists', {
+        params: {
+            limit: limit,
+            offset: offset,
         }
     })
 }

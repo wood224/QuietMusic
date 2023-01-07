@@ -26,7 +26,9 @@
 				</el-button>
 			</div>
 			<div class="songs">
-				<el-table :data="songList" @cell-click="play" max-height="100%" :row-style="rowStyle">
+				<SongsList :list="songList" type="songlist" @getAll="getAll" :count="songListDetail.trackCount"
+					v-loading="loading"></SongsList>
+				<!-- <el-table :data="songList" @cell-click="play" max-height="100%" :row-style="rowStyle">
 					<el-table-column prop="name" label="歌曲名" />
 					<el-table-column label="歌手" width="300">
 						<template #default="scope">
@@ -37,7 +39,7 @@
 					</el-table-column>
 					<el-table-column prop="al.name" label="专辑" />
 					<el-table-column prop="dt" label="时长" />
-				</el-table>
+				</el-table> -->
 			</div>
 		</div>
 	</div>
@@ -45,9 +47,10 @@
 
 <script>
 import { mapState, mapMutations, mapActions } from "vuex"
-import { getPlaylistDetail, getCheckMusic } from "../http/api"
+import { getPlaylistDetail, getCheckMusic, getPlaylistAll } from "../http/api"
 import { getTime } from "../fun"
 import { ElMessage } from 'element-plus'
+import SongsList from "../components/SongsList.vue"
 
 export default {
 	name: 'SongList',
@@ -59,24 +62,31 @@ export default {
 			updateTime: '',         //歌单更新时间
 			duration: '',           //歌曲时长
 
+			loading: false,
+
+			offset: 0.
 		}
 	},
 	mounted() {
-		this.setSongListId(sessionStorage.getItem('songListId'))
-		getPlaylistDetail(this.songListId)
+		// this.setSongListId(sessionStorage.getItem('songListId'))
+		const id = this.$route.params.id
+		getPlaylistDetail(id)
 			.then(res => {
 				const playlisy = res.data.playlist
 				this.songListDetail = playlisy
-				this.songList = playlisy.tracks
-				this.songList.forEach(item => {
-					item.dt = getTime(item.dt)
-				})
+				// this.songList = playlisy.tracks
+				// this.songList.forEach(item => {
+				// 	item.dt = getTime(item.dt)
+				// })
 				this.creatorName = playlisy.creator.nickname
 				const date = new Date(playlisy.updateTime)
 				const y = date.getFullYear()
 				const m = date.getMonth() + 1
 				const d = date.getDate()
 				this.updateTime = `${y}-${m}-${d}`
+
+				this.loading = true
+				this.getAll(this.offset)
 			})
 	},
 	computed: {
@@ -85,6 +95,19 @@ export default {
 	methods: {
 		...mapMutations(['setSongListId', 'setPlaylistId', 'setPlaylist']),
 		...mapActions(['play', 'getPlaylistSongs']),
+
+		//获取歌单所有歌曲
+		getAll(offset, id = this.songListDetail.id, limit = 10,) {
+			this.loading = true
+			getPlaylistAll(id, limit, offset).then(res => {
+				const data = res.data.songs
+				this.songList = data
+				this.songList.forEach(item => {
+					item.dt = getTime(item.dt)
+				})
+				this.loading = false
+			})
+		},
 
 		//添加歌单所有歌曲到歌曲列表
 		async addAllPlaylistSong() {
@@ -120,6 +143,9 @@ export default {
 			}
 		}
 	},
+	components: {
+		SongsList,
+	},
 }
 </script>
 
@@ -128,8 +154,8 @@ export default {
 	display: flex;
 	width: 1000px;
 	height: 100%;
-	margin: 0 auto 100px;
-	padding-top: 10px;
+	margin: 0 auto;
+	padding: 10px 0;
 	font-size: 14px;
 	box-sizing: border-box;
 

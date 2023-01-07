@@ -11,7 +11,7 @@ const routes = [
   },
   {
     path: '/rank',
-    component: () => import('../views/Rank.vue')
+    component: () => import('../views/Rank.vue'),
   },
   {
     path: '/song',
@@ -30,15 +30,15 @@ const routes = [
     component: () => import('../views/SongDetails.vue')
   },
   {
-    path: '/songList',
+    path: '/songList/:id',
     component: () => import('../views/SongList.vue')
   },
   {
-    path: '/songListUser',
+    path: '/songListUser/:id',
     component: () => import('../views/SongListUser.vue')
   },
   {
-    path: '/albumDetail',
+    path: '/albumDetail/:id',
     component: () => import('../views/AlbumDetail.vue')
   },
   {
@@ -53,7 +53,7 @@ const routes = [
     }
   },
   {
-    path: '/singerDetail',
+    path: '/singerDetail/:id',
     component: () => import('../views/SingerDetail.vue')
   },
 ]

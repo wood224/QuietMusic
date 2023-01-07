@@ -12,7 +12,8 @@
 			element-loading-text="Loading..." element-loading-background="rgba(224, 224, 224, 0.4)">
 
 			<el-tab-pane label="单曲" name="searchSingle">
-				<el-table :data="searchSongs" height="100%" style="width: 100%" @cell-click="play" stripe>
+				<SongsList :list="searchSongs"></SongsList>
+				<!-- <el-table :data="searchSongs" height="100%" style="width: 100%" @cell-click="play" stripe>
 					<el-table-column label="歌曲名" width="500">
 						<template #default="scope">
 							<div class="song-name">
@@ -40,21 +41,21 @@
 					</el-table-column>
 					<el-table-column prop="album.name" label="专辑" />
 					<el-table-column prop="duration" label="时长" />
-				</el-table>
+				</el-table> -->
 			</el-tab-pane>
 
 			<el-tab-pane label="歌手" name="searchSinger">
 				<el-scrollbar>
 					<ul class="singerList">
-						<li v-for="item in singerLsit" :key="item.id" @click="singerDetail(item.id)">
+						<li v-for="item in singerLsit" :key="item.id">
 							<el-tooltip :content="item.name" effect="dark" :teleported="false" placement="bottom" :show-after="400">
 								<div class="singer">
-									<div class="pic">
+									<router-link :to="'/singerDetail/' + item.id" class="pic">
 										<img :src="item.picUrl" alt="">
-									</div>
-									<div class="singerInfo">
+									</router-link>
+									<router-link :to="'/singerDetail/' + item.id" class="singerInfo">
 										<span>{{ item.name }}</span>
-									</div>
+									</router-link>
 								</div>
 							</el-tooltip>
 						</li>
@@ -63,8 +64,14 @@
 			</el-tab-pane>
 
 			<el-tab-pane label="歌单" name="searchList">
-				<el-table :data="playList" height="100%" style="width: 100%" @cell-click="playlistDetail" stripe>
-					<el-table-column prop="name" label="名字" width="500" />
+				<el-table :data="playList" height="100%" style="width: 100%" stripe>
+					<el-table-column label="名字" width="500">
+						<template #default="scope">
+							<router-link class="songlist" :to="'/songList/' + scope.row.id">
+								{{ scope.row.name }}
+							</router-link>
+						</template>
+					</el-table-column>
 					<el-table-column prop="creator.nickname" label="创建者" />
 					<el-table-column prop="trackCount" label="歌曲数 (首)" />
 				</el-table>
@@ -73,15 +80,15 @@
 			<el-tab-pane label="专辑" name="searchAlbum">
 				<el-scrollbar>
 					<ul class="albumList">
-						<li v-for="item in albumList" :key="item.id" @click="albumDetail(item.id)">
+						<li v-for="item in albumList" :key="item.id">
 							<el-tooltip :content="item.name" effect="dark" :teleported="false" placement="bottom" :show-after="400">
 								<div class="album">
-									<div class="pic">
+									<router-link :to="'/albumDetail/' + item.id" class="pic">
 										<img :src="item.picUrl" alt="">
-									</div>
-									<div class="albumInfo">
+									</router-link>
+									<router-link :to="'/albumDetail/' + item.id" class="albumInfo">
 										<span>{{ item.name }}</span>
-									</div>
+									</router-link>
 								</div>
 							</el-tooltip>
 						</li>
@@ -90,7 +97,7 @@
 			</el-tab-pane>
 		</el-tabs>
 
-		<el-dialog v-model="loginDialogVisible" title="提示" width="30%" :align-center="true">
+		<!-- <el-dialog v-model="loginDialogVisible" title="提示" width="30%" :align-center="true">
 			<span>请先登录</span>
 			<template #footer>
 				<span class="dialog-footer">
@@ -113,12 +120,13 @@
 					</li>
 				</ul>
 			</el-scrollbar>
-		</el-dialog>
+		</el-dialog> -->
 	</div>
 </template>
 
 <script>
 import { Search } from '@element-plus/icons-vue'
+import SongsList from "../components/SongsList.vue"
 import { getTime, checkMusic } from "../fun"
 import { getSearchApi, getCheckMusic, getMusicDetail } from "../http/api"
 import { mapState, mapMutations, mapActions } from "vuex"
@@ -379,6 +387,9 @@ export default {
 			return location.href = 'login.html'
 		},
 	},
+	components: {
+		SongsList,
+	},
 	setup() {
 		return {
 			Search,
@@ -420,6 +431,13 @@ export default {
 
 			.el-tab-pane {
 				height: 100%;
+
+				a.songlist {
+					display: block;
+					height: 100%;
+					width: 100%;
+					color: inherit;
+				}
 
 				.song-name {
 					display: flex;
@@ -464,6 +482,11 @@ export default {
 						.singer {
 							cursor: pointer;
 
+							a {
+								display: block;
+								color: inherit;
+							}
+
 							.pic {
 								width: 160px;
 								height: 160px;
@@ -499,6 +522,11 @@ export default {
 						.album {
 							cursor: pointer;
 
+							a {
+								display: block;
+								color: inherit;
+							}
+
 							.pic {
 								width: 160px;
 								height: 160px;
@@ -520,37 +548,6 @@ export default {
 						}
 					}
 				}
-			}
-		}
-	}
-
-	.dialog-wrapper {
-		.songlist {
-			margin-bottom: 20px;
-			display: flex;
-			align-items: center;
-			box-sizing: border-box;
-			padding: 10px;
-			cursor: pointer;
-
-			&:hover {
-				background-color: #f2f2f2;
-			}
-
-			.pic {
-				margin-right: 20px;
-				width: 60px;
-				height: 60px;
-
-				img {
-					width: 100%;
-					height: 100%;
-					object-fit: contain;
-				}
-			}
-
-			.name {
-				font-size: 20px;
 			}
 		}
 	}

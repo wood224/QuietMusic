@@ -11,12 +11,12 @@
 				</div>
 				<div class="content">
 					<div class="item" v-for="item in hotSongList" :key="item.id">
-						<div class="pic">
+						<router-link :to="'/songList/' + item.id" class="pic">
 							<img :src="item.coverImgUrl" alt="">
-						</div>
-						<div class="name">
+						</router-link>
+						<router-link :to="'/songList/' + item.id" class="name">
 							<span>{{ item.name }}</span>
-						</div>
+						</router-link>
 					</div>
 				</div>
 			</div>
@@ -33,7 +33,6 @@ const hotSongList = ref([])
 getFinePlaylist().then(res => {
 	const data = res.data
 	hotSongList.value = data.playlists
-
 })
 
 </script>
@@ -80,6 +79,10 @@ getFinePlaylist().then(res => {
 			.content {
 				display: flex;
 				flex-wrap: wrap;
+
+				a {
+					color: black;
+				}
 
 				.item {
 					width: 20%;

@@ -88,7 +88,7 @@
 			</div>
 			<div class="songs">
 				<ul>
-					<li v-for="(item, index) in userSongList" :key="item.id" @click="userSongListDetail(item.id)">
+					<li v-for="(item, index) in userSongList" :key="item.id">
 						<div class="list">
 							<div class="more">
 								<div class="btn" @click.stop="moreIndex = index" @mouseenter="moreIndex = index"
@@ -100,13 +100,18 @@
 								<div class="menu" @mouseenter="moreIndex = index" @mouseleave="moreIndex = -1"
 									v-show="moreIndex === index">
 									<ul>
-										<li @click.stop="userSongListDetail(item.id)"><i class="fa fa-folder-open-o"></i> 打开歌单</li>
+										<li>
+											<router-link :to="'/songListUser/' + item.id">
+												<i class="fa fa-folder-open-o"></i>
+												打开歌单
+											</router-link>
+										</li>
 										<li><i class="fa fa-edit"></i> 编辑歌单</li>
 										<li @click.stop="centerDialogVisible = true"><i class="fa fa-trash-o"></i> 删除歌单</li>
 									</ul>
 								</div>
 								<el-dialog v-model="centerDialogVisible" title="删除歌单" width="30%" center>
-									<span>确定删除歌单 <span style="font-weight: bold;">{{item.name}}</span> 吗？</span>
+									<span>确定删除歌单 <span style="font-weight: bold;">{{ item.name }}</span> 吗？</span>
 									<template #footer>
 										<span class="dialog-footer">
 											<el-button @click="centerDialogVisible = false">取消</el-button>
@@ -115,12 +120,12 @@
 									</template>
 								</el-dialog>
 							</div>
-							<div class="pic">
+							<router-link :to="'/songListUser/' + item.id" class="pic">
 								<img :src="item.coverImg" alt="暂无封面">
-							</div>
-							<div class="list-name">
+							</router-link>
+							<router-link :to="'/songListUser/' + item.id" class="list-name">
 								<span>{{ item.name }}</span>
-							</div>
+							</router-link>
 						</div>
 					</li>
 				</ul>
@@ -154,7 +159,7 @@ export default {
 		this.getUserSongList()
 	},
 	methods: {
-		...mapMutations(['setUserInfo', 'setSongListId']),
+		...mapMutations(['setUserInfo', 'setUserSongListId']),
 
 		getUserDetail() {
 			const userId = JSON.parse(localStorage.getItem('userInfo')).id
@@ -191,8 +196,8 @@ export default {
 
 		//获取用户歌单详情
 		userSongListDetail(id) {
-			this.setSongListId(id)
-			sessionStorage.setItem('songListId', id)
+			this.setUserSongListId(id)
+			sessionStorage.setItem('userSongListId', id)
 			this.$router.push('/songListUser')
 		},
 
@@ -291,78 +296,91 @@ export default {
 				flex-wrap: wrap;
 				justify-content: flex-start;
 
-				.list {
-					position: relative;
+				li {
 					margin-right: 40px;
-					cursor: pointer;
 
-					&:hover {
-						.more {
-							display: block;
-						}
+					a {
+						display: block;
 					}
 
-					.more {
-						display: none;
+					.list {
+						position: relative;
+						cursor: pointer;
+						color: black;
 
-						.btn {
-							position: absolute;
-							right: 0;
-							padding: 0 4px;
-							border-radius: 5px;
-
-							&:hover {
-								background-color: rgba(255, 255, 255, 0.8);
+						&:hover {
+							.more {
+								display: block;
 							}
 						}
 
-						.menu {
-							position: absolute;
-							left: 100%;
-							width: 120px;
-							z-index: 10;
-							border: 1px solid rgb(177, 177, 177);
-							border-radius: 8px;
-							background-color: rgba(255, 255, 255);
-							overflow: hidden;
+						.more {
+							display: none;
 
-							li {
-								padding: 4px 10px;
-								box-sizing: border-box;
-								width: 100%;
-								text-align: center;
-
-								i {
-									width: 16px;
-									height: 16px;
-									margin-right: 2px;
-								}
+							.btn {
+								position: absolute;
+								right: 0;
+								padding: 0 4px;
+								border-radius: 5px;
 
 								&:hover {
-									background-color: rgba(100, 176, 255, 0.6);
+									background-color: rgba(255, 255, 255, 0.8);
 								}
+							}
 
-								&:nth-child(2) {
-									color: rgba(0, 0, 0, 0.2);
-									cursor: not-allowed;
-								}
+							.menu {
+								position: absolute;
+								left: 100%;
+								width: 120px;
+								z-index: 10;
+								border: 1px solid rgb(177, 177, 177);
+								border-radius: 8px;
+								background-color: rgba(255, 255, 255);
+								overflow: hidden;
 
-								&:last-child {
-									margin-top: 6px;
-									border-top: 1px solid gray;
-									color: red;
+								li {
+									margin: 0;
+									padding: 4px 10px;
+									box-sizing: border-box;
+									width: 100%;
+									text-align: center;
+
+									i {
+										width: 16px;
+										height: 16px;
+										margin-right: 2px;
+									}
+
+									&:hover {
+										background-color: rgba(100, 176, 255, 0.6);
+									}
+
+									&:nth-child(2) {
+										color: rgba(0, 0, 0, 0.2);
+										cursor: not-allowed;
+									}
+
+									&:last-child {
+										margin-top: 6px;
+										border-top: 1px solid gray;
+										color: red;
+									}
 								}
 							}
 						}
-					}
 
-					.pic {
-						width: 100px;
-						height: 100px;
+						.pic {
+							width: 100px;
+							height: 100px;
 
-						img {
-							width: 100%;
-							height: 100%;
+							img {
+								width: 100%;
+								height: 100%;
+							}
+						}
+
+						.list-name {
+							color: black;
 						}
 					}
 				}

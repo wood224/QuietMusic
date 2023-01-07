@@ -18,6 +18,7 @@ export default createStore({
     playlistId: 0,        //播放列表 id
     playlist: [],         //播放列表歌曲
     songListId: 0,        //歌单 id
+    userSongListId: 0,    //用户创建的歌单 id
     singerId: 0,          //歌手 id
     albumId: 0,           //专辑 id
     searchActiveName: 'searchSingle',  //搜索组件标签页名字
@@ -63,6 +64,9 @@ export default createStore({
     },
     setSongListId(state, id) {
       state.songListId = id
+    },
+    setUserSongListId(state, id) {
+      state.userSongListId = id
     },
     setSingerId(state, id) {
       state.singerId = id

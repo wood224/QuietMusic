@@ -26,18 +26,7 @@
         </el-button>
       </div>
       <div class="songs">
-        <el-table :data="songList" @cell-click="play" max-height="520">
-          <el-table-column prop="musicName" label="歌曲名" />
-          <el-table-column label="歌手" width="300">
-            <template #default="scope">
-              <span v-for="item in scope.row.singerName" :key="item">
-                {{ item }}&nbsp;
-              </span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="album" label="专辑" />
-          <el-table-column prop="time" label="时长" />
-        </el-table>
+        <SongsList :list="songList"></SongsList>
       </div>
     </div>
   </div>
@@ -46,6 +35,7 @@
 <script>
 import { mapState, mapMutations, mapActions } from "vuex"
 import { getPlaylistDetail, getCheckMusic } from "../http/api"
+import SongsList from "../components/SongsList.vue"
 import { ElMessage } from 'element-plus'
 
 export default {
@@ -57,29 +47,28 @@ export default {
       creatorName: '',        //歌单创建作者名
       updateTime: '',         //歌单更新时间
       duration: '',           //歌曲时长
-
     }
   },
   mounted() {
-    this.setSongListId(sessionStorage.getItem('songListId'))
+    // this.setUserSongListId(sessionStorage.getItem('userSongListId'))
+    const id = this.$route.params.id
     this.$http.get('/songlist/getdetails', {
       params: {
-        id: this.songListId,
+        id: id,
       }
     })
       .then(res => {
         const data = res.data.data
         this.songListDetail = data
         this.songList = data.songs
-        console.log(this.songList);
       })
 
   },
   computed: {
-    ...mapState(['songListId', 'playlistId'])
+    ...mapState(['userSongListId', 'playlistId'])
   },
   methods: {
-    ...mapMutations(['setSongListId', 'setPlaylistId', 'setPlaylist']),
+    ...mapMutations(['setUserSongListId', 'setPlaylistId', 'setPlaylist']),
     ...mapActions(['play', 'getPlaylistSongs']),
 
     //添加歌单所有歌曲到歌曲列表
@@ -107,6 +96,9 @@ export default {
       this.getPlaylistSongs()
     }
   },
+  components: {
+    SongsList,
+  }
 }
 </script>
 
@@ -114,9 +106,9 @@ export default {
 .song-list-container {
   display: flex;
   width: 1000px;
-  height: 600px;
-  margin: 0 auto 100px;
-  padding-top: 10px;
+  height: calc(100% - 100px);
+  margin: 0 auto;
+  padding: 10px 0;
   font-size: 14px;
   box-sizing: border-box;
 
