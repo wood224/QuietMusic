@@ -38,6 +38,7 @@ public class CommentController {
     @Autowired
     private UserService userService;
 
+
     @PostMapping("/publish")
     @ApiOperation("发表评论")
     public R<String> publish(@RequestBody Comment comment){
@@ -112,12 +113,19 @@ public class CommentController {
         lqw.eq(Agreement::getUserId, userId);
         List<Agreement> agreements = agreementService.list(lqw);
 
+        //获取用户信息
+        Map<Integer,User> mapU =new HashMap<>();
+        List<User> users = userService.list();
+        for (User u:users){
+            mapU.put(u.getId(),u);
+        }
+
         //将用户点赞信息存入Map
         Map<Integer,Agreement> map =new HashMap<>();
         for(Agreement a:agreements){
             map.put(a.getCommentId(),a);
         }
-
+        //将评论存入Map
         Map<Integer,Comment> mapAll =new HashMap<>();
         for(Comment c:comments){
             mapAll.put(c.getId(),c);
@@ -127,13 +135,15 @@ public class CommentController {
         List<CommentDto> commentDtos = comments.stream().map((item)->{
             CommentDto commentDto =new CommentDto();
             BeanUtils.copyProperties(item,commentDto);
-            User user = userService.getById(item.getUserId());
+            User user = mapU.get(item.getUserId());
             commentDto.setUsrName(user.getName());
             commentDto.setImg(user.getImg());
             if(map.containsKey(item.getId()))
                 commentDto.setFlag(true);
-            if(item.getReplyId()!=null)
+            if(item.getReplyId()!=null) {
+                commentDto.setReplyUserName(mapU.get(item.getReplyId()).getName());
                 commentDto.setReplyContent(mapAll.get(item.getReplyId()).getContent());
+            }
             return commentDto;
         }).toList();
 

@@ -14,4 +14,6 @@ public class CommentDto extends Comment{
     private String img;
 
     private String replyContent;
+
+    private String replyUserName;
 }
