@@ -86,6 +86,8 @@ public class SonglistDetailsController {
     public R<String> insertAll(@RequestParam(value = "songlistDetails") String songlistDetails) {
         List<SonglistDetails>  list= JSON.parseArray(songlistDetails,SonglistDetails.class);
 
+        if(list==null)
+            return R.error("请选择至少一首歌！");
         LambdaQueryWrapper<SonglistDetails> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         for (SonglistDetails s : list) {
             lambdaQueryWrapper.eq(SonglistDetails::getListId, s.getListId());
