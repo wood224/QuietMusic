@@ -83,14 +83,14 @@ public class SonglistDetailsController {
     @PostMapping("/insertAll")
     @ApiOperation("批量插入")
     @Transactional
-    public R<String> insertAll(String songlistDetails) {
-        System.out.println(songlistDetails);
+    public R<String> insertAll(@RequestBody SonglistDetails[] songlistDetails) {
+        /*System.out.println(songlistDetails);
         List<SonglistDetails>  list= JSON.parseArray(songlistDetails,SonglistDetails.class);
 
         if(list==null)
-            return R.error("请选择至少一首歌！");
+            return R.error("请选择至少一首歌！");*/
         LambdaQueryWrapper<SonglistDetails> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        for (SonglistDetails s : list) {
+        for (SonglistDetails s : songlistDetails) {
             lambdaQueryWrapper.eq(SonglistDetails::getListId, s.getListId());
             lambdaQueryWrapper.eq(SonglistDetails::getMusicId, s.getMusicId());
             SonglistDetails songlistDetails1 = songlistDetailsService.getOne(lambdaQueryWrapper);
