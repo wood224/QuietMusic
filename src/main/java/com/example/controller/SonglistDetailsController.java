@@ -83,7 +83,7 @@ public class SonglistDetailsController {
     @PostMapping("/insertAll")
     @ApiOperation("批量插入")
     @Transactional
-    public R<String> insertAll(@RequestBody String songlistDetails) {
+    public R<String> insertAll(String songlistDetails) {
         List<SonglistDetails>  list= JSON.parseArray(songlistDetails,SonglistDetails.class);
 
         LambdaQueryWrapper<SonglistDetails> lambdaQueryWrapper = new LambdaQueryWrapper<>();
