@@ -1,4 +1,4 @@
-package com.example.test;
+package com.example.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.common.R;
@@ -27,9 +27,18 @@ public class AgreementController {
     @ApiOperation("点赞")
     @Transactional
     public R<String> agree(@RequestBody Agreement agreement){
-        agreementService.save(agreement);
+
+        LambdaQueryWrapper<Agreement> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(Agreement::getCommentId,agreement.getCommentId());
+        lambdaQueryWrapper.eq(Agreement::getUserId,agreement.getUserId());
+        if(agreementService.getOne(lambdaQueryWrapper)!=null)
+            return R.error("您已点赞过该评论！");
+
 
         Comment com = commentService.getById(agreement.getCommentId());
+        if(com==null)
+            return R.error("该评论被吃掉了喵！");
+        agreementService.save(agreement);
         com.setAgreement(com.getAgreement()+1);
         commentService.updateById(com);
         return R.success("点赞成功!");
@@ -37,12 +46,22 @@ public class AgreementController {
 
     @DeleteMapping("/unagree")
     @ApiOperation("取消点赞")
+    @Transactional
     public R<String> unagree(@RequestBody Agreement agreement){
         LambdaQueryWrapper<Agreement> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Agreement::getUserId,agreement.getUserId());
         lambdaQueryWrapper.eq(Agreement::getCommentId,agreement.getCommentId());
         lambdaQueryWrapper.eq(Agreement::getDeleted,0);
+
+        Agreement agreement1 = agreementService.getOne(lambdaQueryWrapper);
+        if(agreement1==null)
+            return R.error("您未点赞过该评论！");
+
         agreementService.remove(lambdaQueryWrapper);
+
+        Comment com = commentService.getById(agreement.getCommentId());
+        com.setAgreement(com.getAgreement()-1);
+        commentService.updateById(com);
         return R.success("取消点赞成功!");
     }
 

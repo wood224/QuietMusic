@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.mapper.SongListMapper">
+
+
+    <update id="updateAdd" >
+        update song_list set sum = sum + 1 where id=#{id};
+    </update>
+    <update id="updateRe">
+        update song_list set sum = sum - 1 where id=#{id};
+    </update>
+    <update id="updateClear">
+        update song_list set sum = 0 where id=#{id};
+    </update>
+
+
+</mapper>

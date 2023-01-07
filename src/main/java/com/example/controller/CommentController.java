@@ -1,17 +1,22 @@
-package com.example.test;
+package com.example.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.common.R;
+import com.example.entity.Agreement;
 import com.example.entity.Comment;
 import com.example.entity.CommentDto;
+import com.example.entity.User;
+import com.example.service.AgreementService;
 import com.example.service.CommentService;
+import com.example.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,9 +32,22 @@ public class CommentController {
     @Autowired
     private CommentService commentService;
 
+    @Autowired
+    private AgreementService agreementService;
+
+    @Autowired
+    private UserService userService;
+
     @PostMapping("/publish")
     @ApiOperation("发表评论")
     public R<String> publish(@RequestBody Comment comment){
+
+        LambdaQueryWrapper<Comment> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.ge(Comment::getCreateTime, LocalDateTime.now().minusSeconds(5));
+        List<Comment> list = commentService.list(lambdaQueryWrapper);
+        if (list!=null)
+            return R.error("发送评论过快喵！");
+
         if(comment.getReplyId()!=null)
         {
             Comment comment1= commentService.getById(comment.getReplyId());
@@ -78,12 +96,33 @@ public class CommentController {
 
     @GetMapping("/byMusic")
     @ApiOperation("获取音乐所有评论")
-    public R<List<Comment>> byMusic(Integer id) {
+    public R<List<CommentDto>> byMusic(Integer id,Integer userId) {
         LambdaQueryWrapper<Comment> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Comment::getMusicId,id);
         lambdaQueryWrapper.orderByAsc(Comment::getCreateTime);
         List<Comment> comments = commentService.list(lambdaQueryWrapper);
-        return R.success(comments);
+
+        LambdaQueryWrapper<Agreement> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(Agreement::getUserId,userId);
+        List<Agreement> agreements = agreementService.list(lqw);
+
+        Map<Integer,Agreement> map =new HashMap<>();
+        for(Agreement a:agreements){
+            map.put(a.getCommentId(),a);
+        }
+
+        List<CommentDto> commentDtos = comments.stream().map((item)->{
+            CommentDto commentDto =new CommentDto();
+            BeanUtils.copyProperties(item,commentDto);
+            User user = userService.getById(item.getUserId());
+            commentDto.setUsrName(user.getName());
+            commentDto.setImg(user.getImg());
+            if(map.containsKey(item.getId()))
+                commentDto.setFlag(true);
+            return commentDto;
+        }).toList();
+
+        return R.success(commentDtos);
     }
 
 
@@ -93,6 +132,13 @@ public class CommentController {
     {
         commentService.removeById(id);
         return R.success("删除成功");
+    }
+
+    @GetMapping("/byId")
+    @ApiOperation("根据id查询")
+    public R<Comment> byId(Integer id){
+        Comment comment = commentService.getById(id);
+        return R.success(comment);
     }
 
 }

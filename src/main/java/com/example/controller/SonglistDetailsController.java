@@ -1,12 +1,17 @@
 package com.example.controller;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.example.common.R;
+import com.example.entity.SongList;
 import com.example.entity.SonglistDetails;
+import com.example.service.SongListService;
 import com.example.service.SonglistDetailsService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,8 +24,12 @@ public class SonglistDetailsController {
     @Autowired
     private SonglistDetailsService songlistDetailsService;
 
+    @Autowired
+    private SongListService songListService;
+
     @PostMapping("/add")
     @ApiOperation("添加歌曲")
+    @Transactional
     public R<String> addSong(@RequestBody SonglistDetails songlistDetails){
         LambdaQueryWrapper<SonglistDetails> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(SonglistDetails::getListId,songlistDetails.getListId());
@@ -31,13 +40,18 @@ public class SonglistDetailsController {
             return R.error("该乐曲已在歌单中！");
 
         songlistDetailsService.save(songlistDetails);
+
+        songListService.updateAdd(songlistDetails.getListId());
         return R.success("添加成功!");
     }
 
     @DeleteMapping("/delete")
     @ApiOperation("删除歌曲")
-    public R<String> deleteSong(Integer id){
+    public R<String> deleteSong(Integer id,Integer listId){
         songlistDetailsService.removeById(id);
+
+        songListService.updateRe(listId);
+
         return R.success("删除成功!");
     }
 
@@ -54,11 +68,32 @@ public class SonglistDetailsController {
 
     @DeleteMapping("/delall")
     @ApiOperation("清空歌单")
-    public R<String> delall(Integer id){
+    @Transactional
+    public R<String> delall(Integer listId){
         LambdaQueryWrapper<SonglistDetails> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(SonglistDetails::getListId,id);
+        lambdaQueryWrapper.eq(SonglistDetails::getListId,listId);
         songlistDetailsService.remove(lambdaQueryWrapper);
+
+        songListService.updateClear(listId);
         return R.success("清空成功");
     }
+
+    @PostMapping("/insertAll")
+    @ApiOperation("批量插入")
+    public R<String> insertAll(@RequestBody SonglistDetails[] songlistDetails) {
+        LambdaQueryWrapper<SonglistDetails> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        for (SonglistDetails s : songlistDetails) {
+            lambdaQueryWrapper.eq(SonglistDetails::getListId, s.getListId());
+            lambdaQueryWrapper.eq(SonglistDetails::getMusicId, s.getMusicId());
+            SonglistDetails songlistDetails1 = songlistDetailsService.getOne(lambdaQueryWrapper);
+            if (songlistDetails1 != null)
+                continue;
+            songlistDetailsService.save(s);
+
+            songListService.updateAdd(s.getListId());
+        }
+        return R.success("添加成功");
+    }
+
 
 }

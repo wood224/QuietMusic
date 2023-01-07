@@ -7,4 +7,11 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface SongListMapper extends BaseMapper<SongList> {
+
+
+    void updateAdd(Integer id);
+
+    void updateRe(Integer id);
+
+    void updateClear(Integer id);
 }

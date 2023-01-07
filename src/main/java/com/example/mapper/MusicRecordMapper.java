@@ -1,6 +1,7 @@
 package com.example.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.example.entity.Music;
 import com.example.entity.MusicRecord;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -10,11 +11,11 @@ import java.util.Map;
 @Mapper
 public interface MusicRecordMapper extends BaseMapper<MusicRecord> {
 
-    List<MusicRecord> selectRank();
+    List<Music> selectRank();
 
-    List<MusicRecord> selectRankByOneTime();
+    List<Music> selectRankByOneTime();
 
-    List<MusicRecord> selectRankBySevenTime();
+    List<Music> selectRankBySevenTime();
 
-    List<MusicRecord> selectRankByThirtyTime();
+    List<Music> selectRankByThirtyTime();
 }
