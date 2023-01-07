@@ -97,21 +97,33 @@ public class CommentController {
 
     @GetMapping("/byMusic")
     @ApiOperation("获取音乐所有评论")
-    public R<List<CommentDto>> byMusic(Integer id,Integer userId) {
+    public R<List<CommentDto>> byMusic(Integer id,Integer userId,Integer order) {
+
+        //获取所有评论
         LambdaQueryWrapper<Comment> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Comment::getMusicId,id);
-        lambdaQueryWrapper.orderByAsc(Comment::getCreateTime);
+        if (order==1)//按发布时间降序排列
+            lambdaQueryWrapper.orderByDesc(Comment::getCreateTime);
+        if (order==2)//按点赞数排列
+            lambdaQueryWrapper.orderByDesc(Comment::getAgreement).and(m->m.orderByDesc(Comment::getCreateTime));
         List<Comment> comments = commentService.list(lambdaQueryWrapper);
-
+        //获取用户点赞信息
         LambdaQueryWrapper<Agreement> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(Agreement::getUserId,userId);
+        lqw.eq(Agreement::getUserId, userId);
         List<Agreement> agreements = agreementService.list(lqw);
 
+        //将用户点赞信息存入Map
         Map<Integer,Agreement> map =new HashMap<>();
         for(Agreement a:agreements){
             map.put(a.getCommentId(),a);
         }
 
+        Map<Integer,Comment> mapAll =new HashMap<>();
+        for(Comment c:comments){
+            mapAll.put(c.getId(),c);
+        }
+
+        //将comment转换为commentDto
         List<CommentDto> commentDtos = comments.stream().map((item)->{
             CommentDto commentDto =new CommentDto();
             BeanUtils.copyProperties(item,commentDto);
@@ -120,6 +132,8 @@ public class CommentController {
             commentDto.setImg(user.getImg());
             if(map.containsKey(item.getId()))
                 commentDto.setFlag(true);
+            if(item.getReplyId()!=null)
+                commentDto.setReplyContent(mapAll.get(item.getReplyId()).getContent());
             return commentDto;
         }).toList();
 
