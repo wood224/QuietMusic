@@ -14,7 +14,8 @@
             </div>
         </div>
         <div class="songs">
-            <el-table :data="songs" stripe height="100%" style="width: 100%" @cell-click="play">
+            <SongsList :list="songs"></SongsList>
+            <!-- <el-table :data="songs" stripe height="100%" style="width: 100%" @cell-click="play">
                 <el-table-column prop="name" label="歌曲名" width="400" />
                 <el-table-column label="歌手" width="300">
                     <template #default="scope">
@@ -25,13 +26,14 @@
                 </el-table-column>
                 <el-table-column prop="al.name" label="专辑" />
                 <el-table-column prop="dt" label="时长" />
-            </el-table>
+            </el-table> -->
         </div>
     </div>
 </template>
 
 <script>
 import { getSingerDetail } from "../http/api"
+import SongsList from "../components/SongsList.vue"
 import { getTime } from "../fun"
 import { mapActions } from "vuex"
 
@@ -44,7 +46,7 @@ export default {
         }
     },
     created() {
-        const singerId = sessionStorage.getItem('singerId')
+        const singerId = this.$route.params.id
         getSingerDetail(singerId)
             .then(res => {
                 const data = res.data
@@ -61,6 +63,9 @@ export default {
     methods: {
         ...mapActions(['play'])
     },
+    componentes: {
+        SongsList,
+    }
 }
 </script>
 
@@ -70,7 +75,7 @@ export default {
     flex-direction: column;
     margin: 0 auto;
     box-sizing: border-box;
-    padding-top: 10px;
+    padding: 10px 0;
     width: 1000px;
     height: calc(100vh - 198px);
 

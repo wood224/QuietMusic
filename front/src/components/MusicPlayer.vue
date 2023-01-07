@@ -16,24 +16,30 @@
 					</div>
 				</div>
 				<div class="musicList">
-					<li v-for="(item, index) in playlist" :key="item.id">
-						<div class="musicList-item" @click.stop="playIndex(item.musicId, index)">
-							<div class="musicList-number">{{ index + 1 }}</div>
-							<div class="musicList-name textHidden">{{ item.musicName }}
-								<el-tooltip class="box-item" effect="light" content="移除歌曲" placement="top" :hide-after="0">
-									<div class="delete" @click.stop="deletePlaylistSong(item.musicId)">
-										<i class="fa fa-trash"></i>
-									</div>
-								</el-tooltip>
+					<el-scrollbar>
+						<li v-for="(item, index) in playlist" :key="item.id">
+							<div class="musicList-item" @click.stop="playIndex(item.musicId, index)">
+								<div class="musicList-number">{{ index + 1 }}</div>
+								<div class="musicList-name textHidden">
+									<el-tooltip :content="item.musicName" effect="light" placement="top" :show-after="300"
+										:hide-after="0">
+										<span>{{ item.musicName }}</span>
+									</el-tooltip>
+									<el-tooltip class="box-item" effect="light" content="移除歌曲" placement="top" :hide-after="0">
+										<div class="delete" @click.stop="deletePlaylistSong(item.musicId)">
+											<i class="fa fa-trash"></i>
+										</div>
+									</el-tooltip>
+								</div>
+								<div class="musicList-artist textHidden">
+									<span v-for="(name, index) in item.singerName" :key="index">
+										<span v-if="index !== 0">/</span>{{ name }}
+									</span>
+								</div>
+								<div class="musicList-time">{{ item.time }}</div>
 							</div>
-							<div class="musicList-artist textHidden">
-								<span v-for="(name, index) in item.singerName" :key="index">
-									<span v-if="index !== 0">/</span>{{ name }}
-								</span>
-							</div>
-							<div class="musicList-time">{{ item.time }}</div>
-						</div>
-					</li>
+						</li>
+					</el-scrollbar>
 				</div>
 			</div>
 
@@ -63,7 +69,7 @@
 					</div>
 					<div class="volume-info">
 						<button @click="setMute">
-							<i class="fa fa-volume-mute" v-show="isMute"></i>
+							<i class="fa fa-volume-off" v-show="isMute"></i>
 							<i class="fa fa-volume-down" v-show="!isMute && !isloud"></i>
 							<i class="fa fa-volume-up" v-show="!isMute && isloud"></i>
 						</button>
@@ -378,17 +384,16 @@ export default {
 		//记录听歌次数
 		recordMusic() {
 			const userInfo = JSON.parse(localStorage.getItem('userInfo'))
-			if (userInfo === null) {
-				this.$http.post('/music/save', {
-					musicId: this.songInfo.id,
-					userId: null
-				})
-			} else {
-				this.$http.post('music/save', {
-					musicId: this.songInfo.id,
-					userId: userInfo.id
-				})
-			}
+			this.$http.post('/music/save', {
+				userId: userInfo === null ? null : userInfo.id,
+				id: this.songInfo.id,
+				name: this.songInfo.name,
+				singerName: this.songInfo.ar.map(item => {
+					return item.name;
+				}),
+				album: this.songInfo.alName,
+				time: this.songInfo.duration
+			})
 		},
 
 		//添加歌曲到歌曲列表
@@ -544,6 +549,13 @@ export default {
 							justify-content: space-between;
 							width: 254px;
 							color: white;
+
+							span {
+								width: 200px;
+								overflow: hidden;
+								white-space: nowrap;
+								text-overflow: ellipsis;
+							}
 
 							.delete {
 								display: none;

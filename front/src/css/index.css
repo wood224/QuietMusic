@@ -1,0 +1,33 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+a {
+  text-decoration: none;
+}
+li {
+  list-style: none;
+}
+button {
+  outline: none;
+}
+a {
+  text-decoration: none;
+  outline: none;
+  color: black;
+}
+/* 滚动条样式 */
+.scrollbar:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(150, 150, 150, 0.3);
+}
+.scrollbar::-webkit-scrollbar {
+  width: 7px;
+}
+.scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 5px;
+  background-color: rgba(150, 150, 150, 0);
+}
+.scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(150, 150, 150, 0.5);
+}

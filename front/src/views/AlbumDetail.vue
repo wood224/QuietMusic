@@ -26,7 +26,8 @@
 				</el-button>
 			</div>
 			<div class="songs">
-				<el-table :data="albumSongs" @cell-click="play" max-height="520">
+				<SongsList :list="albumSongs"></SongsList>
+				<!-- <el-table :data="albumSongs" @cell-click="play" max-height="520">
 					<el-table-column prop="name" label="歌曲名" width="300" />
 					<el-table-column label="歌手" width="200">
 						<template #default="scope">
@@ -37,7 +38,7 @@
 					</el-table-column>
 					<el-table-column prop="al.name" label="专辑" />
 					<el-table-column prop="dt" label="时长" />
-				</el-table>
+				</el-table> -->
 			</div>
 		</div>
 	</div>
@@ -45,6 +46,7 @@
 
 <script>
 import { mapState, mapMutations, mapActions } from "vuex"
+import SongsList from "../components/SongsList.vue"
 import { getAlbumDetail, getCheckMusic } from "../http/api"
 import { getTime } from "../fun"
 import { ElMessage } from 'element-plus'
@@ -62,8 +64,9 @@ export default {
 		}
 	},
 	mounted() {
-		this.setAlbumId(sessionStorage.getItem('albumId'))
-		getAlbumDetail(this.albumId)
+		// this.setAlbumId(sessionStorage.getItem('albumId'))
+		const id = this.$route.params.id
+		getAlbumDetail(id)
 			.then(res => {
 				const data = res.data
 				this.albumDetail = data.album
@@ -72,12 +75,10 @@ export default {
 					item.dt = getTime(item.dt)
 				})
 				this.creatorName = data.album.artist.name
-				console.log(data.album.publishTime)
 				const date = new Date(data.album.publishTime)
 				const y = date.getFullYear()
 				const m = date.getMonth() + 1
 				const d = date.getDate()
-				console.log(d)
 				this.publishTime = `${y}-${m}-${d}`
 			})
 
@@ -114,6 +115,9 @@ export default {
 			this.getPlaylistSongs()
 		}
 	},
+	componentes: {
+		SongsList,
+	},
 }
 </script>
 
@@ -121,9 +125,9 @@ export default {
 .song-list-container {
 	display: flex;
 	width: 1000px;
-	height: 600px;
-	margin: 0 auto 100px;
-	padding-top: 10px;
+	height: calc(100% - 100px);
+	margin: 0 auto;
+	padding: 10px 0;
 	font-size: 14px;
 	box-sizing: border-box;
 
@@ -182,6 +186,10 @@ export default {
 					}
 				}
 			}
+		}
+
+		.songs {
+			height: calc(100% - 70px);
 		}
 	}
 }
