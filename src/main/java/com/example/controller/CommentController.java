@@ -141,8 +141,9 @@ public class CommentController {
             if(map.containsKey(item.getId()))
                 commentDto.setFlag(true);
             if(item.getReplyId()!=null) {
-                commentDto.setReplyUserName(mapU.get(item.getReplyId()).getName());
-                commentDto.setReplyContent(mapAll.get(item.getReplyId()).getContent());
+                Comment c = mapAll.get(item.getReplyId());
+                commentDto.setReplyUserName(mapU.get(c.getUserId()).getName());
+                commentDto.setReplyContent(c.getContent());
             }
             return commentDto;
         }).toList();
