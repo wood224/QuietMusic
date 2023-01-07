@@ -2,7 +2,11 @@
   <div class="songs-list-wrapper">
     <el-scrollbar>
       <el-table :data="songsList" style="width: 100%" @cell-click="playSong" row-key="id" :row-style="rowStyle" stripe>
-        <el-table-column type="index" width="50" v-if="type === 'top'" />
+        <el-table-column width="50" v-if="type === 'top'">
+          <template #default="scope">
+            {{ 10 * (currentPage - 1) + (scope.$index + 1) }}
+          </template>
+        </el-table-column>
         <el-table-column label="歌曲名" :width="type === 'top' ? 450 : 380">
           <template #default="scope">
             <div class="song-name">
