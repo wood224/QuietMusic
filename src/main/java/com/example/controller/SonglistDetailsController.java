@@ -83,7 +83,8 @@ public class SonglistDetailsController {
     @PostMapping("/insertAll")
     @ApiOperation("批量插入")
     @Transactional
-    public R<String> insertAll(@RequestParam(value = "songlistDetails") String songlistDetails) {
+    public R<String> insertAll(String songlistDetails) {
+        System.out.println(songlistDetails);
         List<SonglistDetails>  list= JSON.parseArray(songlistDetails,SonglistDetails.class);
 
         if(list==null)
