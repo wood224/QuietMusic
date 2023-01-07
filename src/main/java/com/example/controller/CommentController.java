@@ -44,7 +44,8 @@ public class CommentController {
 
         LambdaQueryWrapper<Comment> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.ge(Comment::getCreateTime, LocalDateTime.now().minusSeconds(5));
-        List<Comment> list = commentService.list(lambdaQueryWrapper);
+        //List<Comment> list = commentService.list(lambdaQueryWrapper);
+        Comment list = commentService.getOne(lambdaQueryWrapper);
         if (list!=null)
             return R.error("发送评论过快喵！");
 
