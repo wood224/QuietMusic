@@ -80,7 +80,8 @@ public class SonglistDetailsController {
 
     @PostMapping("/insertAll")
     @ApiOperation("批量插入")
-    public R<String> insertAll(@RequestBody SonglistDetails[] songlistDetails) {
+    @Transactional
+    public R<String> insertAll(@RequestBody List<SonglistDetails> songlistDetails) {
         LambdaQueryWrapper<SonglistDetails> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         for (SonglistDetails s : songlistDetails) {
             lambdaQueryWrapper.eq(SonglistDetails::getListId, s.getListId());

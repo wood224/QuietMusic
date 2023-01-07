@@ -38,13 +38,15 @@ public class CommentController {
     @Autowired
     private UserService userService;
 
+
     @PostMapping("/publish")
     @ApiOperation("发表评论")
     public R<String> publish(@RequestBody Comment comment){
 
         LambdaQueryWrapper<Comment> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.ge(Comment::getCreateTime, LocalDateTime.now().minusSeconds(5));
-        List<Comment> list = commentService.list(lambdaQueryWrapper);
+        //List<Comment> list = commentService.list(lambdaQueryWrapper);
+        Comment list = commentService.getOne(lambdaQueryWrapper);
         if (list!=null)
             return R.error("发送评论过快喵！");
 
@@ -96,29 +98,53 @@ public class CommentController {
 
     @GetMapping("/byMusic")
     @ApiOperation("获取音乐所有评论")
-    public R<List<CommentDto>> byMusic(Integer id,Integer userId) {
+    public R<List<CommentDto>> byMusic(Integer id,Integer userId,Integer order) {
+
+        //获取所有评论
         LambdaQueryWrapper<Comment> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Comment::getMusicId,id);
-        lambdaQueryWrapper.orderByAsc(Comment::getCreateTime);
+        if (order==1)//按发布时间降序排列
+            lambdaQueryWrapper.orderByDesc(Comment::getCreateTime);
+        if (order==2)//按点赞数排列
+            lambdaQueryWrapper.orderByDesc(Comment::getAgreement,Comment::getCreateTime);
         List<Comment> comments = commentService.list(lambdaQueryWrapper);
-
+        //获取用户点赞信息
         LambdaQueryWrapper<Agreement> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(Agreement::getUserId,userId);
+        lqw.eq(Agreement::getUserId, userId);
         List<Agreement> agreements = agreementService.list(lqw);
 
+        //获取用户信息
+        Map<Integer,User> mapU =new HashMap<>();
+        List<User> users = userService.list();
+        for (User u:users){
+            mapU.put(u.getId(),u);
+        }
+
+        //将用户点赞信息存入Map
         Map<Integer,Agreement> map =new HashMap<>();
         for(Agreement a:agreements){
             map.put(a.getCommentId(),a);
         }
+        //将评论存入Map
+        Map<Integer,Comment> mapAll =new HashMap<>();
+        for(Comment c:comments){
+            mapAll.put(c.getId(),c);
+        }
 
+        //将comment转换为commentDto
         List<CommentDto> commentDtos = comments.stream().map((item)->{
             CommentDto commentDto =new CommentDto();
             BeanUtils.copyProperties(item,commentDto);
-            User user = userService.getById(item.getUserId());
+            User user = mapU.get(item.getUserId());
             commentDto.setUsrName(user.getName());
             commentDto.setImg(user.getImg());
             if(map.containsKey(item.getId()))
                 commentDto.setFlag(true);
+            if(item.getReplyId()!=null) {
+                Comment c = mapAll.get(item.getReplyId());
+                commentDto.setReplyUserName(mapU.get(c.getUserId()).getName());
+                commentDto.setReplyContent(c.getContent());
+            }
             return commentDto;
         }).toList();
 
