@@ -105,7 +105,7 @@ public class CommentController {
         if (order==1)//按发布时间降序排列
             lambdaQueryWrapper.orderByDesc(Comment::getCreateTime);
         if (order==2)//按点赞数排列
-            lambdaQueryWrapper.orderByDesc(Comment::getAgreement).and(m->m.orderByDesc(Comment::getCreateTime));
+            lambdaQueryWrapper.orderByDesc(Comment::getAgreement,Comment::getCreateTime);
         List<Comment> comments = commentService.list(lambdaQueryWrapper);
         //获取用户点赞信息
         LambdaQueryWrapper<Agreement> lqw = new LambdaQueryWrapper<>();
