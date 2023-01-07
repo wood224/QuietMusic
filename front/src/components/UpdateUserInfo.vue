@@ -7,6 +7,14 @@
 				</el-icon>
 			</div>
 			<div class="form">
+				<el-upload class="avatar-uploader" method="post" :action="BASEAPI + '/file/upload'" :show-file-list="false"
+					:before-upload="beforeAvatarUpload" :on-success="handleAvatarSuccess">
+					<img v-if="imageUrl" :src="imageUrl" class="avatar" />
+					<el-icon v-else class="avatar-uploader-icon">
+						<Plus />
+					</el-icon>
+					<div>更换头像</div>
+				</el-upload>
 				<el-form :model="form" :rules="rules" ref="form">
 					<el-form-item label="昵称" prop="name">
 						<el-input v-model="form.name" clearable maxlength="20" />
@@ -42,6 +50,9 @@ export default {
 	name: 'UpdateUserInfo',
 	data() {
 		return {
+			BASEAPI: window.BASEURL.baseURL,
+			imageUrl: '',
+			tempImgUrl: '',
 			form: {
 				id: 0,
 				name: '',
@@ -49,6 +60,7 @@ export default {
 				phone: '',
 				description: '',
 			},
+
 			rules: {
 				name: [
 					{ validator: this.validateName, trigger: 'blur' },
@@ -79,6 +91,24 @@ export default {
 			this.$emit('setUpdateView', 'setUserInfo')
 		},
 
+		//用户头像上传校验
+		beforeAvatarUpload(rawFile) {
+			if (rawFile.type !== 'image/jpeg') {
+				ElMessage.error('头像必须是图片格式！')
+				return false
+			} else if (rawFile.size / 1024 / 1024 > 2) {
+				ElMessage.error('图片不能超过2MB！')
+				return false
+			}
+			return true
+		},
+
+		//用户头像上传成功
+		async handleAvatarSuccess(res, uploadFile) {
+			this.tempImgUrl = res.data
+			this.imageUrl = await this.$fun.getImg(this.tempImgUrl)
+		},
+
 		//校验昵称
 		async validateName(rule, Name, callback) {
 			const reg = /[a-zA-Z0-9\u4e00-\u9fa5]{3,20}/
@@ -102,6 +132,7 @@ export default {
 				if (valid) {
 					this.$http.put('/user/update', {
 						id: this.form.id,
+						img: this.tempImgUrl === '' ? null : this.tempImgUrl,
 						name: this.form.name === '' ? null : this.form.name,
 						sex: this.form.sex,
 						phone: this.form.phone === '' ? null : this.form.phone,
@@ -129,10 +160,10 @@ export default {
 <style lang="less">
 .bg {
 	position: absolute;
-	top: 90px;
+	top: 100px;
 	left: 50%;
 	transform: translateX(-50%);
-	height: 80vh;
+	height: calc(100vh - 198px);
 	background-color: rgba(122, 122, 122, 0.8);
 	width: 100%;
 	padding: 40px 0;
@@ -153,6 +184,27 @@ export default {
 		.form {
 			margin-top: 30px;
 			padding: 30px 100px;
+
+			.avatar-uploader {
+				width: 160px;
+				height: 160px;
+
+				.el-upload {
+					flex-direction: column;
+					width: 100%;
+					height: 100%;
+					border: 1px dashed var(--el-border-color);
+					border-radius: 6px;
+					cursor: pointer;
+					position: relative;
+					overflow: hidden;
+					transition: var(--el-transition-duration-fast);
+
+					&:hover {
+						border-color: var(--el-color-primary);
+					}
+				}
+			}
 
 			.el-form {
 				position: relative;

@@ -6,7 +6,7 @@
 	<div class="user-home-container">
 		<div class="userInfo">
 			<div class="img">
-				<el-image :src="url" fit="cover">
+				<el-image :src="userDetail.img === null ? url : userDetail.img" fit="cover">
 					<template #error>
 						<div class="image-slot">
 							<el-icon>
@@ -135,6 +135,7 @@
 </template>
 
 <script>
+import { getCurrentInstance } from "vue";
 import { mapState, mapMutations } from "vuex"
 import UpdateUserInfo from '../components/UpdateUserInfo.vue'
 import CreateSongList from '../components/CreateSongList.vue'
@@ -164,15 +165,18 @@ export default {
 		getUserDetail() {
 			const userId = JSON.parse(localStorage.getItem('userInfo')).id
 			this.$http.get(`/user/${userId}`)
-				.then(res => {
-					this.userDetail = res.data.data
+				.then(async res => {
 					let userInfo = {
 						name: res.data.data.name,
 						id: res.data.data.id,
 						sex: res.data.data.sex,
 						phone: res.data.data.phone,
-						description: res.data.data.description
+						description: res.data.data.description,
+						img: res.data.data.img,
 					}
+					const { img, ...data } = res.data.data;
+					this.userDetail = data;
+					this.userDetail.img = await this.$fun.getImg(img)
 					//将表示登录状态的对象存入 localstorage 和 vuex 中
 					localStorage.setItem("userInfo", JSON.stringify(userInfo))
 					this.setUserInfo(userInfo)
@@ -240,6 +244,7 @@ export default {
 		box-shadow: 4px 4px 15px;
 
 		.img {
+			position: relative;
 			width: 200px;
 			height: 200px;
 			padding: 20px;

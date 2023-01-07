@@ -12,7 +12,7 @@
 			element-loading-text="Loading..." element-loading-background="rgba(224, 224, 224, 0.4)">
 
 			<el-tab-pane label="单曲" name="searchSingle">
-				<SongsList :list="searchSongs"></SongsList>
+				<SongsList :list="searchSongs" type="search"></SongsList>
 				<!-- <el-table :data="searchSongs" height="100%" style="width: 100%" @cell-click="play" stripe>
 					<el-table-column label="歌曲名" width="500">
 						<template #default="scope">

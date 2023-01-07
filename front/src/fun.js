@@ -13,6 +13,25 @@ export function getHash() {
 	return location.hash.slice(1) || '/'
 }
 
+//获取服务器图片
+export async function getImg(url) {
+	const { data } = await axios.get(window.BASEURL.baseURL + '/file/download', {
+		params: {
+			img: url
+		},
+		headers: {},
+		responseType: 'blob',
+	})
+	const blob = data;
+	return new Promise((resolve, reject) => {
+		const reader = new FileReader();
+		reader.readAsDataURL(blob);
+		reader.onload = async () => {
+			resolve(reader.result);
+		}
+	})
+}
+
 //检测歌曲是否可用
 export async function checkMusic(id) {
 	const { data } = await getCheckMusic(id)

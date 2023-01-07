@@ -8,23 +8,38 @@
 				<div class="comments-wrapper">
 					<div class="comments-container">
 						<div class="comment-input">
-							<el-input v-model="commentText" :rows="3" type="textarea" placeholder="发表你的评论吧" :maxlength="100"
-								:show-word-limit="true" @keydown.enter.prevent="submitComment(commentText)" />
+							<el-input ref="comment" @input="commentInput" v-model="commentText" :rows="3" type="textarea"
+								placeholder="发表你的评论吧" :maxlength="100" :show-word-limit="true"
+								@keydown.enter.prevent="submitComment(commentText, replyId)" />
 						</div>
 						<el-scrollbar class="comments-list">
+							<div class="tabs">
+								<div class="tab" :class="{ checked: actionType === item.type }" v-for="item in tabs"
+									@click="setType(item.type)">
+									<span>{{ item.name }}</span>
+								</div>
+							</div>
 							<ul>
 								<li v-for="item in commentList" :key="item.id">
 									<div class="comment">
-										<div class="userPic"></div>
+										<div class="userPic">
+											<img :src="getImg(item.img)" alt="">
+										</div>
 										<div class="comment-content">
 											<div class="top">
-												<div class="name">{{ item.usrName }}：</div>
-												<div class="text">{{ item.content }}</div>
+												<div class="user-comment">
+													<div class="name">{{ item.usrName }}：</div>
+													<div class="text">{{ item.content }}</div>
+												</div>
+												<div class="reply-content" v-if="item.replyContent !== null">
+													<div class="name">{{ item.replyUserName }}：</div>
+													<div class="text">{{ item.replyContent }}</div>
+												</div>
 											</div>
 											<div class="bottom">
 												<div class="time">{{ item.createTime }}</div>
 												<div class="interact">
-													<div class="like" @click="setLike(item.flag, item.id)">
+													<div class="like" @click="setLike(item)">
 														<i class="fa fa-thumbs-up" v-if="item.flag"></i>
 														<i class="fa fa-thumbs-o-up" v-else></i>
 														<span>{{ item.agreement }}</span>
@@ -33,7 +48,7 @@
 													<div class="btns">
 														<a src="javascript:" class="delete" @click="openDeleteCommentDialog(item.id)"
 															v-if="checkComment(item.userId)">删除</a>
-														<a src="javascript:" class="reply" v-else>回复</a>
+														<a src="javascript:" class="reply" @click="reply(item.id, item.usrName)" v-else>回复</a>
 													</div>
 												</div>
 											</div>
@@ -130,15 +145,29 @@ export default {
 
 			currentRow: 0,     //当前歌词播放行数
 
+			tabs: [
+				{
+					name: '最热',
+					type: 2,
+				},
+				{
+					name: '最新',
+					type: 1,
+				}
+			],
+			actionType: 2,
+
 			commentList: [],  //评论列表
 			commentText: '',  //评论内容
+			replyId: -1, 			//回复评论的评论id
+			replyName: '',    //回复评论的名字
 
 			dialogVisible: false,
 			deleteCommentId: -1
 		}
 	},
 	computed: {
-		...mapState(['musicInfo', 'lyricCurrent', 'lastKey']),
+		...mapState(['musicInfo', 'userBaseImg', 'lyricCurrent', 'lastKey']),
 	},
 	created() {
 		const info = JSON.parse(localStorage.getItem('songInfo'))
@@ -153,7 +182,7 @@ export default {
 
 		this.userInfo = JSON.parse(localStorage.getItem('userInfo'))
 		this.getLyric()
-		this.getMusicComments(this.songInfo.id)
+		this.getMusicComments(this.songInfo.id, this.actionType)
 
 	},
 	mounted() {
@@ -202,7 +231,7 @@ export default {
 				this.songInfo.alPicUrl = info.al.picUrl
 				this.bgi = this.songInfo.alPicUrl
 				this.getLyric()
-				this.getMusicComments(this.songInfo.id)
+				this.getMusicComments(this.songInfo.id, this.actionType)
 			}
 		},
 		// songInfo: {
@@ -237,6 +266,21 @@ export default {
 				})
 		},
 
+		//输入框内容改变时
+		commentInput() {
+			if (this.replyId !== -1) {	//回复状态
+				if (this.commentText.slice(1, this.replyName.length + 2) !== this.replyName + '：') {
+					this.replayId = -1
+					this.replyName = ''
+					if (this.commentText.length < this.replyName.length + 2) {
+						this.commentText = ''
+					}
+				}
+			} else {		//非回复状态
+
+			}
+		},
+
 		//发表评论
 		submitComment(text, replyId = -1) {
 			if (this.userInfo === null) {
@@ -249,24 +293,48 @@ export default {
 				replyId: replyId === -1 ? null : replyId
 			}).then(res => {
 				if (res.data.code === 200) {
-					this.getMusicComments(this.songInfo.id)
 					ElMessage.success('评论成功！');
 					this.commentText = ''
+					this.getMusicComments(this.songInfo.id, this.actionType,)
+				} else if (res.data.code === 410) {
+					ElMessage.warning('评论过于频繁')
 				}
 			})
 		},
 
+		//设置排序方式
+		setType(type) {
+			this.actionType = type
+			this.getMusicComments(this.songInfo.id, this.actionType)
+		},
+
 		//获取音乐评论
-		getMusicComments(id) {
+		getMusicComments(id, type) {
 			this.$http.get('/comment/byMusic', {
 				params: {
 					id: id,
 					userId: this.userInfo === null ? null : this.userInfo.id,
+					order: type,
 				}
-			}).then(res => {
+			}).then(async res => {
+				this.commentList = []
 				const data = res.data.data
-				this.commentList = data
+				const List = data.map(async item => {
+					item.img = item.img === null ? null : await this.$fun.getImg(item.img)
+					return {
+						...item
+					}
+				})
+				for (let i in List) {
+					const comment = await List[i];
+					this.commentList.push(comment);
+				}
 			})
+		},
+
+		//获取用户头像
+		getImg(img) {
+			return img === null ? this.userBaseImg : img
 		},
 
 		//判断评论是否为自己的
@@ -278,22 +346,44 @@ export default {
 		},
 
 		//点赞 or 取消点赞
-		setLike(flag, commentId) {
-			if (flag) {
+		setLike(commentInfo) {
+			if (commentInfo.flag) {		//如果已点赞
 				this.$http.delete('/agreement/unagree', {
-					userId: this.userInfo.id,
-					commentId: commentId
+					data: {
+						userId: this.userInfo.id,
+						commentId: commentInfo.id
+					}
 				}).then(res => {
-					getMusicComments(this.songInfo.id)
+					if (res.data.code === 200) {
+						commentInfo.flag = false
+						commentInfo.agreement--
+					} else {
+						ElMessage.error('出现未知错误，请稍后再试');
+					}
 				})
-			} else {
+			} else {		//如果未点赞
 				this.$http.post('/agreement/agree', {
 					userId: this.userInfo.id,
-					commentId: commentId
+					commentId: commentInfo.id
 				}).then(res => {
-					this.getMusicComments(this.songInfo.id)
+					if (res.data.code === 200) {
+						// this.getMusicComments(this.songInfo.id);
+						commentInfo.flag = true
+						commentInfo.agreement++
+					}
+					else {
+						ElMessage.error('出现未知错误，请稍后再试');
+					}
 				})
 			}
+		},
+
+		//回复评论
+		reply(id, userName) {
+			this.replyId = id;
+			this.replyName = userName;
+			this.commentText = `@${this.replyName}：`;
+			this.$refs.comment.focus();
 		},
 
 		//打开删除确认弹窗
@@ -310,7 +400,7 @@ export default {
 				}
 			}).then(res => {
 				if (res.data.code === 200) {
-					this.getMusicComments(this.songInfo.id)
+					this.getMusicComments(this.songInfo.id, this.actionType,)
 					ElMessage('删除成功！');
 					this.dialogVisible = false
 				}
@@ -389,7 +479,33 @@ export default {
 					.comments-list {
 						flex: 1;
 						box-sizing: border-box;
-						padding-top: 20px;
+
+						.tabs {
+							display: flex;
+							width: 100%;
+							height: 50px;
+							box-sizing: border-box;
+							padding-left: 20px;
+							text-align: center;
+							line-height: 50px;
+
+							.tab {
+								margin-right: 20px;
+								width: 50px;
+								font-size: 18px;
+								box-sizing: border-box;
+								cursor: pointer;
+
+								&:hover {
+									color: var(--el-color-primary);
+								}
+
+								&.checked {
+									color: var(--el-color-primary);
+									border-bottom: 2px solid var(--el-color-primary);
+								}
+							}
+						}
 
 						ul {
 							width: 100%;
@@ -404,14 +520,27 @@ export default {
 
 								// background-color: rgba(87, 87, 87, 0.5);
 								.comment {
+									display: flex;
+									// align-items: center;
 									box-sizing: border-box;
 									padding: 15px 0;
 									border-top: 1px solid #ccc;
 
-									.comment-content {
-										.top {
-											display: flex;
+									.userPic {
+										margin-right: 10px;
+										width: 50px;
+										height: 50px;
 
+										img {
+											width: 100%;
+											height: 100%;
+										}
+									}
+
+									.comment-content {
+										flex: 1;
+
+										.top {
 											.name {
 												margin-right: 5px;
 												color: #0c73c2;
@@ -419,6 +548,28 @@ export default {
 
 											.text {
 												color: black;
+											}
+
+											.user-comment {
+												display: flex;
+
+												.name {
+													margin-right: 5px;
+													color: #0c73c2;
+												}
+
+												.text {
+													color: black;
+												}
+											}
+
+											.reply-content {
+												display: flex;
+												padding: 8px 19px;
+												margin-top: 10px;
+												line-height: 20px;
+												background: #f4f4f4;
+												border: 1px solid #dedede;
 											}
 										}
 
@@ -539,7 +690,7 @@ export default {
 					transition: 0.3s;
 
 					li {
-						height: 25px;
+						min-height: 25px;
 						margin: 5px 0;
 						line-height: 25px;
 						text-align: center;

@@ -10,7 +10,8 @@
 			</div>
 		</div>
 		<div class="right">
-			<SongsList :list="rankList" type="top"></SongsList>
+			<SongsList :list="pageRank" type="top" @getAll="getPageRank" :count="rankList.length" v-loading="loading">
+			</SongsList>
 		</div>
 	</div>
 </template>
@@ -20,6 +21,8 @@ import { ref, getCurrentInstance } from 'vue';
 import SongsList from '../components/SongsList.vue';
 
 const { proxy } = getCurrentInstance()
+
+const loading = ref(false)
 
 const leftMenu = ref([
 	{
@@ -45,16 +48,25 @@ const leftMenu = ref([
 ])
 
 const rankList = ref([])
+const pageRank = ref([])
+
 const checkedIndex = ref(0)
 const getRank = (index) => {
 	checkedIndex.value = index
+	loading.value = true
 	proxy.$http.post(leftMenu.value[index].url).then(res => {
 		const data = res.data.data
 		rankList.value = data
+		getPageRank(0)
+		loading.value = false
 	})
 }
 getRank(0)
 
+//获取分页排行
+const getPageRank = (offset) => {
+	pageRank.value = rankList.value.slice(offset, offset + 10)
+}
 
 </script>
 

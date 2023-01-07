@@ -1,35 +1,42 @@
 <template>
   <div class="songs-list-wrapper">
-    <el-table :data="songsList" height="100%" style="width: 100%" @cell-click="playSong" :row-style="rowStyle" stripe>
-      <el-table-column type="index" width="50" v-if="type === 'top'" />
-      <el-table-column label="歌曲名" :width="type === 'top' ? 450 : 380">
-        <template #default="scope">
-          <div class="song-name">
-            <div class="name">
-              <span>{{ scope.row.name }}</span>
+    <el-scrollbar>
+      <el-table :data="songsList" style="width: 100%" @cell-click="playSong" row-key="id" :row-style="rowStyle" stripe>
+        <el-table-column type="index" width="50" v-if="type === 'top'" />
+        <el-table-column label="歌曲名" :width="type === 'top' ? 450 : 380">
+          <template #default="scope">
+            <div class="song-name">
+              <div class="name">
+                <span>{{ scope.row.name }}</span>
+              </div>
+              <div class="btn-list">
+                <el-tooltip content="收藏" :show-after="400" :hide-after="0">
+                  <div class="collect" @click.stop="selectList(scope.row.id)">
+                    <el-icon>
+                      <FolderAdd />
+                    </el-icon>
+                  </div>
+                </el-tooltip>
+              </div>
             </div>
-            <div class="btn-list">
-              <el-tooltip content="收藏" :show-after="400" :hide-after="0">
-                <div class="collect" @click.stop="selectList(scope.row.id)">
-                  <el-icon>
-                    <FolderAdd />
-                  </el-icon>
-                </div>
-              </el-tooltip>
-            </div>
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column label="歌手" :width="type === 'top' ? 300 : 200">
-        <template #default="scope">
-          <router-link :to="'/singerDetail/' + item.id" v-for="item in scope.row.ar" :key="item.name">
-            {{ item.name }}&nbsp;
-          </router-link>
-        </template>
-      </el-table-column>
-      <el-table-column prop="al.name" label="专辑" v-if="type !== 'top'" />
-      <el-table-column prop="dt" label="时长" />
-    </el-table>
+          </template>
+        </el-table-column>
+        <el-table-column label="歌手" :width="type === 'top' ? 300 : 200">
+          <template #default="scope">
+            <span class="singer-name" :class="{ link: item.id !== 0 }" @click.stop="goSingerDetail(item.id)"
+              v-for="item in scope.row.ar" :key="item.name">
+              {{ item.name }}&nbsp;
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column label="专辑" v-if="type !== 'top'">
+          <template #default="scope">
+            <span class="link" @click.stop="goAlbumDetail(scope.row.al.id)">{{ scope.row.al.name }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="dt" label="时长" />
+      </el-table>
+    </el-scrollbar>
     <el-pagination v-model:current-page="currentPage" @current-change="setPage" :hide-on-single-page="true" background
       layout="prev, pager, next" :total="count" />
 
@@ -65,9 +72,11 @@ import { ref, toRefs, getCurrentInstance, computed } from 'vue';
 import { useStore } from "vuex";
 import { getTime, checkMusic } from "../fun"
 import { ElMessage } from 'element-plus'
+import { useRouter } from "vue-router";
 
 const { proxy } = getCurrentInstance()
 const store = useStore()
+const router = useRouter()
 
 const props = defineProps({
   list: {
@@ -81,8 +90,7 @@ const props = defineProps({
   },
   count: {
     type: Number,
-    default: 0,
-    required: true,
+    default: 10,
   }
 })
 const emit = defineEmits(['getAll'])
@@ -96,7 +104,8 @@ const setPage = () => {
 
 const songsList = computed(() => {
   return list.value.map(item => {
-    if (item.hasOwnProperty("musicId")) {
+    //用户歌单
+    if (type.value === 'songlistUser') {
       return {
         id: item.musicId,
         name: item.musicName,
@@ -109,7 +118,8 @@ const songsList = computed(() => {
         dt: item.time,
       }
     }
-    else if (item.hasOwnProperty("artists")) {
+    //搜索
+    else if (type.value === 'search') {
       return {
         id: item.id,
         name: item.name,
@@ -118,7 +128,8 @@ const songsList = computed(() => {
         dt: item.duration,
       }
     }
-    else if (item.hasOwnProperty("views")) {
+    //排行榜
+    else if (type.value === 'top') {
       return {
         id: item.id,
         name: item.name,
@@ -131,6 +142,7 @@ const songsList = computed(() => {
         dt: item.time,
       }
     }
+    //其它
     else {
       return { ...item }
     }
@@ -210,6 +222,18 @@ const login = () => {
   return location.href = 'login.html'
 }
 
+//打开歌手页面
+const goSingerDetail = (id) => {
+  if (id === 0) return
+  router.push('/singerDetail/' + id)
+}
+
+//打开专辑页面
+const goAlbumDetail = (id) => {
+  if (id === 0) return
+  router.push('/albumDetail/' + id)
+}
+
 </script>
 
 <style lang="less" scoped>
@@ -261,6 +285,21 @@ const login = () => {
 
   a {
     color: inherit;
+  }
+
+  span {
+    &.singer-name {
+      cursor: default;
+    }
+
+    &.link {
+      cursor: pointer;
+
+      &:hover {
+        text-decoration: underline;
+        ;
+      }
+    }
   }
 
   .dialog-wrapper {

@@ -19,14 +19,18 @@
 		<div class="right">
 			<div class="title">
 				<h6>&lt;{{ albumDetail.name }}&gt; －歌曲列表</h6>
-				<el-button type="primary" @click="addAllPlaylistSong">
-					<span class="text">
-						<i class="fa fa-play"></i>添加至播放列表
-					</span>
-				</el-button>
+				<div class="btn-list">
+					<el-button type="primary" @click="addAllPlaylistSong">
+						<span class="text">
+							<i class="fa fa-play"></i>将歌曲添加至播放列表
+						</span>
+					</el-button>
+				</div>
 			</div>
 			<div class="songs">
-				<SongsList :list="albumSongs"></SongsList>
+				<SongsList :list="albumPageSongs" type="album" @getAll="getPageSongs" :count="albumSongs.length"
+					v-loading="loading">
+				</SongsList>
 				<!-- <el-table :data="albumSongs" @cell-click="play" max-height="520">
 					<el-table-column prop="name" label="歌曲名" width="300" />
 					<el-table-column label="歌手" width="200">
@@ -57,15 +61,18 @@ export default {
 		return {
 			albumDetail: {},     //专辑详情信息
 			albumSongs: [],         //专辑中歌曲列表
+			albumPageSongs: [], 	//专辑中分页歌曲列表
 			creatorName: '',        //专辑创建作者名
 			publishTime: '',         //专辑更新时间
 			duration: '',           //歌曲时长
 
+			loading: false,
 		}
 	},
 	mounted() {
 		// this.setAlbumId(sessionStorage.getItem('albumId'))
 		const id = this.$route.params.id
+		this.loading = true
 		getAlbumDetail(id)
 			.then(res => {
 				const data = res.data
@@ -80,6 +87,8 @@ export default {
 				const m = date.getMonth() + 1
 				const d = date.getDate()
 				this.publishTime = `${y}-${m}-${d}`
+				this.getPageSongs(0)
+				this.loading = false
 			})
 
 	},
@@ -89,6 +98,11 @@ export default {
 	methods: {
 		...mapMutations(['setAlbumId', 'setPlaylistId', 'setPlaylist']),
 		...mapActions(['play', 'getPlaylistSongs']),
+
+		//分页获取歌曲
+		getPageSongs(offset) {
+			this.albumPageSongs = this.albumSongs.slice(offset, offset + 10)
+		},
 
 		//添加专辑所有歌曲到歌曲列表
 		async addAllPlaylistSong() {
@@ -125,7 +139,7 @@ export default {
 .song-list-container {
 	display: flex;
 	width: 1000px;
-	height: calc(100% - 100px);
+	height: calc(100vh - 198px);
 	margin: 0 auto;
 	padding: 10px 0;
 	font-size: 14px;
@@ -186,10 +200,6 @@ export default {
 					}
 				}
 			}
-		}
-
-		.songs {
-			height: calc(100% - 70px);
 		}
 	}
 }
