@@ -16,7 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/songlistdetails")
@@ -89,16 +91,24 @@ public class SonglistDetailsController {
 
         if(list==null)
             return R.error("请选择至少一首歌！");*/
-        LambdaQueryWrapper<SonglistDetails> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        for (SonglistDetails s : songlistDetails) {
-            lambdaQueryWrapper.eq(SonglistDetails::getListId, s.getListId());
-            lambdaQueryWrapper.eq(SonglistDetails::getMusicId, s.getMusicId());
-            SonglistDetails songlistDetails1 = songlistDetailsService.getOne(lambdaQueryWrapper);
-            if (songlistDetails1 != null)
-                continue;
-            songlistDetailsService.save(s);
+        if(songlistDetails.length==0)
+            return R.error("请至少添加一首歌");
 
-            songListService.updateAdd(s.getListId());
+
+        LambdaQueryWrapper<SonglistDetails> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(SonglistDetails::getListId, songlistDetails[0].getListId());
+        List<SonglistDetails> list = songlistDetailsService.list(lambdaQueryWrapper);
+
+        Map<Integer,SonglistDetails> map = new HashMap<>();
+        for (SonglistDetails s:list){
+            map.put(s.getMusicId(),s);
+        }
+
+        for (SonglistDetails s : songlistDetails) {
+            if (!map.containsKey(s.getMusicId())) {
+                songlistDetailsService.save(s);
+                songListService.updateAdd(s.getListId());
+            }
         }
         return R.success("添加成功");
     }
