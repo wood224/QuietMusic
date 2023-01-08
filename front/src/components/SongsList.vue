@@ -2,7 +2,11 @@
   <div class="songs-list-wrapper">
     <el-scrollbar>
       <el-table :data="songsList" style="width: 100%" @cell-click="playSong" row-key="id" :row-style="rowStyle" stripe>
-        <el-table-column type="index" width="50" v-if="type === 'top'" />
+        <el-table-column width="50" v-if="type === 'top'">
+          <template #default="scope">
+            {{ 10 * (currentPage - 1) + (scope.$index + 1) }}
+          </template>
+        </el-table-column>
         <el-table-column label="歌曲名" :width="type === 'top' ? 450 : 380">
           <template #default="scope">
             <div class="song-name">
@@ -11,7 +15,7 @@
               </div>
               <div class="btn-list">
                 <el-tooltip content="收藏" :show-after="400" :hide-after="0">
-                  <div class="collect" @click.stop="selectList(scope.row.id)">
+                  <div class="collect" @click.stop="openSelectList(scope.row.id)">
                     <el-icon>
                       <FolderAdd />
                     </el-icon>
@@ -40,7 +44,8 @@
     <el-pagination v-model:current-page="currentPage" @current-change="setPage" :hide-on-single-page="true" background
       layout="prev, pager, next" :total="count" />
 
-    <el-dialog v-model="loginDialogVisible" title="提示" width="30%" :align-center="true">
+    <Collect :single="true" :music-id="collectMusicId" v-if="collectView" @close="closeSelectList"></Collect>
+    <!-- <el-dialog v-model="loginDialogVisible" title="提示" width="30%" :align-center="true">
       <span>请先登录</span>
       <template #footer>
         <span class="dialog-footer">
@@ -63,7 +68,7 @@
           </li>
         </ul>
       </el-scrollbar>
-    </el-dialog>
+    </el-dialog> -->
   </div>
 </template>
 
@@ -71,6 +76,7 @@
 import { ref, toRefs, getCurrentInstance, computed } from 'vue';
 import { useStore } from "vuex";
 import { getTime, checkMusic } from "../fun"
+import Collect from './Collect.vue';
 import { ElMessage } from 'element-plus'
 import { useRouter } from "vue-router";
 
@@ -153,6 +159,8 @@ const userSongList = ref([])  //用户歌单列表
 const collectDialogVisible = ref(false)
 const loginDialogVisible = ref(false)
 const collectMusicInfo = ref({})  //收藏的歌曲详情
+const collectView = ref(false)
+const collectMusicId = ref()      //收藏的歌单id
 
 //表格行样式
 const rowStyle = ({ row, rowIndex }) => {
@@ -169,27 +177,34 @@ const playSong = (row) => {
   store.dispatch('play', row)
 }
 
-//选择收藏歌单
-const selectList = (id) => {
-  const userInfo = JSON.parse(localStorage.getItem('userInfo'))
-  if (userInfo !== null) {
-    checkMusic(id).then(res => {
-      if (res.result) {
-        collectMusicInfo.value = res.info
-        collectDialogVisible.value = true
-        proxy.$http.get('/songlist/lists', {
-          params: {
-            id: userInfo.id,
-          }
-        }).then(res => {
-          const data = res.data.data
-          userSongList.value = data
-        })
-      }
-    });
-  } else {
-    loginDialogVisible.value = true
-  }
+//打开选择收藏歌单
+const openSelectList = (id) => {
+  collectMusicId.value = id
+  collectView.value = true
+  // const userInfo = JSON.parse(localStorage.getItem('userInfo'))
+  // if (userInfo !== null) {
+  //   checkMusic(id).then(res => {
+  //     if (res.result) {
+  //       collectMusicInfo.value = res.info
+  //       collectDialogVisible.value = true
+  //       proxy.$http.get('/songlist/lists', {
+  //         params: {
+  //           id: userInfo.id,
+  //         }
+  //       }).then(res => {
+  //         const data = res.data.data
+  //         userSongList.value = data
+  //       })
+  //     }
+  //   });
+  // } else {
+  //   loginDialogVisible.value = true
+  // }
+}
+
+// 关闭选择收藏歌单
+const closeSelectList = () => {
+  collectView.value = false
 }
 
 //收藏

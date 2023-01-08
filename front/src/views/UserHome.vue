@@ -176,7 +176,7 @@ export default {
 					}
 					const { img, ...data } = res.data.data;
 					this.userDetail = data;
-					this.userDetail.img = await this.$fun.getImg(img)
+					this.userDetail.img = img === null ? null : await this.$fun.getImg(img)
 					//将表示登录状态的对象存入 localstorage 和 vuex 中
 					localStorage.setItem("userInfo", JSON.stringify(userInfo))
 					this.setUserInfo(userInfo)
