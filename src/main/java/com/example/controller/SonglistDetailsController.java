@@ -64,7 +64,7 @@ public class SonglistDetailsController {
     public R<List<SonglistDetails>> getList(Integer id){
         LambdaQueryWrapper<SonglistDetails> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(SonglistDetails::getListId,id);
-        lambdaQueryWrapper.orderByAsc(SonglistDetails::getCreateTime);
+        lambdaQueryWrapper.orderByAsc(SonglistDetails::getId);
 
         List<SonglistDetails> list = songlistDetailsService.list(lambdaQueryWrapper);
         return R.success(list);
