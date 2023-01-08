@@ -48,7 +48,7 @@ public class SongListController {
         listDto.setUserName(userService.getById(list.getUserId()).getName());
         LambdaQueryWrapper<SonglistDetails> lambdaQueryWrapper =new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(SonglistDetails::getListId,id);
-        lambdaQueryWrapper.orderByAsc(SonglistDetails::getCreateTime);
+        lambdaQueryWrapper.orderByAsc(SonglistDetails::getId);
         listDto.setSongs(songlistDetailsService.list(lambdaQueryWrapper));
 
         return R.success(listDto);
