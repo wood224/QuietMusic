@@ -89,7 +89,7 @@ public class SongListController {
 
     @PutMapping("/update")
     @ApiOperation("修改信息")
-    public R<String> update(@RequestBody SongList songList {
+    public R<String> update(@RequestBody SongList songList){
         songListService.updateById(songList);
         return R.success("修改成功!");
     }
