@@ -25,7 +25,7 @@
 							<i class="fa fa-play"></i>将歌曲添加至播放列表
 						</span>
 					</el-button>
-					<el-button type="success" @click="selectList">
+					<el-button type="success" @click="OpenSelectList">
 						<span class="text">
 							<el-icon>
 								<FolderAdd />
@@ -40,7 +40,10 @@
 					v-loading="loading"></SongsList>
 			</div>
 		</div>
-		<el-dialog v-model="loginDialogVisible" title="提示" width="30%" :align-center="true">
+
+		<Collect :single="false" :songlist-detail-id="songListDetail.id" v-if="collectView" @close="closeSelectList">
+		</Collect>
+		<!-- <el-dialog v-model="loginDialogVisible" title="提示" width="30%" :align-center="true">
 			<span>请先登录</span>
 			<template #footer>
 				<span class="dialog-footer">
@@ -63,7 +66,7 @@
 					</li>
 				</ul>
 			</el-scrollbar>
-		</el-dialog>
+		</el-dialog> -->
 	</div>
 </template>
 
@@ -71,10 +74,9 @@
 import { mapState, mapMutations, mapActions } from "vuex"
 import { getPlaylistDetail, getCheckMusic, getPlaylistAll } from "../http/api"
 import { getTime } from "../fun"
+import Collect from "../components/Collect.vue"
 import { ElMessage } from 'element-plus'
 import SongsList from "../components/SongsList.vue"
-import qs from 'qs'
-import axios from "axios"
 
 export default {
 	name: 'SongList',
@@ -88,8 +90,9 @@ export default {
 
 			userSongList: [], 		  //用户歌单列表
 
-			collectDialogVisible: false,
-			loginDialogVisible: false,
+			// collectDialogVisible: false,
+			// loginDialogVisible: false,
+			collectView: false,
 
 			loading: false,
 		}
@@ -136,6 +139,16 @@ export default {
 			})
 		},
 
+		//打开选择收藏歌单
+		OpenSelectList() {
+			this.collectView = true
+		},
+
+		//关闭选择收藏歌单
+		closeSelectList() {
+			this.collectView = false
+		},
+
 		//添加歌单所有歌曲到歌曲列表
 		async addAllPlaylistSong() {
 			let msg = ElMessage('添加中...')
@@ -161,64 +174,45 @@ export default {
 			this.getPlaylistSongs()
 		},
 
-		//选择收藏歌单
-		selectList() {
-			const userInfo = JSON.parse(localStorage.getItem('userInfo'))
-			if (userInfo !== null) {
-				this.collectDialogVisible = true
-				this.$http.get('/songlist/lists', {
-					params: {
-						id: userInfo.id,
-					}
-				}).then(res => {
-					const data = res.data.data;
-					this.userSongList = data;
-				})
-			}
-			else {
-				this.loginDialogVisible = true;
-			}
-		},
+		// //将所有歌曲添加至歌单
+		// async addAllSonglist(id) {
+		// 	const { data } = await getPlaylistAll(this.songListDetail.id, 0, 0);
+		// 	let songs = []
+		// 	for (let i in data.songs) {
+		// 		const item = data.songs[i];
+		// 		if (item.noCopyrightRcmd) {
+		// 			continue
+		// 		}
+		// 		songs.push({
+		// 			listId: id,
+		// 			musicId: item.id,
+		// 			musicName: item.name,
+		// 			singerName: item.ar.map(item => {
+		// 				return item.name;
+		// 			}),
+		// 			album: item.al.name,
+		// 			time: getTime(item.dt)
+		// 		})
+		// 	}
+		// 	this.$http.post('/songlistdetails/insertAll',
+		// 		songs
+		// 	).then(res => {
+		// 		const data = res.data
+		// 		if (data.code === 200) {
+		// 			ElMessage.success('添加成功')
+		// 		}
+		// 		else {
+		// 			ElMessage.warning(data.msg)
+		// 		}
+		// 		this.collectDialogVisible = false
+		// 	})
+		// },
 
-		//将所有歌曲添加至歌单
-		async addAllSonglist(id) {
-			const { data } = await getPlaylistAll(this.songListDetail.id, 0, 0);
-			let songs = []
-			for (let i in data.songs) {
-				const item = data.songs[i];
-				if (item.noCopyrightRcmd) {
-					continue
-				}
-				songs.push({
-					listId: id,
-					musicId: item.id,
-					musicName: item.name,
-					singerName: item.ar.map(item => {
-						return item.name;
-					}),
-					album: item.al.name,
-					time: getTime(item.dt)
-				})
-			}
-			this.$http.post('/songlistdetails/insertAll',
-				songs
-			).then(res => {
-				const data = res.data
-				if (data.code === 200) {
-					ElMessage.success('添加成功')
-				}
-				else {
-					ElMessage.warning(data.msg)
-				}
-				this.collectDialogVisible = false
-			})
-		},
-
-		//弹窗跳转登录
-		login() {
-			this.loginDialogVisible = false
-			return location.href = 'login.html'
-		},
+		// //弹窗跳转登录
+		// login() {
+		// 	this.loginDialogVisible = false
+		// 	return location.href = 'login.html'
+		// },
 
 		//表格行样式
 		rowStyle({ row, rowIndex }) {
@@ -231,6 +225,7 @@ export default {
 	},
 	components: {
 		SongsList,
+		Collect,
 	},
 }
 </script>

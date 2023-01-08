@@ -95,20 +95,22 @@ const create = (formEl) => {
 <style lang="less" scoped>
 .bg {
 	position: absolute;
-	top: 90px;
+	top: 0;
 	left: 50%;
 	transform: translateX(-50%);
-	height: 80vh;
-	background-color: rgba(122, 122, 122, 0.8);
+	display: flex;
+	align-items: center;
+	height: 100%;
 	width: 100%;
+	background-color: rgba(122, 122, 122, 0.8);
+	box-sizing: border-box;
 	padding: 40px 0;
-	z-index: 99;
+	z-index: 2005;
 
 	.create-song-list-container {
 		width: 800px;
 		margin: 0 auto;
 		background-color: white;
-		z-index: 99;
 
 		.close {
 			top: 10px;
@@ -125,11 +127,15 @@ const create = (formEl) => {
 		}
 
 		.form {
-			padding: 30px 100px;
+			padding: 40px 30px;
 
 			.el-form {
 				position: relative;
 				margin: 30px 0;
+
+				.el-form-item {
+					margin-bottom: 30px;
+				}
 
 				.right {
 					position: absolute;

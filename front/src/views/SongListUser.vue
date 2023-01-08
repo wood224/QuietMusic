@@ -70,6 +70,7 @@ export default {
         this.getPageSongs(0)
         this.loading = false
       })
+      .catch(err => { console.log(err); })
 
   },
   computed: {
