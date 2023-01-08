@@ -6,6 +6,7 @@ import com.example.common.R;
 import com.example.entity.SongList;
 import com.example.entity.SongListDto;
 import com.example.entity.SonglistDetails;
+import com.example.entity.User;
 import com.example.service.SongListService;
 import com.example.service.SonglistDetailsService;
 import com.example.service.UserService;
@@ -86,6 +87,12 @@ public class SongListController {
         return R.success(list);
     }
 
+    @PutMapping("/update")
+    @ApiOperation("修改信息")
+    public R<String> update(@RequestBody SongList songList {
+        songListService.updateById(songList);
+        return R.success("修改成功!");
+    }
 
 
 }
