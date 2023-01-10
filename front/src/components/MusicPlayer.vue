@@ -5,17 +5,25 @@
 		<div class="music-info">
 			<!-- 播放列表 -->
 			<div class="playlist" v-show="playlistView">
-				<div class="title">播放列表/{{ playlist.length }}
-					<el-tooltip class="box-item" effect="light" content="清空列表" placement="top">
-						<div class="clear" @click.stop="clearPlaylist">
-							<i class="fa fa-trash"></i>
-						</div>
-					</el-tooltip>
+				<div class="title">
+					<span class="title-text">播放列表/{{ playlist.length }}</span>
+					<div class="btns">
+						<!-- <el-tooltip effect="light" content="将列表添加至歌单" placement="top">
+							<el-icon class="collect" @click.stop="openSelectList(false)">
+								<Plus />
+							</el-icon>
+						</el-tooltip> -->
+						<el-tooltip class="box-item" effect="light" content="清空列表" placement="top">
+							<div class="clear" @click.stop="clearPlaylist">
+								<i class="fa fa-trash"></i>
+							</div>
+						</el-tooltip>
+					</div>
 					<div class="close" @click="setPlaylistView">
 						<i class="fa fa-close"></i>
 					</div>
 				</div>
-				<div class="musicList">
+				<div class="musicList" v-loading="listLoading">
 					<el-scrollbar>
 						<li v-for="(item, index) in playlist" :key="item.id">
 							<div class="musicList-item" @click.stop="playIndex(item.musicId, index)">
@@ -42,6 +50,9 @@
 					</el-scrollbar>
 				</div>
 			</div>
+			<Collect :single="isSingle" :play-list="true" :songlist-detail-id="songListDetail.id" v-if="collectView"
+				@close="closeSelectList">
+			</Collect>
 
 			<div class="music-img" @click="goSongDetails">
 				<img :src="songInfo.alPicUrl" alt="" @error="picNull(songInfo)">
@@ -106,6 +117,7 @@
 import { getTime } from "../fun"
 import { getMusicDetail, getMusicUrl } from "../http/api"
 import { mapState, mapMutations, mapActions } from "vuex"
+import Collect from "./Collect.vue"
 import axios from "axios"
 
 export default {
@@ -131,6 +143,7 @@ export default {
 			isListLoop: true,       //是否开启列表循环
 
 			playlistView: false,    //是否显示歌曲列表
+			listLoading: false,
 
 			////DOM元素
 			audio: {},
@@ -148,6 +161,9 @@ export default {
 			loading: false,
 
 			RecordTime: 60000,      //记录时间
+
+			isSingle: false, 				//收藏的是否为单曲
+			collectView: false,
 		}
 	},
 	mounted() {
@@ -176,8 +192,9 @@ export default {
 			this.songIndex = 0
 		}
 
+		this.listLoading = true
 		this.getPlaylistSongs()
-
+		this.listLoading = false
 
 	},
 	computed: {
@@ -239,8 +256,10 @@ export default {
 			},
 		},
 		playlist: {
-			handler() {
-				this.getPlaylistSongs()
+			async handler() {
+				this.listLoading = true
+				await this.getPlaylistSongs()
+				this.listLoading = false
 			},
 		},
 		songIndex: {
@@ -430,6 +449,17 @@ export default {
 			}
 		},
 
+		//打开选择收藏歌单(全部添加)
+		openSelectList(isSingle) {
+			this.isSingle = isSingle
+			this.collectView = true
+		},
+
+		//关闭选择收藏歌单
+		closeSelectList() {
+			this.collectView = false
+		},
+
 		//清空播放列表
 		clearPlaylist() {
 			this.$http.delete('/listsongs/delall', {
@@ -449,6 +479,9 @@ export default {
 			this.songIndex = index
 		}
 	},
+	componentes: {
+		Collect,
+	}
 }
 </script>
 
@@ -494,16 +527,32 @@ export default {
 
 			.title {
 				display: flex;
-				padding: 10px;
-				background-color: #04b6ff;
 				justify-content: space-between;
 				align-items: center;
+				padding: 10px;
+				background-color: #04b6ff;
 				font-size: 20px;
 				color: #003993;
 
-				.clear {
-					text-align: center;
-					cursor: pointer;
+				.title-text {
+					margin-right: 106px;
+				}
+
+				.btns {
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+					width: 20%;
+
+					.collect {
+						font-weight: bold;
+						cursor: pointer;
+					}
+
+					.clear {
+						text-align: center;
+						cursor: pointer;
+					}
 				}
 
 				.close {

@@ -58,8 +58,12 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  playList: {
+    type: Boolean,
+    default: false,
+  }
 })
-const { musicId, songlistDetailId, single } = toRefs(props)
+const { musicId, songlistDetailId, single, playList } = toRefs(props)
 
 const emit = defineEmits(['close'])
 
@@ -98,14 +102,6 @@ const selectList = () => {
     }
     collectDialogVisible.value = true
     getUserSongList()
-    // proxy.$http.get('/songlist/lists', {
-    //   params: {
-    //     id: userInfo.value.id,
-    //   }
-    // }).then(res => {
-    //   const data = res.data.data
-    //   userSongList.value = data
-    // })
   } else {
     loginDialogVisible.value = true
   }
@@ -135,35 +131,43 @@ const collect = async (id) => {
       }
     })
   } else {
-    const { data } = await getPlaylistAll(songlistDetailId.value, 0, 0);
-    let songs = []
-    for (let i in data.songs) {
-      const item = data.songs[i];
-      if (item.noCopyrightRcmd) {
-        continue
+    if (playList.value) {
+      if (single.value) { }
+      else {
+
       }
-      songs.push({
-        listId: id,
-        musicId: item.id,
-        musicName: item.name,
-        singerName: item.ar.map(item => {
-          return item.name;
-        }),
-        album: item.al.name,
-        time: getTime(item.dt)
+    }
+    else {
+      const { data } = await getPlaylistAll(songlistDetailId.value, 0, 0);
+      let songs = []
+      for (let i in data.songs) {
+        const item = data.songs[i];
+        if (item.noCopyrightRcmd) {
+          continue
+        }
+        songs.push({
+          listId: id,
+          musicId: item.id,
+          musicName: item.name,
+          singerName: item.ar.map(item => {
+            return item.name;
+          }),
+          album: item.al.name,
+          time: getTime(item.dt)
+        })
+      }
+      proxy.$http.post('/songlistdetails/insertAll',
+        songs
+      ).then(res => {
+        const data = res.data
+        if (data.code === 200) {
+          ElMessage.success('添加成功')
+        }
+        else {
+          ElMessage.warning(data.msg)
+        }
       })
     }
-    proxy.$http.post('/songlistdetails/insertAll',
-      songs
-    ).then(res => {
-      const data = res.data
-      if (data.code === 200) {
-        ElMessage.success('添加成功')
-      }
-      else {
-        ElMessage.warning(data.msg)
-      }
-    })
   }
   collectDialogVisible.value = false
   emit('close')

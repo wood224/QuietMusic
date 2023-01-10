@@ -22,7 +22,7 @@
 				<div class="action">
 					<el-button type="primary" @click="addAllPlaylistSong">
 						<span class="text">
-							<i class="fa fa-play"></i>将歌曲添加至播放列表
+							<i class="fa fa-play"></i>将本页歌曲添加至播放列表
 						</span>
 					</el-button>
 					<el-button type="success" @click="OpenSelectList">
@@ -151,7 +151,7 @@ export default {
 
 		//添加歌单所有歌曲到歌曲列表
 		async addAllPlaylistSong() {
-			let msg = ElMessage('添加中...')
+			let msg = ElMessage({ message: '添加中...', duration: 0 })
 			for (let i of this.songList) {
 				const { data: res } = await getCheckMusic(i.id)
 				if (res.success === true) {

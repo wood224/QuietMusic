@@ -106,7 +106,7 @@
 												打开歌单
 											</router-link>
 										</li>
-										<li><i class="fa fa-edit"></i> 编辑歌单</li>
+										<li @click.stop="openUpdateSongList(item.id)"><i class="fa fa-edit"></i> 编辑歌单</li>
 										<li @click.stop="centerDialogVisible = true"><i class="fa fa-trash-o"></i> 删除歌单</li>
 									</ul>
 								</div>
@@ -131,6 +131,33 @@
 				</ul>
 			</div>
 		</div>
+
+		<el-dialog v-model="dialogFormVisible" title="修改歌单信息">
+			<el-form :model="form" ref="form">
+				<el-upload class="avatar-uploader" method="post" :action="BASEAPI + '/file/upload'" :show-file-list="false"
+					:before-upload="beforeAvatarUpload" :on-success="handleAvatarSuccess">
+					<img v-if="imageUrl" :src="imageUrl" class="avatar" />
+					<el-icon v-else class="avatar-uploader-icon">
+						<Plus />
+					</el-icon>
+					<div>更换封面</div>
+				</el-upload>
+				<el-form-item label="歌单名称">
+					<el-input v-model="form.name" clearable maxlength="20" show-word-limit />
+				</el-form-item>
+				<el-form-item label="歌单简介">
+					<el-input v-model="form.description" clearable maxlength="80" show-word-limit type="textarea" />
+				</el-form-item>
+			</el-form>
+			<template #footer>
+				<span class="dialog-footer">
+					<el-button @click="dialogFormVisible = false">关闭</el-button>
+					<el-button type="primary" @click="Submit(id)">
+						确认
+					</el-button>
+				</span>
+			</template>
+		</el-dialog>
 	</div>
 </template>
 
@@ -150,7 +177,18 @@ export default {
 			createView: false,
 			url: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg',
 			moreIndex: -1,
+
 			centerDialogVisible: false,
+
+			BASEAPI: window.BASEURL.baseURL,
+			tempImgUrl: '',
+			imageUrl: '',
+			dialogFormVisible: false,
+			updateSonglistId: -1,
+			form: {
+				name: '',
+				description: '',
+			},
 		}
 	},
 	computed: {
@@ -193,17 +231,59 @@ export default {
 					id: userId
 				}
 			})
-				.then(res => {
-					this.userSongList = res.data.data
+				.then(async res => {
+					const data = res.data.data;
+					for (let i in data) {
+						const item = data[i];
+						item.coverImg = item.coverImg[0] === '/' ? item.coverImg : await this.$fun.getImg(item.coverImg)
+					}
+					this.userSongList = data
 				})
 		},
 
-		//获取用户歌单详情
-		userSongListDetail(id) {
-			this.setUserSongListId(id)
-			sessionStorage.setItem('userSongListId', id)
-			this.$router.push('/songListUser')
+		//打开修改歌单窗口
+		openUpdateSongList(id) {
+			this.updateSonglistId = id
+			this.dialogFormVisible = true
 		},
+
+		//歌单封面上传校验
+		beforeAvatarUpload(rawFile) {
+			if (rawFile.type !== 'image/jpeg') {
+				ElMessage.error('头像必须是图片格式！')
+				return false
+			} else if (rawFile.size / 1024 / 1024 > 2) {
+				ElMessage.error('图片不能超过2MB！')
+				return false
+			}
+			return true
+		},
+
+		//歌单封面上传成功
+		async handleAvatarSuccess(res, uploadFile) {
+			this.tempImgUrl = res.data
+			this.imageUrl = await this.$fun.getImg(this.tempImgUrl)
+		},
+		//提交修改信息(歌单)
+		Submit(formEl) {
+			this.$http.put('/songlist/update', {
+				id: this.updateSonglistId,
+				coverImg: this.tempImgUrl === '' ? null : this.tempImgUrl,
+				name: this.form.name === '' ? null : this.form.name,
+				description: this.form.description === '' ? null : this.form.description
+			}).then(res => {
+				if (res.data.code === 200) {
+					ElMessage.success('修改成功!')
+					this.getUserSongList()
+				} else {
+					ElMessage.error('修改失败!')
+				}
+			}).catch(err => {
+				console.error(err)
+			})
+			this.dialogFormVisible = false
+		},
+
 
 		//删除歌单
 		deleteSongList(id) {
@@ -360,11 +440,6 @@ export default {
 										background-color: rgba(100, 176, 255, 0.6);
 									}
 
-									&:nth-child(2) {
-										color: rgba(0, 0, 0, 0.2);
-										cursor: not-allowed;
-									}
-
 									&:last-child {
 										margin-top: 6px;
 										border-top: 1px solid gray;
@@ -389,6 +464,28 @@ export default {
 						}
 					}
 				}
+			}
+		}
+	}
+
+	.avatar-uploader {
+		margin-bottom: 18px;
+		width: 160px;
+		height: 160px;
+
+		.el-upload {
+			flex-direction: column;
+			width: 100%;
+			height: 100%;
+			border: 1px dashed var(--el-border-color);
+			border-radius: 6px;
+			cursor: pointer;
+			position: relative;
+			overflow: hidden;
+			transition: var(--el-transition-duration-fast);
+
+			&:hover {
+				border-color: var(--el-color-primary);
 			}
 		}
 	}

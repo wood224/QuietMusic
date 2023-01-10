@@ -7,7 +7,7 @@
             {{ 10 * (currentPage - 1) + (scope.$index + 1) }}
           </template>
         </el-table-column>
-        <el-table-column label="歌曲名" :width="type === 'top' ? 450 : 380">
+        <el-table-column label="歌曲名" :width="type === 'top' ? 450 : 350">
           <template #default="scope">
             <div class="song-name">
               <div class="name">
@@ -18,6 +18,13 @@
                   <div class="collect" @click.stop="openSelectList(scope.row.id)">
                     <el-icon>
                       <FolderAdd />
+                    </el-icon>
+                  </div>
+                </el-tooltip>
+                <el-tooltip v-if="deleteShow" content="移出歌单" :show-after="400" :hide-after="0">
+                  <div class="delete" @click.stop="openDelete(scope.row.userMusicId)">
+                    <el-icon>
+                      <DeleteFilled />
                     </el-icon>
                   </div>
                 </el-tooltip>
@@ -45,30 +52,17 @@
       layout="prev, pager, next" :total="count" />
 
     <Collect :single="true" :music-id="collectMusicId" v-if="collectView" @close="closeSelectList"></Collect>
-    <!-- <el-dialog v-model="loginDialogVisible" title="提示" width="30%" :align-center="true">
-      <span>请先登录</span>
+    <el-dialog v-model="deleteDialogVisible" title="提示" width="30%">
+      <span>确认移出该歌曲吗</span>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="loginDialogVisible = false">稍后再说</el-button>
-          <el-button type="primary" @click="login">现在登录</el-button>
+          <el-button @click="deleteDialogVisible = false">考虑一下</el-button>
+          <el-button type="danger" @click="deleteSong(deleteSongId)">
+            确认移除
+          </el-button>
         </span>
       </template>
     </el-dialog>
-
-    <el-dialog v-model="collectDialogVisible" title="选择歌单" width="30%" :align-center="true">
-      <el-scrollbar>
-        <ul class="dialog-wrapper">
-          <li v-for="item in userSongList" :key="item.id" @click="collect(item.id)">
-            <div class="songlist">
-              <div class="pic">
-                <img :src="item.coverImg" alt="">
-              </div>
-              <div class="name">{{ item.name }}</div>
-            </div>
-          </li>
-        </ul>
-      </el-scrollbar>
-    </el-dialog> -->
   </div>
 </template>
 
@@ -97,11 +91,21 @@ const props = defineProps({
   count: {
     type: Number,
     default: 10,
+  },
+  isUsers: {
+    type: Boolean,
+    default: false,
   }
 })
-const emit = defineEmits(['getAll'])
+const emit = defineEmits(['getAll', 'deleteSong'])
 
-const { list, type, count } = toRefs(props);
+const deleteShow = ref(false)
+const deleteListId = ref(-1)
+const { list, type, count, isUsers } = toRefs(props);
+if (type.value === 'songlistUser' && isUsers.value) {
+  deleteShow.value = true
+  deleteListId.value = list.value[0].id
+}
 
 const currentPage = ref(1)
 const setPage = () => {
@@ -114,6 +118,7 @@ const songsList = computed(() => {
     if (type.value === 'songlistUser') {
       return {
         id: item.musicId,
+        userMusicId: item.id,
         name: item.musicName,
         ar: item.singerName.map(arName => {
           return {
@@ -154,11 +159,6 @@ const songsList = computed(() => {
     }
   })
 })
-
-const userSongList = ref([])  //用户歌单列表
-const collectDialogVisible = ref(false)
-const loginDialogVisible = ref(false)
-const collectMusicInfo = ref({})  //收藏的歌曲详情
 const collectView = ref(false)
 const collectMusicId = ref()      //收藏的歌单id
 
@@ -181,60 +181,11 @@ const playSong = (row) => {
 const openSelectList = (id) => {
   collectMusicId.value = id
   collectView.value = true
-  // const userInfo = JSON.parse(localStorage.getItem('userInfo'))
-  // if (userInfo !== null) {
-  //   checkMusic(id).then(res => {
-  //     if (res.result) {
-  //       collectMusicInfo.value = res.info
-  //       collectDialogVisible.value = true
-  //       proxy.$http.get('/songlist/lists', {
-  //         params: {
-  //           id: userInfo.id,
-  //         }
-  //       }).then(res => {
-  //         const data = res.data.data
-  //         userSongList.value = data
-  //       })
-  //     }
-  //   });
-  // } else {
-  //   loginDialogVisible.value = true
-  // }
 }
 
 // 关闭选择收藏歌单
 const closeSelectList = () => {
   collectView.value = false
-}
-
-//收藏
-const collect = (id) => {
-  if (collectMusicInfo === null) return collectDialogVisible = false
-  proxy.$http.post('/songlistdetails/add', {
-    listId: id,
-    musicId: collectMusicInfo.value.id,
-    musicName: collectMusicInfo.value.name,
-    singerName: collectMusicInfo.value.ar.map(item => {
-      return item.name;
-    }),
-    album: collectMusicInfo.value.al.name,
-    time: getTime(collectMusicInfo.value.dt)
-  }).then(res => {
-    const data = res.data
-    if (data.code === 200) {
-      ElMessage.success('收藏成功')
-    }
-    else {
-      ElMessage.warning(data.msg)
-    }
-    collectDialogVisible.value = false
-  })
-}
-
-//弹窗跳转登录
-const login = () => {
-  loginDialogVisible.value = false
-  return location.href = 'login.html'
 }
 
 //打开歌手页面
@@ -247,6 +198,19 @@ const goSingerDetail = (id) => {
 const goAlbumDetail = (id) => {
   if (id === 0) return
   router.push('/albumDetail/' + id)
+}
+
+const deleteDialogVisible = ref(false)
+const deleteSongId = ref(-1)
+//打开删除提醒弹窗
+const openDelete = (id) => {
+  deleteDialogVisible.value = true
+  deleteSongId.value = id
+}
+//移除歌曲
+const deleteSong = (id) => {
+  emit('deleteSong', id, deleteListId.value, (currentPage.value - 1) * 10)
+  deleteDialogVisible.value = false
 }
 
 </script>
@@ -262,7 +226,7 @@ const goAlbumDetail = (id) => {
 
       &:hover {
         .btn-list {
-          display: block !important;
+          display: flex !important;
         }
       }
     }
@@ -279,8 +243,11 @@ const goAlbumDetail = (id) => {
     .btn-list {
       display: none;
 
-      .collect {
-        .el-icon {
+      .collect,
+      .delete {
+        margin-right: 6px;
+
+        ::v-deep(.el-icon) {
           width: 20px;
           height: 20px;
           color: #999999;
