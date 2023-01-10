@@ -13,6 +13,8 @@ public class SongListDto extends SongList{
     //用户名称
     private String userName;
 
+    private Integer sum;
+
     //歌单内歌曲
     private List<SonglistDetails> songs;
 }

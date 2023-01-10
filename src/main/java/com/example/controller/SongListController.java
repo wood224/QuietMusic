@@ -51,6 +51,7 @@ public class SongListController {
         lambdaQueryWrapper.eq(SonglistDetails::getListId,id);
         lambdaQueryWrapper.orderByAsc(SonglistDetails::getId);
         listDto.setSongs(songlistDetailsService.list(lambdaQueryWrapper));
+        listDto.setSum((int) songlistDetailsService.count(lambdaQueryWrapper));
 
         return R.success(listDto);
     }

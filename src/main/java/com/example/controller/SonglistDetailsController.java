@@ -28,8 +28,8 @@ public class SonglistDetailsController {
     @Autowired
     private SonglistDetailsService songlistDetailsService;
 
-    @Autowired
-    private SongListService songListService;
+   /* @Autowired
+    private SongListService songListService;*/
 
     @PostMapping("/add")
     @ApiOperation("添加歌曲")
@@ -45,7 +45,7 @@ public class SonglistDetailsController {
 
         songlistDetailsService.save(songlistDetails);
 
-        songListService.updateAdd(songlistDetails.getListId());
+        //songListService.updateAdd(songlistDetails.getListId());
         return R.success("添加成功!");
     }
 
@@ -54,7 +54,7 @@ public class SonglistDetailsController {
     public R<String> deleteSong(Integer id,Integer listId){
         songlistDetailsService.removeById(id);
 
-        songListService.updateRe(listId);
+       // songListService.updateRe(listId);
 
         return R.success("删除成功!");
     }
@@ -78,7 +78,7 @@ public class SonglistDetailsController {
         lambdaQueryWrapper.eq(SonglistDetails::getListId,listId);
         songlistDetailsService.remove(lambdaQueryWrapper);
 
-        songListService.updateClear(listId);
+       // songListService.updateClear(listId);
         return R.success("清空成功");
     }
 
@@ -107,7 +107,7 @@ public class SonglistDetailsController {
         for (SonglistDetails s : songlistDetails) {
             if (!map.containsKey(s.getMusicId())) {
                 songlistDetailsService.save(s);
-                songListService.updateAdd(s.getListId());
+             //   songListService.updateAdd(s.getListId());
             }
         }
         return R.success("添加成功");
