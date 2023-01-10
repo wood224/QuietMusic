@@ -30,7 +30,7 @@ public class SongList {
     private String description;
 
     //歌曲总数
-    private Integer sum;
+   // private Integer sum;
 
     //创建时间
     @TableField(fill = FieldFill.INSERT)
