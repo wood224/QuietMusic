@@ -45,10 +45,13 @@ const routes = [
     path: '/userHome',
     component: () => import('../views/UserHome.vue'),
     beforeEnter: (to, from, next) => {
+      if (from.fullPath === '/login') {
+        location.href = 'index.html'
+      }
       if (localStorage.getItem('userInfo') !== null) {
         next()
       } else {
-        return location.href = 'login.html'
+        location.href = 'login.html'
       }
     }
   },
