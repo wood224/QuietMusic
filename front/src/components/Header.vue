@@ -134,7 +134,7 @@ export default {
 		logout() {
 			localStorage.removeItem('userInfo')
 			//返回主页
-			if ((getHash().slice(0, 9)) === '/userHome') return this.$router.go(-1)
+			if ((getHash().slice(0, 9)) === '/userHome') this.$router.go(-1)
 			location.reload()
 		},
 
