@@ -45,6 +45,7 @@ import CreateSongList from './CreateSongList.vue';
 import { getPlaylistAll } from "../http/api";
 import { getTime, checkMusic } from "../fun"
 
+
 const props = defineProps({
   musicId: {
     type: Number,
@@ -83,8 +84,13 @@ const getUserSongList = () => {
       id: userInfo.value.id
     }
   })
-    .then(res => {
-      userSongList.value = res.data.data
+    .then(async res => {
+      const data = res.data.data
+      for (let i in data) {
+        const item = data[i];
+        item.coverImg = item.coverImg[0] === '/' ? item.coverImg : await proxy.$fun.getImg(item.coverImg)
+      }
+      userSongList.value = data
     })
 }
 
