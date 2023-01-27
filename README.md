@@ -1,4 +1,4 @@
-# QuietMusic(更新中...)
+# QuietMusic(课设结束)
 静谧音乐社
 
 *仅供学习使用*
